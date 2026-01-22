@@ -46,11 +46,11 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
   return (
     <div className="pb-6 animate-fade-in">
       {/* Header */}
-      <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
+      <div className="nurture-gradient-hero px-4 md:px-8 pt-safe-top pb-6">
         <div className="flex items-center justify-between mb-6 pt-4">
           <div>
-            <p className="text-muted-foreground text-sm">Good morning 👋</p>
-            <h1 className="font-display text-2xl font-bold text-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">Good morning 👋</p>
+            <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
               {pregnancy.babyName ? `How's ${pregnancy.babyName}?` : "How are you today?"}
             </h1>
           </div>
@@ -63,15 +63,15 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
         {/* Week Progress Card */}
         <Card variant="elevated" className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row">
               {/* Left side - Week info */}
-              <div className="flex-1 p-5">
+              <div className="flex-1 p-4 md:p-6">
                 <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-3 trimester-${pregnancy.trimester}`}>
                   {getTrimesterLabel(pregnancy.trimester)}
                 </div>
                 
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-4xl font-bold text-foreground">Week {pregnancy.currentWeek}</span>
+                  <span className="text-3xl md:text-4xl font-bold text-foreground">Week {pregnancy.currentWeek}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   {daysUntilDue} days until due date
@@ -92,11 +92,11 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
               </div>
 
               {/* Right side - Baby illustration */}
-              <div className="w-28 relative bg-primary/5 flex items-center justify-center">
+              <div className="w-full sm:w-32 h-24 sm:h-auto relative bg-primary/5 flex items-center justify-center">
                 <img 
                   src={babyIcon} 
                   alt="Baby development" 
-                  className="w-20 h-20 object-contain animate-float"
+                  className="w-16 h-16 md:w-20 md:h-20 object-contain animate-float"
                 />
               </div>
             </div>
@@ -105,21 +105,21 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       </div>
 
       {/* Quick Actions */}
-      <div className="px-6 mt-6">
-        <h2 className="font-display text-lg font-bold text-foreground mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-4 gap-3">
+      <div className="px-4 md:px-8 mt-6">
+        <h2 className="font-display text-lg md:text-xl font-bold text-foreground mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-4 md:grid-cols-4 gap-2 md:gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <button
                 key={action.id}
                 onClick={() => onNavigate(action.id)}
-                className="flex flex-col items-center gap-2"
+                className="flex flex-col items-center gap-2 p-2 md:p-3 rounded-2xl transition-all hover:bg-muted/50"
               >
-                <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center transition-transform hover:scale-105`}>
-                  <Icon className="w-6 h-6" />
+                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${action.color} flex items-center justify-center transition-transform hover:scale-105`}>
+                  <Icon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
+                <span className="text-[10px] md:text-xs font-medium text-muted-foreground text-center">{action.label}</span>
               </button>
             );
           })}
@@ -127,29 +127,29 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       </div>
 
       {/* Baby Development */}
-      <div className="px-6 mt-8">
+      <div className="px-4 md:px-8 mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg font-bold text-foreground">Baby Development</h2>
+          <h2 className="font-display text-lg md:text-xl font-bold text-foreground">Baby Development</h2>
           <Button variant="ghost" size="sm" className="text-primary">
             See all <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
 
         <Card variant="gradient-warm">
-          <CardContent className="p-5">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4">
               <Baby className="w-5 h-5" />
               <span className="font-medium">This week your baby is...</span>
             </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="text-center">
-                <p className="text-3xl font-bold">{currentWeekData.babySize}</p>
+                <p className="text-2xl md:text-3xl font-bold">{currentWeekData.babySize}</p>
                 <p className="text-xs opacity-80">Size</p>
               </div>
               <div className="w-px h-10 bg-foreground/20" />
               <div>
-                <p className="font-medium">About the size of a</p>
-                <p className="text-lg font-bold">{currentWeekData.babySizeComparison}</p>
+                <p className="font-medium text-sm md:text-base">About the size of a</p>
+                <p className="text-base md:text-lg font-bold">{currentWeekData.babySizeComparison}</p>
               </div>
             </div>
             <ul className="space-y-2">
@@ -165,10 +165,10 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       </div>
 
       {/* Your Body This Week */}
-      <div className="px-6 mt-6">
+      <div className="px-4 md:px-8 mt-6">
         <Card variant="soft">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-base md:text-lg flex items-center gap-2">
               <span className="text-xl">🤰</span> Your Body This Week
             </CardTitle>
           </CardHeader>
@@ -186,8 +186,8 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       </div>
 
       {/* Upcoming */}
-      <div className="px-6 mt-6">
-        <h2 className="font-display text-lg font-bold text-foreground mb-4">Upcoming</h2>
+      <div className="px-4 md:px-8 mt-6">
+        <h2 className="font-display text-lg md:text-xl font-bold text-foreground mb-4">Upcoming</h2>
         <Card variant="elevated">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -205,9 +205,9 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       </div>
 
       {/* Tips */}
-      <div className="px-6 mt-6">
+      <div className="px-4 md:px-8 mt-6">
         <Card variant="spiritual" className="overflow-hidden">
-          <CardContent className="p-5 relative">
+          <CardContent className="p-4 md:p-6 relative">
             <div className="flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-spiritual-foreground shrink-0" />
               <div>
