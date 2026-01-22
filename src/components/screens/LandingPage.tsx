@@ -107,7 +107,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
         </div>
         
-        <div className="container mx-auto px-6 pt-8 pb-16 md:pt-16 md:pb-24 lg:pt-20 lg:pb-32 relative">
+        <div className="w-full px-4 md:px-8 lg:px-12 pt-8 pb-16 md:pt-16 md:pb-24 lg:pt-20 lg:pb-32 relative">
           {/* Navigation */}
           <nav className="flex items-center justify-between mb-12 md:mb-16">
             <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Stats Section */}
       <section className="py-12 md:py-16 bg-card border-y border-border">
-        <div className="container mx-auto px-6">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
@@ -223,7 +223,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Features Section */}
       <section className="py-16 md:py-24">
-        <div className="container mx-auto px-6">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
               Everything You Need for a
@@ -264,7 +264,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Benefits Section */}
       <section className="py-16 md:py-24 nurture-gradient-hero">
-        <div className="container mx-auto px-6">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
@@ -339,7 +339,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Testimonials Section */}
       <section className="py-16 md:py-24">
-        <div className="container mx-auto px-6">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <div className="text-center mb-12">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
               Loved by Families
@@ -380,7 +380,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 nurture-gradient-primary">
-        <div className="container mx-auto px-6 text-center">
+        <div className="w-full px-4 md:px-8 lg:px-12 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
             Ready to Start Your Journey?
           </h2>
@@ -403,7 +403,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Footer */}
       <footer className="py-12 bg-card border-t border-border">
-        <div className="container mx-auto px-6">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 nurture-gradient-primary rounded-lg flex items-center justify-center">
