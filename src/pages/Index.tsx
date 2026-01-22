@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AppProvider } from '@/contexts/AppContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { LandingPage } from '@/components/screens/LandingPage';
 import { OnboardingScreen } from '@/components/screens/OnboardingScreen';
 import { PregnancySetupScreen } from '@/components/screens/PregnancySetupScreen';
 import { AuthScreen } from '@/components/screens/AuthScreen';
@@ -13,15 +14,16 @@ import { PartnerDashboard } from '@/components/screens/PartnerDashboard';
 import { FamilyPlanningScreen } from '@/components/screens/FamilyPlanningScreen';
 import { ProfileScreen } from '@/components/screens/ProfileScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
+import { defaultChecklist } from '@/data/pregnancyData';
 
 function NurtureLifeApp() {
-  const [currentScreen, setCurrentScreen] = useState<'onboarding' | 'auth' | 'setup' | 'main'>('onboarding');
+  const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main'>('landing');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
   const [user, setUser] = useState<User | null>(null);
   const [pregnancy, setPregnancy] = useState<PregnancyData | null>(null);
   const [isPartnerMode, setIsPartnerMode] = useState(false);
-  const [checklist, setChecklist] = useState<any[]>([]);
+  const [checklist, setChecklist] = useState(defaultChecklist);
 
   const handleRoleSelect = (role: 'mother' | 'partner') => {
     setSelectedRole(role);
@@ -58,7 +60,7 @@ function NurtureLifeApp() {
     setUser(null);
     setPregnancy(null);
     setIsPartnerMode(false);
-    setCurrentScreen('onboarding');
+    setCurrentScreen('landing');
   };
 
   const toggleChecklistItem = (id: string) => {
@@ -69,7 +71,30 @@ function NurtureLifeApp() {
     );
   };
 
+  // Handle quick actions navigation from dashboard
+  const handleNavigate = (screen: string) => {
+    switch (screen) {
+      case 'nutrition':
+      case 'exercise':
+      case 'symptoms':
+        setActiveTab('health');
+        break;
+      case 'spiritual':
+        setActiveTab('spiritual');
+        break;
+      case 'tracking':
+        setActiveTab('tracking');
+        break;
+      default:
+        setActiveTab(screen);
+    }
+  };
+
   // Render appropriate screen
+  if (currentScreen === 'landing') {
+    return <LandingPage onGetStarted={() => setCurrentScreen('onboarding')} />;
+  }
+
   if (currentScreen === 'onboarding') {
     return <OnboardingScreen onComplete={handleRoleSelect} />;
   }
@@ -100,14 +125,14 @@ function NurtureLifeApp() {
     switch (activeTab) {
       case 'home':
         return isPartnerMode 
-          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={setActiveTab} />
-          : <DashboardScreen pregnancy={pregnancy} onNavigate={setActiveTab} />;
+          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={handleNavigate} />
+          : <DashboardScreen pregnancy={pregnancy} onNavigate={handleNavigate} />;
       case 'tracking':
         return <WeeklyTrackingScreen pregnancy={pregnancy} />;
       case 'health':
         return <HealthScreen pregnancy={pregnancy} />;
       case 'checklist':
-        return <ChecklistScreen checklist={checklist.length ? checklist : require('@/data/pregnancyData').defaultChecklist} onToggleItem={toggleChecklistItem} />;
+        return <ChecklistScreen checklist={checklist} onToggleItem={toggleChecklistItem} />;
       case 'spiritual':
         return <SpiritualScreen />;
       case 'family-planning':
@@ -124,8 +149,8 @@ function NurtureLifeApp() {
         );
       default:
         return isPartnerMode 
-          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={setActiveTab} />
-          : <DashboardScreen pregnancy={pregnancy} onNavigate={setActiveTab} />;
+          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={handleNavigate} />
+          : <DashboardScreen pregnancy={pregnancy} onNavigate={handleNavigate} />;
     }
   };
 

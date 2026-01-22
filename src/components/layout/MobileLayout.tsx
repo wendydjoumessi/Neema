@@ -21,12 +21,14 @@ export function MobileLayout({
 }: MobileLayoutProps) {
   return (
     <div className={cn(
-      "min-h-screen bg-background flex flex-col max-w-md mx-auto relative",
+      "min-h-screen bg-background flex flex-col w-full mx-auto relative",
+      // Responsive max-width for different screen sizes
+      "md:max-w-2xl lg:max-w-4xl xl:max-w-5xl",
       isPartnerMode && "partner-mode"
     )}>
       <main className={cn(
         "flex-1 overflow-y-auto scroll-smooth hide-scrollbar",
-        showNav && "pb-nav-height",
+        showNav && "pb-24",
         className
       )}>
         {children}

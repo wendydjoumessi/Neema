@@ -75,18 +75,18 @@ export function FamilyPlanningScreen() {
   return (
     <div className="pb-6 animate-fade-in">
       {/* Header */}
-      <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
+      <div className="nurture-gradient-hero px-4 md:px-8 pt-safe-top pb-6">
         <div className="pt-4">
-          <h1 className="font-display text-2xl font-bold text-foreground">
+          <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
             Family Planning
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             Fertility tracking and education
           </p>
         </div>
       </div>
 
-      <div className="px-6 mt-6">
+      <div className="px-4 md:px-8 mt-6">
         <Tabs defaultValue="tracking">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="tracking">
