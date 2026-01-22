@@ -1,13 +1,150 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { AppProvider } from '@/contexts/AppContext';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { OnboardingScreen } from '@/components/screens/OnboardingScreen';
+import { PregnancySetupScreen } from '@/components/screens/PregnancySetupScreen';
+import { AuthScreen } from '@/components/screens/AuthScreen';
+import { DashboardScreen } from '@/components/screens/DashboardScreen';
+import { WeeklyTrackingScreen } from '@/components/screens/WeeklyTrackingScreen';
+import { HealthScreen } from '@/components/screens/HealthScreen';
+import { ChecklistScreen } from '@/components/screens/ChecklistScreen';
+import { SpiritualScreen } from '@/components/screens/SpiritualScreen';
+import { PartnerDashboard } from '@/components/screens/PartnerDashboard';
+import { FamilyPlanningScreen } from '@/components/screens/FamilyPlanningScreen';
+import { ProfileScreen } from '@/components/screens/ProfileScreen';
+import { PregnancyData, User } from '@/types/pregnancy';
+
+function NurtureLifeApp() {
+  const [currentScreen, setCurrentScreen] = useState<'onboarding' | 'auth' | 'setup' | 'main'>('onboarding');
+  const [activeTab, setActiveTab] = useState('home');
+  const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
+  const [user, setUser] = useState<User | null>(null);
+  const [pregnancy, setPregnancy] = useState<PregnancyData | null>(null);
+  const [isPartnerMode, setIsPartnerMode] = useState(false);
+  const [checklist, setChecklist] = useState<any[]>([]);
+
+  const handleRoleSelect = (role: 'mother' | 'partner') => {
+    setSelectedRole(role);
+    setCurrentScreen('auth');
+  };
+
+  const handleAuth = (authUser: User) => {
+    setUser(authUser);
+    if (authUser.role === 'partner') {
+      setIsPartnerMode(true);
+      // Create demo pregnancy data for partner
+      const demoPregnancy: PregnancyData = {
+        id: 'demo',
+        userId: authUser.id,
+        startDate: new Date(Date.now() - 140 * 24 * 60 * 60 * 1000),
+        dueDate: new Date(Date.now() + 140 * 24 * 60 * 60 * 1000),
+        currentWeek: 20,
+        trimester: 2,
+        babyName: 'Little One',
+      };
+      setPregnancy(demoPregnancy);
+      setCurrentScreen('main');
+    } else {
+      setCurrentScreen('setup');
+    }
+  };
+
+  const handlePregnancySetup = (data: PregnancyData) => {
+    setPregnancy(data);
+    setCurrentScreen('main');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setPregnancy(null);
+    setIsPartnerMode(false);
+    setCurrentScreen('onboarding');
+  };
+
+  const toggleChecklistItem = (id: string) => {
+    setChecklist(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  // Render appropriate screen
+  if (currentScreen === 'onboarding') {
+    return <OnboardingScreen onComplete={handleRoleSelect} />;
+  }
+
+  if (currentScreen === 'auth') {
+    return (
+      <AuthScreen 
+        onAuth={handleAuth} 
+        onBack={() => setCurrentScreen('onboarding')}
+        defaultRole={selectedRole}
+      />
+    );
+  }
+
+  if (currentScreen === 'setup') {
+    return (
+      <PregnancySetupScreen 
+        onComplete={handlePregnancySetup}
+        onBack={() => setCurrentScreen('auth')}
+      />
+    );
+  }
+
+  // Main app with bottom navigation
+  const renderContent = () => {
+    if (!pregnancy) return null;
+
+    switch (activeTab) {
+      case 'home':
+        return isPartnerMode 
+          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={setActiveTab} />
+          : <DashboardScreen pregnancy={pregnancy} onNavigate={setActiveTab} />;
+      case 'tracking':
+        return <WeeklyTrackingScreen pregnancy={pregnancy} />;
+      case 'health':
+        return <HealthScreen pregnancy={pregnancy} />;
+      case 'checklist':
+        return <ChecklistScreen checklist={checklist.length ? checklist : require('@/data/pregnancyData').defaultChecklist} onToggleItem={toggleChecklistItem} />;
+      case 'spiritual':
+        return <SpiritualScreen />;
+      case 'family-planning':
+        return <FamilyPlanningScreen />;
+      case 'profile':
+        return (
+          <ProfileScreen 
+            user={user}
+            pregnancy={pregnancy}
+            isPartnerMode={isPartnerMode}
+            onTogglePartnerMode={() => setIsPartnerMode(!isPartnerMode)}
+            onLogout={handleLogout}
+          />
+        );
+      default:
+        return isPartnerMode 
+          ? <PartnerDashboard pregnancy={pregnancy} onNavigate={setActiveTab} />
+          : <DashboardScreen pregnancy={pregnancy} onNavigate={setActiveTab} />;
+    }
+  };
+
+  return (
+    <MobileLayout 
+      activeTab={activeTab} 
+      onTabChange={setActiveTab}
+      isPartnerMode={isPartnerMode}
+    >
+      {renderContent()}
+    </MobileLayout>
+  );
+}
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AppProvider>
+      <NurtureLifeApp />
+    </AppProvider>
   );
 };
 
