@@ -28,8 +28,8 @@ export function BottomNav({ activeTab, onTabChange, isPartnerMode = false }: Bot
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-around px-2 py-2 safe-area-bottom">
+      <div className="w-full">
+        <div className="flex items-center justify-around px-4 md:px-8 py-2 safe-area-bottom">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

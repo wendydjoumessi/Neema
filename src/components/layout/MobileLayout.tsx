@@ -21,9 +21,7 @@ export function MobileLayout({
 }: MobileLayoutProps) {
   return (
     <div className={cn(
-      "min-h-screen bg-background flex flex-col w-full mx-auto relative",
-      // Responsive max-width for different screen sizes
-      "md:max-w-2xl lg:max-w-4xl xl:max-w-5xl",
+      "min-h-screen bg-background flex flex-col w-full relative",
       isPartnerMode && "partner-mode"
     )}>
       <main className={cn(
