@@ -3,19 +3,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   Heart, 
   Baby, 
+  Calendar, 
+  Shield, 
   Users, 
-  Sparkles, 
-  ArrowRight, 
-  CheckCircle,
-  Shield,
-  Clock,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
   Star,
-  ChevronRight,
-  Calendar,
-  Apple,
-  Dumbbell
+  Play
 } from 'lucide-react';
-import heroIllustration from '@/assets/hero-illustration.jpg';
+import heroImage from '@/assets/hero-pregnant.jpg';
+import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
+import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
+import pregnantCouple from '@/assets/pregnant-couple.jpg';
+import motherBaby from '@/assets/mother-baby.jpg';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -23,184 +24,166 @@ interface LandingPageProps {
 
 const features = [
   {
-    icon: Baby,
-    title: "Week-by-Week Tracking",
-    description: "Monitor your baby's development with detailed weekly updates and milestones",
-    color: "bg-primary/10 text-primary"
+    icon: Calendar,
+    title: 'Week-by-Week Tracking',
+    description: 'Follow your baby\'s development with detailed weekly updates and milestones.',
+    image: pregnantWoman1
   },
   {
     icon: Heart,
-    title: "Health & Wellness",
-    description: "Personalized nutrition plans, safe exercises, and symptom tracking",
-    color: "bg-secondary/20 text-secondary-foreground"
+    title: 'Health & Wellness',
+    description: 'Personalized nutrition plans, safe exercises, and symptom monitoring.',
+    image: pregnantWoman2
   },
   {
     icon: Users,
-    title: "Partner Dashboard",
-    description: "Keep your partner involved with their own dedicated support view",
-    color: "bg-partner/10 text-partner"
+    title: 'Partner Support',
+    description: 'Keep your partner involved with a dedicated dashboard and shared journey.',
+    image: pregnantCouple
   },
   {
-    icon: Sparkles,
-    title: "Spiritual Support",
-    description: "Daily prayers, verses, and emotional encouragement for your journey",
-    color: "bg-spiritual/20 text-spiritual-foreground"
+    icon: Baby,
+    title: 'Birth Preparation',
+    description: 'Comprehensive checklists and contraction timer for the big day.',
+    image: motherBaby
   },
-  {
-    icon: Calendar,
-    title: "Family Planning",
-    description: "Fertility tracking, ovulation prediction, and conception guidance",
-    color: "bg-tertiary/30 text-tertiary-foreground"
-  },
-  {
-    icon: Shield,
-    title: "Safety Alerts",
-    description: "Know the danger signs and when to seek immediate medical help",
-    color: "bg-destructive/10 text-destructive"
-  }
 ];
 
 const benefits = [
-  "Track pregnancy week by week",
-  "Personalized health guidance",
-  "Partner involvement tools",
-  "Baby preparation checklists",
-  "Contraction timer",
-  "Safe medication guide"
+  'Personalized pregnancy timeline',
+  'Doctor-approved health guidance',
+  'Daily affirmations & support',
+  'Partner involvement tools',
+  'Birth preparation checklists',
+  'Medication safety database',
 ];
 
 const testimonials = [
   {
-    name: "Sarah M.",
-    role: "First-time Mom",
-    content: "NurtureLife made my pregnancy journey so much easier. The weekly updates helped me understand what was happening at every stage.",
-    rating: 5
+    name: 'Sarah M.',
+    role: 'First-time Mom',
+    content: 'NurtureLife made my pregnancy journey so much easier. The weekly updates kept me informed and the partner feature helped my husband feel included.',
+    rating: 5,
+    image: pregnantWoman1
   },
   {
-    name: "James & Emma",
-    role: "Expecting Parents",
-    content: "The partner mode is fantastic! It helped me stay connected and supportive throughout the pregnancy.",
-    rating: 5
+    name: 'Emily & James',
+    role: 'Parents of Two',
+    content: 'We used this app for both our pregnancies. The contraction timer and hospital bag checklist were lifesavers during delivery!',
+    rating: 5,
+    image: pregnantCouple
   },
   {
-    name: "Dr. Patricia A.",
-    role: "OB-GYN",
-    content: "I recommend NurtureLife to all my patients. The medical information is accurate and the danger signs section is invaluable.",
-    rating: 5
-  }
+    name: 'Maria L.',
+    role: 'Mom-to-be',
+    content: 'The spiritual support section gives me peace of mind. It\'s like having a supportive friend throughout my pregnancy.',
+    rating: 5,
+    image: pregnantWoman2
+  },
 ];
 
 const stats = [
-  { value: "100K+", label: "Happy Families" },
-  { value: "40", label: "Weeks Covered" },
-  { value: "24/7", label: "Support Available" },
-  { value: "4.9", label: "App Rating" }
+  { value: '50K+', label: 'Happy Families' },
+  { value: '40', label: 'Weeks Covered' },
+  { value: '4.9', label: 'App Rating' },
+  { value: '24/7', label: 'Support' },
 ];
 
 export function LandingPage({ onGetStarted }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative nurture-gradient-hero overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
+      <section className="relative min-h-screen flex items-center">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src={heroImage} 
+            alt="Pregnant woman in peaceful setting" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
         </div>
         
-        <div className="w-full px-4 md:px-8 lg:px-12 pt-8 pb-16 md:pt-16 md:pb-24 lg:pt-20 lg:pb-32 relative">
+        <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
           {/* Navigation */}
-          <nav className="flex items-center justify-between mb-12 md:mb-16">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 md:w-12 md:h-12 nurture-gradient-primary rounded-xl flex items-center justify-center">
-                <Baby className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
+          <nav className="flex items-center justify-between mb-16 md:mb-24">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 nurture-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
               </div>
-              <span className="font-display text-xl md:text-2xl font-bold text-foreground">
-                Nurture<span className="text-primary">Life</span>
-              </span>
+              <span className="font-serif text-xl md:text-2xl font-semibold text-foreground">NurtureLife</span>
             </div>
-            <Button variant="nurture" size="sm" className="hidden sm:flex" onClick={onGetStarted}>
-              Get Started
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" className="hidden md:inline-flex text-foreground hover:bg-foreground/5">
+                About
+              </Button>
+              <Button variant="ghost" size="sm" className="hidden md:inline-flex text-foreground hover:bg-foreground/5">
+                Features
+              </Button>
+              <Button 
+                onClick={onGetStarted}
+                className="nurture-gradient-primary text-primary-foreground hover:opacity-90 shadow-lg"
+              >
+                Get Started
+              </Button>
+            </div>
           </nav>
 
           {/* Hero Content */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
-                <Heart className="w-4 h-4 animate-pulse" />
-                <span className="text-sm font-medium">Your pregnancy companion</span>
-              </div>
-              
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-                Supporting Your
-                <span className="text-gradient-primary block">Beautiful Journey</span>
-                to Motherhood
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
-                From planning to delivery, NurtureLife provides personalized guidance, 
-                health tracking, and emotional support for you and your partner.
-              </p>
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Your pregnancy companion</span>
+            </div>
+            
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
+              Embrace Every 
+              <span className="text-primary"> Moment</span> of 
+              Your Journey
+            </h1>
+            
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
+              From the first heartbeat to the first embrace, NurtureLife guides you through every beautiful milestone of pregnancy and beyond.
+            </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button variant="nurture" size="xl" onClick={onGetStarted}>
-                  Start Your Journey
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-                <Button variant="outline" size="lg" className="group">
-                  Learn More
-                  <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 mt-8 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-success" />
-                  <span>HIPAA Compliant</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success" />
-                  <span>Doctor Approved</span>
-                </div>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <Button 
+                size="lg" 
+                onClick={onGetStarted}
+                className="nurture-gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]"
+              >
+                Start Your Journey
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="text-lg px-8 py-6 border-2 hover:bg-foreground/5"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch Demo
+              </Button>
             </div>
 
-            {/* Hero Image */}
-            <div className="relative hidden lg:block">
-              <div className="relative">
-                <div className="absolute inset-0 nurture-gradient-primary rounded-3xl blur-3xl opacity-20 scale-95" />
-                <img 
-                  src={heroIllustration} 
-                  alt="Pregnant woman in peaceful setting" 
-                  className="relative w-full rounded-3xl nurture-shadow-elevated object-cover aspect-[4/5]"
-                />
-                
-                {/* Floating Cards */}
-                <div className="absolute -left-8 top-1/4 bg-card rounded-2xl p-4 nurture-shadow-elevated animate-float">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 nurture-gradient-secondary rounded-xl flex items-center justify-center">
-                      <Baby className="w-6 h-6 text-secondary-foreground" />
+            {/* Trust Indicators */}
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[pregnantWoman1, pregnantWoman2, pregnantCouple].map((img, i) => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-background overflow-hidden">
+                      <img src={img} alt="" className="w-full h-full object-cover" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-foreground">Week 24</p>
-                      <p className="text-xs text-muted-foreground">Baby is 12 inches</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="absolute -right-4 bottom-1/4 bg-card rounded-2xl p-4 nurture-shadow-elevated animate-float" style={{ animationDelay: '1s' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 nurture-gradient-warm rounded-xl flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">Healthy</p>
-                      <p className="text-xs text-muted-foreground">All vitals normal</p>
-                    </div>
-                  </div>
-                </div>
+                <span className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">50,000+</strong> happy families
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-spiritual text-spiritual" />
+                ))}
+                <span className="text-sm text-muted-foreground ml-1">4.9 rating</span>
               </div>
             </div>
           </div>
@@ -208,13 +191,13 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 md:py-16 bg-card border-y border-border">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-16 md:py-20 bg-card border-y border-border">
+        <div className="w-full px-6 md:px-12 lg:px-20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <p className="text-3xl md:text-4xl font-bold text-primary mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="font-serif text-4xl md:text-5xl font-semibold text-primary mb-2">{stat.value}</p>
+                <p className="text-muted-foreground font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -222,38 +205,49 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 md:py-24">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+      <section className="py-20 md:py-28">
+        <div className="w-full px-6 md:px-12 lg:px-20">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium mb-4">
+              Features
+            </span>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4">
               Everything You Need for a
-              <span className="text-gradient-primary"> Healthy Pregnancy</span>
+              <br className="hidden md:block" />
+              <span className="text-primary"> Healthy Pregnancy</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Comprehensive tools and guidance designed by healthcare professionals 
-              to support every stage of your pregnancy journey.
+              to support you through every stage of your pregnancy journey.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <Card 
                   key={index} 
-                  variant="elevated" 
-                  className="group hover:border-primary/30 transition-all duration-300"
+                  className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500"
                 >
-                  <CardContent className="p-6">
-                    <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
-                      <Icon className="w-7 h-7" />
+                  <div className="relative h-48 md:h-56 overflow-hidden">
+                    <img 
+                      src={feature.image} 
+                      alt={feature.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center gap-3 text-primary-foreground">
+                        <div className="w-10 h-10 rounded-lg bg-primary/90 flex items-center justify-center">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <h3 className="font-serif text-xl font-semibold">{feature.title}</h3>
+                      </div>
                     </div>
-                    <h3 className="font-display text-xl font-bold text-foreground mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {feature.description}
-                    </p>
+                  </div>
+                  <CardContent className="p-6">
+                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -263,115 +257,143 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 md:py-24 nurture-gradient-hero">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="py-20 md:py-28 bg-muted/50">
+        <div className="w-full px-6 md:px-12 lg:px-20">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Why Thousands of Families
-                <span className="text-gradient-primary block">Choose NurtureLife</span>
+              <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
+                Why NurtureLife
+              </span>
+              <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-6">
+                A Trusted Companion for Your
+                <span className="text-primary"> Pregnancy Journey</span>
               </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Join a community of parents who trust NurtureLife to guide them 
-                through one of life's most precious journeys.
+              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+                Join thousands of families who trust NurtureLife to guide them through 
+                one of life's most beautiful experiences. Our app combines medical expertise 
+                with emotional support.
               </p>
-
-              <div className="grid sm:grid-cols-2 gap-4">
+              
+              <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                      <CheckCircle className="w-4 h-4 text-success" />
+                    <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-4 h-4 text-secondary" />
                     </div>
                     <span className="text-foreground font-medium">{benefit}</span>
                   </div>
                 ))}
               </div>
 
-              <Button variant="nurture" size="lg" className="mt-8" onClick={onGetStarted}>
-                Start Free Today
+              <Button 
+                size="lg" 
+                onClick={onGetStarted}
+                className="nurture-gradient-primary text-primary-foreground shadow-lg"
+              >
+                Get Started Free
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
 
-            <div className="hidden lg:block">
-              <div className="relative">
-                <Card variant="elevated" className="p-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="week-bubble text-base">20</div>
-                    <div>
-                      <p className="font-display text-2xl font-bold text-foreground">Week 20</p>
-                      <p className="text-muted-foreground">Halfway there! 🎉</p>
-                    </div>
+            {/* Image Collage */}
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="photo-frame aspect-[4/5]">
+                    <img 
+                      src={pregnantWoman1} 
+                      alt="Happy pregnant woman"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-secondary/10 border border-secondary/20">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Baby className="w-5 h-5 text-secondary-foreground" />
-                        <span className="font-semibold text-foreground">Baby Development</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Your baby is about 10 inches long and weighs about 10 oz!
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="p-3 rounded-xl bg-primary/10 text-center">
-                        <Apple className="w-5 h-5 mx-auto mb-1 text-primary" />
-                        <span className="text-xs text-muted-foreground">Nutrition</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-tertiary/20 text-center">
-                        <Dumbbell className="w-5 h-5 mx-auto mb-1 text-tertiary-foreground" />
-                        <span className="text-xs text-muted-foreground">Exercise</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-spiritual/20 text-center">
-                        <Sparkles className="w-5 h-5 mx-auto mb-1 text-spiritual-foreground" />
-                        <span className="text-xs text-muted-foreground">Wellness</span>
-                      </div>
-                    </div>
+                  <div className="photo-frame aspect-square">
+                    <img 
+                      src={motherBaby} 
+                      alt="Mother with baby"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </Card>
+                </div>
+                <div className="space-y-4 pt-8">
+                  <div className="photo-frame aspect-square">
+                    <img 
+                      src={pregnantCouple} 
+                      alt="Expecting couple"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="photo-frame aspect-[4/5]">
+                    <img 
+                      src={pregnantWoman2} 
+                      alt="Pregnant woman relaxing"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
               </div>
+              
+              {/* Floating Card */}
+              <Card className="absolute -bottom-6 -left-6 p-4 shadow-xl bg-card/95 backdrop-blur border-0 hidden md:block">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 nurture-gradient-secondary rounded-full flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-secondary-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Doctor Approved</p>
+                    <p className="text-sm text-muted-foreground">Medically reviewed content</p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+      <section className="py-20 md:py-28">
+        <div className="w-full px-6 md:px-12 lg:px-20">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-2 bg-accent/20 rounded-full text-accent-foreground text-sm font-medium mb-4">
+              Testimonials
+            </span>
+            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-4">
               Loved by Families
-              <span className="text-gradient-primary"> Worldwide</span>
+              <span className="text-primary"> Worldwide</span>
             </h2>
-            <p className="text-lg text-muted-foreground">
-              See what parents are saying about their NurtureLife experience
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              Real stories from real parents who've used NurtureLife throughout their pregnancy journey.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} variant="soft" className="p-6">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-warning text-warning" />
-                  ))}
-                </div>
-                <p className="text-foreground mb-4 italic">
-                  "{testimonial.content}"
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full nurture-gradient-primary flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">
-                      {testimonial.name.charAt(0)}
-                    </span>
+              <Card 
+                key={index} 
+                className="border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-spiritual text-spiritual" />
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <p className="text-foreground mb-6 leading-relaxed italic">
+                    "{testimonial.content}"
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                      <img 
+                        src={testimonial.image} 
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -379,50 +401,62 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 nurture-gradient-primary">
-        <div className="w-full px-4 md:px-8 lg:px-12 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
+      <section className="relative py-20 md:py-28 overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src={pregnantCouple} 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-foreground/85" />
+        </div>
+        
+        <div className="relative w-full px-6 md:px-12 lg:px-20 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-background mb-6">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl text-primary-foreground/80 mb-8 max-w-xl mx-auto">
-            Join thousands of families who trust NurtureLife for their pregnancy journey.
+          <p className="text-background/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+            Join our community of expecting parents and experience the joy of a 
+            well-supported pregnancy journey.
           </p>
-          <Button 
-            size="xl" 
-            className="bg-white text-primary hover:bg-white/90"
-            onClick={onGetStarted}
-          >
-            Get Started Free
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <p className="text-primary-foreground/60 text-sm mt-4">
-            No credit card required • Free forever
-          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              onClick={onGetStarted}
+              className="bg-background text-foreground hover:bg-background/90 text-lg px-8 py-6 shadow-xl"
+            >
+              Get Started Free
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="border-background/50 text-background hover:bg-background/10 text-lg px-8 py-6"
+            >
+              Learn More
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-card border-t border-border">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 nurture-gradient-primary rounded-lg flex items-center justify-center">
-                <Baby className="w-4 h-4 text-primary-foreground" />
+      <footer className="py-12 md:py-16 bg-card border-t border-border">
+        <div className="w-full px-6 md:px-12 lg:px-20">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 nurture-gradient-primary rounded-xl flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-display text-lg font-bold text-foreground">
-                NurtureLife
-              </span>
+              <span className="font-serif text-xl font-semibold text-foreground">NurtureLife</span>
             </div>
-            
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-8 text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
               <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="#" className="hover:text-foreground transition-colors">Support</a>
               <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+              <a href="#" className="hover:text-foreground transition-colors">Support</a>
             </div>
-            
             <p className="text-sm text-muted-foreground">
-              © 2024 NurtureLife. Made with 💕
+              © 2024 NurtureLife. Made with ❤️ for families.
             </p>
           </div>
         </div>

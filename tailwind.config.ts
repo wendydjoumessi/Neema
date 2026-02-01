@@ -9,13 +9,14 @@ export default {
       center: true,
       padding: "1rem",
       screens: {
-        "2xl": "430px", // Mobile-first max width
+        "2xl": "1400px",
       },
     },
     extend: {
       fontFamily: {
-        primary: ["Nunito", "system-ui", "sans-serif"],
-        display: ["Quicksand", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "Georgia", "serif"],
+        display: ["Playfair Display", "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -96,7 +97,7 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        "2xl": "1.25rem",
+        "2xl": "1rem",
         "3xl": "1.5rem",
       },
       spacing: {
@@ -115,14 +116,14 @@ export default {
         },
         "heart-beat": {
           "0%, 100%": { transform: "scale(1)" },
-          "14%": { transform: "scale(1.1)" },
+          "14%": { transform: "scale(1.08)" },
           "28%": { transform: "scale(1)" },
-          "42%": { transform: "scale(1.1)" },
+          "42%": { transform: "scale(1.08)" },
           "70%": { transform: "scale(1)" },
         },
         "bounce-gentle": {
           "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-5px)" },
+          "50%": { transform: "translateY(-4px)" },
         },
       },
       animation: {

@@ -1,6 +1,6 @@
 import { PregnancyData } from '@/types/pregnancy';
 import { weeklyData } from '@/data/pregnancyData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
@@ -16,7 +16,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import coupleIllustration from '@/assets/couple-illustration.png';
+import pregnantCouple from '@/assets/pregnant-couple.jpg';
 
 interface PartnerDashboardProps {
   pregnancy: PregnancyData;
@@ -49,44 +49,50 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
 
   return (
     <div className="pb-6 animate-fade-in">
-      {/* Header with Partner Theme */}
+      {/* Header with Real Photo */}
       <div className="relative overflow-hidden">
-        <div className="nurture-gradient-partner px-4 md:px-8 pt-safe-top pb-20">
-          <div className="flex items-center justify-between mb-4 pt-4">
+        <div className="relative h-56 md:h-72">
+          <img 
+            src={pregnantCouple} 
+            alt="Happy expecting couple" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-partner/40 via-background/60 to-background" />
+          <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top flex items-center justify-between">
             <div>
-              <p className="text-partner-foreground/80 text-sm">Partner Mode 💙</p>
-              <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-partner-foreground">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-partner/20 backdrop-blur-sm rounded-full mb-2">
+                <Heart className="w-3 h-3 text-partner-foreground" />
+                <span className="text-xs font-medium text-partner-foreground">Partner Mode</span>
+              </div>
+              <h1 className="font-serif text-2xl md:text-3xl font-semibold text-white drop-shadow-lg">
                 Welcome, Partner!
               </h1>
             </div>
-            <Button variant="ghost" size="icon-sm" className="text-partner-foreground">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
               <Bell className="w-5 h-5" />
             </Button>
           </div>
         </div>
         
-        {/* Floating Card */}
-        <div className="px-4 md:px-8 -mt-12">
-          <Card variant="elevated" className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="flex flex-col sm:flex-row">
-                <div className="flex-1 p-4 md:p-5">
-                  <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-partner/10 text-partner mb-3">
-                    Week {pregnancy.currentWeek}
-                  </div>
-                  <p className="text-2xl md:text-3xl font-bold text-foreground mb-1">{daysUntilDue}</p>
-                  <p className="text-sm text-muted-foreground">days until baby arrives</p>
-                  <div className="mt-4">
-                    <Progress value={progressPercent} className="h-2" />
-                  </div>
+        {/* Floating Progress Card */}
+        <div className="px-4 md:px-8 lg:px-12 -mt-16">
+          <Card className="overflow-hidden border-0 shadow-xl bg-card/95 backdrop-blur">
+            <CardContent className="p-5 md:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-partner/10 text-partner">
+                  Week {pregnancy.currentWeek}
                 </div>
-                <div className="w-full sm:w-28 h-20 sm:h-auto bg-partner/5 flex items-end justify-center">
-                  <img 
-                    src={coupleIllustration} 
-                    alt="Couple" 
-                    className="w-20 sm:w-24 h-auto object-contain"
-                  />
+                <div className="text-right">
+                  <p className="font-serif text-3xl md:text-4xl font-semibold text-foreground">{daysUntilDue}</p>
+                  <p className="text-xs text-muted-foreground">days until baby arrives</p>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Journey Progress</span>
+                  <span className="font-semibold text-partner">{Math.round(progressPercent)}%</span>
+                </div>
+                <Progress value={progressPercent} className="h-2.5" />
               </div>
             </CardContent>
           </Card>
@@ -94,40 +100,44 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
       </div>
 
       {/* Today's Support Tip */}
-      <div className="px-4 md:px-8 mt-6">
-        <Card variant="partner">
-          <CardContent className="p-4 md:p-5">
-            <div className="flex items-start gap-3">
-              <Lightbulb className="w-5 h-5 md:w-6 md:h-6 text-partner-foreground shrink-0" />
-              <div>
-                <p className="text-xs md:text-sm font-medium text-partner-foreground/80 mb-1">
-                  Today's Support Tip
-                </p>
-                <p className="text-sm md:text-base font-medium text-partner-foreground">
-                  {todaysTip}
-                </p>
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <Card className="border-0 overflow-hidden">
+          <div className="nurture-gradient-partner">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center shrink-0">
+                  <Lightbulb className="w-5 h-5 text-partner-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-partner-foreground/70 mb-1">
+                    Today's Support Tip
+                  </p>
+                  <p className="font-medium text-partner-foreground leading-relaxed">
+                    {todaysTip}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="px-4 md:px-8 mt-6">
-        <h2 className="font-display text-lg md:text-xl font-bold text-foreground mb-4">Ways to Help</h2>
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">Ways to Help</h2>
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
           {[
-            { icon: MessageCircle, label: 'Send Love', color: 'bg-destructive/10 text-destructive' },
-            { icon: Gift, label: 'Surprise Her', color: 'bg-tertiary/30 text-tertiary-foreground' },
-            { icon: Calendar, label: 'Plan Date', color: 'bg-partner/10 text-partner' },
+            { icon: MessageCircle, label: 'Send Love', color: 'bg-accent/20 text-accent-foreground', hoverColor: 'hover:bg-accent/30' },
+            { icon: Gift, label: 'Surprise Her', color: 'bg-tertiary/40 text-tertiary-foreground', hoverColor: 'hover:bg-tertiary/60' },
+            { icon: Calendar, label: 'Plan Date', color: 'bg-partner/15 text-partner', hoverColor: 'hover:bg-partner/25' },
           ].map((action, i) => {
             const Icon = action.icon;
             return (
-              <button key={i} className="flex flex-col items-center gap-2 p-2">
-                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${action.color} flex items-center justify-center transition-transform hover:scale-105`}>
-                  <Icon className="w-5 h-5 md:w-6 md:h-6" />
+              <button key={i} className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${action.hoverColor} group`}>
+                <div className={`w-14 h-14 rounded-xl ${action.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
+                  <Icon className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] md:text-xs font-medium text-muted-foreground">{action.label}</span>
+                <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
               </button>
             );
           })}
@@ -135,27 +145,31 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
       </div>
 
       {/* Baby Update for Partner */}
-      <div className="px-4 md:px-8 mt-6">
-        <Card variant="gradient-warm">
-          <CardContent className="p-4 md:p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <Baby className="w-5 h-5" />
-              <span className="font-medium text-sm md:text-base">Baby This Week</span>
-            </div>
-            <p className="text-xl md:text-2xl font-bold mb-2">
-              {currentWeekData.babySizeComparison}
-            </p>
-            <p className="text-xs md:text-sm opacity-80">
-              About {currentWeekData.babySize} in size
-            </p>
-          </CardContent>
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="nurture-gradient-warm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
+                  <Baby className="w-5 h-5 text-primary" />
+                </div>
+                <span className="font-medium">Baby This Week</span>
+              </div>
+              <p className="font-serif text-2xl md:text-3xl font-semibold text-foreground mb-1">
+                {currentWeekData.babySizeComparison}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                About {currentWeekData.babySize} in size
+              </p>
+            </CardContent>
+          </div>
         </Card>
       </div>
 
       {/* Partner Tasks */}
-      <div className="px-4 md:px-8 mt-6">
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg md:text-xl font-bold text-foreground">Your Tasks</h2>
+          <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground">Your Tasks</h2>
           <span className="text-sm text-muted-foreground">
             {completedTasks}/{partnerTasks.length} done
           </span>
@@ -163,19 +177,19 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
         
         <div className="space-y-3">
           {partnerTasks.map(task => (
-            <Card key={task.id} variant={task.completed ? 'soft' : 'elevated'}>
-              <CardContent className="p-3 md:p-4 flex items-center gap-3">
-                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
+            <Card key={task.id} className={`border-0 shadow-md transition-all duration-300 hover:shadow-lg ${task.completed ? 'bg-muted/50' : ''}`}>
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                   task.completed ? 'bg-success text-success-foreground' : 'bg-muted'
                 }`}>
                   {task.completed ? (
-                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
+                    <CheckCircle className="w-5 h-5" />
                   ) : (
-                    <Clock className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
+                    <Clock className="w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`font-medium text-sm md:text-base truncate ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                  <p className={`font-medium truncate ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                     {task.title}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -189,17 +203,17 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
       </div>
 
       {/* What She's Experiencing */}
-      <div className="px-4 md:px-8 mt-6">
-        <h2 className="font-display text-lg md:text-xl font-bold text-foreground mb-4">
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">
           What She's Experiencing
         </h2>
-        <Card variant="soft">
-          <CardContent className="p-4 md:p-5">
+        <Card className="border-0 shadow-lg bg-muted/30">
+          <CardContent className="p-5">
             <ul className="space-y-3">
               {currentWeekData.motherChanges.map((change, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <Heart className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm md:text-base text-foreground">{change}</span>
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <span className="text-foreground leading-relaxed">{change}</span>
                 </li>
               ))}
             </ul>
@@ -207,20 +221,22 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
         </Card>
       </div>
 
-      {/* Reminders */}
-      <div className="px-4 md:px-8 mt-6">
-        <Card variant="elevated">
-          <CardContent className="p-3 md:p-4 flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-partner/10 flex items-center justify-center shrink-0">
-              <Calendar className="w-5 h-5 md:w-6 md:h-6 text-partner" />
+      {/* Due Date Card */}
+      <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <Card className="border-0 shadow-lg overflow-hidden group cursor-pointer hover:shadow-xl transition-all">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-4 p-4">
+              <div className="w-14 h-14 rounded-xl nurture-gradient-partner flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-partner-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground">Due Date</p>
+                <p className="text-sm text-muted-foreground">
+                  {format(pregnancy.dueDate, 'MMMM d, yyyy')}
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground text-sm md:text-base">Due Date</p>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                {format(pregnancy.dueDate, 'MMMM d, yyyy')}
-              </p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
           </CardContent>
         </Card>
       </div>
