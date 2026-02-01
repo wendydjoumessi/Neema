@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { 
   Apple, 
   Dumbbell, 
@@ -18,6 +19,10 @@ import {
   Flame,
   Plus
 } from 'lucide-react';
+
+import pregnantYogaImg from '@/assets/pregnant-yoga.jpg';
+import pregnantNutritionImg from '@/assets/pregnant-nutrition.jpg';
+import prenatalCheckupImg from '@/assets/prenatal-checkup.jpg';
 
 interface HealthScreenProps {
   pregnancy: PregnancyData;
@@ -66,6 +71,21 @@ export function HealthScreen({ pregnancy }: HealthScreenProps) {
 
           {/* Nutrition Tab */}
           <TabsContent value="nutrition" className="space-y-4">
+            {/* Hero Image */}
+            <Card variant="elevated" className="overflow-hidden">
+              <AspectRatio ratio={16/9}>
+                <img 
+                  src={pregnantNutritionImg} 
+                  alt="Healthy pregnancy nutrition" 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <CardContent className="p-4">
+                <h3 className="font-display text-lg font-semibold text-foreground">Eating for Two</h3>
+                <p className="text-sm text-muted-foreground">Nourish yourself and your baby with the right foods</p>
+              </CardContent>
+            </Card>
+
             {/* Calories */}
             <Card variant="gradient-warm">
               <CardContent className="p-5">
@@ -147,6 +167,21 @@ export function HealthScreen({ pregnancy }: HealthScreenProps) {
 
           {/* Exercise Tab */}
           <TabsContent value="exercise" className="space-y-4">
+            {/* Hero Image */}
+            <Card variant="elevated" className="overflow-hidden">
+              <AspectRatio ratio={16/9}>
+                <img 
+                  src={pregnantYogaImg} 
+                  alt="Pregnant woman doing yoga" 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <CardContent className="p-4">
+                <h3 className="font-display text-lg font-semibold text-foreground">Stay Active & Healthy</h3>
+                <p className="text-sm text-muted-foreground">Gentle exercises to keep you and baby strong</p>
+              </CardContent>
+            </Card>
+
             <Card variant="gradient-secondary">
               <CardContent className="p-5">
                 <p className="text-sm opacity-80 mb-2">Safe Exercise Guidelines</p>
@@ -192,6 +227,21 @@ export function HealthScreen({ pregnancy }: HealthScreenProps) {
 
           {/* Symptoms Tab */}
           <TabsContent value="symptoms" className="space-y-4">
+            {/* Hero Image */}
+            <Card variant="elevated" className="overflow-hidden">
+              <AspectRatio ratio={16/9}>
+                <img 
+                  src={prenatalCheckupImg} 
+                  alt="Prenatal checkup with doctor" 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <CardContent className="p-4">
+                <h3 className="font-display text-lg font-semibold text-foreground">Know Your Symptoms</h3>
+                <p className="text-sm text-muted-foreground">Track and understand what your body is telling you</p>
+              </CardContent>
+            </Card>
+
             {/* Danger Symptoms */}
             <Card variant="elevated" className="border-destructive/30">
               <CardHeader className="bg-destructive/5 rounded-t-2xl">

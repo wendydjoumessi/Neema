@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { 
   Shirt, 
   Droplets, 
@@ -16,6 +17,9 @@ import {
   Timer,
   AlertCircle
 } from 'lucide-react';
+
+import babyShoppingImg from '@/assets/baby-shopping.jpg';
+import babyNurseryImg from '@/assets/baby-nursery.jpg';
 
 interface ChecklistScreenProps {
   checklist: ChecklistItem[];
@@ -98,8 +102,25 @@ export function ChecklistScreen({ checklist, onToggleItem }: ChecklistScreenProp
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Hero Image */}
       <div className="px-6 mt-6 mb-6">
+        <Card variant="elevated" className="overflow-hidden">
+          <AspectRatio ratio={16/9}>
+            <img 
+              src={babyShoppingImg} 
+              alt="Shopping for baby items" 
+              className="w-full h-full object-cover"
+            />
+          </AspectRatio>
+          <CardContent className="p-4">
+            <h3 className="font-display text-lg font-semibold text-foreground">Get Ready for Baby</h3>
+            <p className="text-sm text-muted-foreground">Everything you need to prepare before the big day</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="px-6 mb-6">
         <div className="grid grid-cols-2 gap-3">
           <Button 
             variant="outline" 
