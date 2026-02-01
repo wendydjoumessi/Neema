@@ -101,7 +101,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             alt="Pregnant woman in peaceful setting" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
         </div>
         
         <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
