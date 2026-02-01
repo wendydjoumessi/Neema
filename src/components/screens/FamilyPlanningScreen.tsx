@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { 
   Calendar,
   Heart,
@@ -16,6 +17,9 @@ import {
   Sparkles
 } from 'lucide-react';
 import { format, addDays, subDays, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from 'date-fns';
+
+import familyPlanningImg from '@/assets/family-planning.jpg';
+import pregnantCoupleImg from '@/assets/pregnant-couple.jpg';
 
 export function FamilyPlanningScreen() {
   const [cycleLength, setCycleLength] = useState(28);
@@ -232,6 +236,21 @@ export function FamilyPlanningScreen() {
           </TabsContent>
 
           <TabsContent value="planning" className="space-y-4">
+            {/* Hero Image */}
+            <Card variant="elevated" className="overflow-hidden">
+              <AspectRatio ratio={16/9}>
+                <img 
+                  src={pregnantCoupleImg} 
+                  alt="Happy pregnant couple" 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <CardContent className="p-4">
+                <h3 className="font-display text-lg font-semibold text-foreground">Your Journey Together</h3>
+                <p className="text-sm text-muted-foreground">Planning for the family you've always dreamed of</p>
+              </CardContent>
+            </Card>
+
             <Card variant="gradient-warm">
               <CardContent className="p-5 text-center">
                 <Heart className="w-10 h-10 mx-auto mb-4" />
@@ -278,6 +297,21 @@ export function FamilyPlanningScreen() {
           </TabsContent>
 
           <TabsContent value="education" className="space-y-4">
+            {/* Hero Image */}
+            <Card variant="elevated" className="overflow-hidden">
+              <AspectRatio ratio={16/9}>
+                <img 
+                  src={familyPlanningImg} 
+                  alt="Happy family" 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <CardContent className="p-4">
+                <h3 className="font-display text-lg font-semibold text-foreground">Learn & Grow</h3>
+                <p className="text-sm text-muted-foreground">Understanding your body and family planning options</p>
+              </CardContent>
+            </Card>
+
             <Card variant="soft">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
