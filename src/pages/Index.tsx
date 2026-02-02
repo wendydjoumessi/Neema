@@ -13,11 +13,12 @@ import { SpiritualScreen } from '@/components/screens/SpiritualScreen';
 import { PartnerDashboard } from '@/components/screens/PartnerDashboard';
 import { FamilyPlanningScreen } from '@/components/screens/FamilyPlanningScreen';
 import { ProfileScreen } from '@/components/screens/ProfileScreen';
+import { ContactScreen } from '@/components/screens/ContactScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
 import { defaultChecklist } from '@/data/pregnancyData';
 
 function NurtureLifeApp() {
-  const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main'>('landing');
+  const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main' | 'contact'>('landing');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
   const [user, setUser] = useState<User | null>(null);
@@ -90,9 +91,25 @@ function NurtureLifeApp() {
     }
   };
 
+  // Handle navigation from landing page
+  const handleLandingNavigate = (section: string) => {
+    if (section === 'contact') {
+      setCurrentScreen('contact');
+    }
+  };
+
   // Render appropriate screen
   if (currentScreen === 'landing') {
-    return <LandingPage onGetStarted={() => setCurrentScreen('onboarding')} />;
+    return (
+      <LandingPage 
+        onGetStarted={() => setCurrentScreen('onboarding')} 
+        onNavigate={handleLandingNavigate}
+      />
+    );
+  }
+
+  if (currentScreen === 'contact') {
+    return <ContactScreen onBack={() => setCurrentScreen('landing')} />;
   }
 
   if (currentScreen === 'onboarding') {
