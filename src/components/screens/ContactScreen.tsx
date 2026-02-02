@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Heart, Mail, ArrowLeft, Send, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
 interface ContactScreenProps {
@@ -60,24 +61,27 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
     setIsSubmitting(true);
 
     try {
-      // Create mailto link with form data
-      const mailtoSubject = encodeURIComponent(formData.subject);
-      const mailtoBody = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-      );
-      
-      // Open email client
-      window.location.href = `mailto:fortunelekane61@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+        },
+      });
+
+      if (error) throw error;
       
       setIsSubmitted(true);
       toast({
-        title: "Email client opened!",
-        description: "Please send the email from your email application.",
+        title: "Message sent!",
+        description: "We'll get back to you within 24-48 hours.",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Contact form error:', error);
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Failed to send message",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     } finally {
@@ -208,11 +212,10 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
                         <CheckCircle className="w-10 h-10 text-primary-foreground" />
                       </div>
                       <h3 className="font-serif text-2xl font-semibold text-foreground mb-3">
-                        Email Client Opened!
+                        Message Sent!
                       </h3>
                       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                        Please complete sending the email from your email application. 
-                        We'll get back to you within 24-48 hours.
+                        Thank you for reaching out! We'll get back to you within 24-48 hours.
                       </p>
                       <Button onClick={resetForm} variant="outline">
                         Send Another Message
@@ -292,7 +295,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
                         {isSubmitting ? (
                           <>
                             <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                            Opening Email...
+                            Sending...
                           </>
                         ) : (
                           <>
