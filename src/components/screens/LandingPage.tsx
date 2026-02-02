@@ -20,6 +20,7 @@ import motherBaby from '@/assets/mother-baby.jpg';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  onNavigate?: (section: string) => void;
 }
 
 const features = [
@@ -89,7 +90,14 @@ const stats = [
   { value: '24/7', label: 'Support' },
 ];
 
-export function LandingPage({ onGetStarted }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -114,11 +122,29 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               <span className="font-serif text-xl md:text-2xl font-semibold text-foreground">NurtureLife</span>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="hidden md:inline-flex text-foreground hover:bg-foreground/5">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
+                onClick={() => scrollToSection('about-section')}
+              >
                 About
               </Button>
-              <Button variant="ghost" size="sm" className="hidden md:inline-flex text-foreground hover:bg-foreground/5">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
+                onClick={() => scrollToSection('features-section')}
+              >
                 Features
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
+                onClick={() => onNavigate?.('contact')}
+              >
+                Contact
               </Button>
               <Button 
                 onClick={onGetStarted}
@@ -205,7 +231,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-28">
+      <section id="features-section" className="py-20 md:py-28">
         <div className="w-full px-6 md:px-12 lg:px-20">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium mb-4">
@@ -256,8 +282,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 md:py-28 bg-muted/50">
+      {/* Benefits/About Section */}
+      <section id="about-section" className="py-20 md:py-28 bg-muted/50">
         <div className="w-full px-6 md:px-12 lg:px-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
@@ -450,10 +476,10 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               <span className="font-serif text-xl font-semibold text-foreground">NurtureLife</span>
             </div>
             <div className="flex items-center gap-8 text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="#" className="hover:text-foreground transition-colors">Contact</a>
-              <a href="#" className="hover:text-foreground transition-colors">Support</a>
+              <button onClick={() => scrollToSection('about-section')} className="hover:text-foreground transition-colors">About</button>
+              <button onClick={() => scrollToSection('features-section')} className="hover:text-foreground transition-colors">Features</button>
+              <button onClick={() => onNavigate?.('contact')} className="hover:text-foreground transition-colors">Contact</button>
+              <a href="mailto:fortunelekane61@gmail.com" className="hover:text-foreground transition-colors">Support</a>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 NurtureLife. Made with ❤️ for families.
