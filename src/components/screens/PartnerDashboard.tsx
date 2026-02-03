@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
+import logo from '@/assets/logo.png';
 
 interface PartnerDashboardProps {
   pregnancy: PregnancyData;
@@ -60,13 +61,11 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
           <div className="absolute inset-0 bg-gradient-to-b from-partner/40 via-background/60 to-background" />
           <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top flex items-center justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-partner/20 backdrop-blur-sm rounded-full mb-2">
+              <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-2" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-partner/20 backdrop-blur-sm rounded-full">
                 <Heart className="w-3 h-3 text-partner-foreground" />
                 <span className="text-xs font-medium text-partner-foreground">Partner Mode</span>
               </div>
-              <h1 className="font-serif text-2xl md:text-3xl font-semibold text-white drop-shadow-lg">
-                Welcome, Partner!
-              </h1>
             </div>
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
               <Bell className="w-5 h-5" />
