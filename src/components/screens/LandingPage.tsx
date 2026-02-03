@@ -17,6 +17,7 @@ import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import motherBaby from '@/assets/mother-baby.jpg';
+import logo from '@/assets/logo.png';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -115,11 +116,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
         <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
           {/* Navigation */}
           <nav className="flex items-center justify-between mb-16 md:mb-24">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 nurture-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
-              </div>
-              <span className="font-serif text-xl md:text-2xl font-semibold text-foreground">NurtureLife</span>
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="NurtureLife" className="h-10 md:h-12 w-auto" />
             </div>
             <div className="flex items-center gap-3">
               <Button 
@@ -469,11 +467,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       <footer className="py-12 md:py-16 bg-card border-t border-border">
         <div className="w-full px-6 md:px-12 lg:px-20">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 nurture-gradient-primary rounded-xl flex items-center justify-center">
-                <Heart className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-serif text-xl font-semibold text-foreground">NurtureLife</span>
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="NurtureLife" className="h-10 w-auto" />
             </div>
             <div className="flex items-center gap-8 text-muted-foreground">
               <button onClick={() => scrollToSection('about-section')} className="hover:text-foreground transition-colors">About</button>
