@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import pregnantWoman from '@/assets/pregnant-woman-1.jpg';
+import logo from '@/assets/logo.png';
 
 interface DashboardScreenProps {
   pregnancy: PregnancyData;
@@ -57,17 +58,19 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
         </div>
         
         <div className="relative px-4 md:px-8 lg:px-12 pt-safe-top pb-6">
-          <div className="flex items-center justify-between mb-6 pt-4">
-            <div>
-              <p className="text-muted-foreground text-sm md:text-base">Good morning 👋</p>
-              <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground">
-                {pregnancy.babyName ? `How's ${pregnancy.babyName}?` : "How are you today?"}
-              </h1>
-            </div>
+          <div className="flex items-center justify-between mb-4 pt-4">
+            <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
             <Button variant="ghost" size="icon" className="relative w-10 h-10 rounded-full bg-card shadow-sm">
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-background" />
             </Button>
+          </div>
+          
+          <div className="mb-6">
+            <p className="text-muted-foreground text-sm md:text-base">Good morning 👋</p>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground">
+              {pregnancy.babyName ? `How's ${pregnancy.babyName}?` : "How are you today?"}
+            </h1>
           </div>
 
           {/* Week Progress Card */}
