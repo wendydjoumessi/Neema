@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { format, addWeeks, subWeeks } from 'date-fns';
 import babyIcon from '@/assets/baby-icon.png';
+import logo from '@/assets/logo.png';
 
 interface WeeklyTrackingScreenProps {
   pregnancy: PregnancyData;
@@ -44,6 +45,7 @@ export function WeeklyTrackingScreen({ pregnancy }: WeeklyTrackingScreenProps) {
       {/* Header */}
       <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
         <div className="pt-4 mb-6">
+          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-4" />
           <h1 className="font-display text-2xl font-bold text-foreground">
             Weekly Tracking
           </h1>

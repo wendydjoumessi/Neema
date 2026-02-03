@@ -12,6 +12,7 @@ import {
   Bookmark
 } from 'lucide-react';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
+import logo from '@/assets/logo.png';
 
 export function SpiritualScreen() {
   const [currentPrayerIndex, setCurrentPrayerIndex] = useState(0);
@@ -38,6 +39,9 @@ export function SpiritualScreen() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-spiritual/30 via-background/50 to-background" />
+        <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top">
+          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+        </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-spiritual/20 backdrop-blur-sm rounded-full mb-3">
             <Sparkles className="w-4 h-4 text-spiritual" />
