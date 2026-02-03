@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { User } from '@/types/pregnancy';
 import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
+import logo from '@/assets/logo.png';
 
 interface AuthScreenProps {
   onAuth: (user: User) => void;
@@ -85,18 +86,19 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
 
       {/* Content */}
       <div className="relative min-h-screen flex flex-col px-6 md:px-8 lg:px-12 pt-safe-top pb-8">
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-foreground/70 hover:text-foreground mb-6 mt-4 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back
-        </button>
+        {/* Header with Back and Logo */}
+        <div className="flex items-center justify-between mb-6 mt-4">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back
+          </button>
+          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+        </div>
 
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-2xl nurture-gradient-primary flex items-center justify-center mb-4 shadow-xl">
-            <Heart className="w-8 h-8 text-primary-foreground animate-heart-beat" />
-          </div>
           <h1 className="font-serif text-3xl font-semibold text-foreground">
             Welcome to NurtureLife
           </h1>

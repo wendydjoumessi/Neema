@@ -13,6 +13,7 @@ import heroImage from '@/assets/hero-pregnant.jpg';
 import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import motherBaby from '@/assets/mother-baby.jpg';
+import logo from '@/assets/logo.png';
 
 interface OnboardingScreenProps {
   onComplete: (role: 'mother' | 'partner') => void;
@@ -100,15 +101,18 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
         {/* Content */}
         <div className="relative min-h-screen flex flex-col p-6 md:p-8 lg:p-12 pt-safe-top pb-safe-bottom">
-          {/* Back Button */}
-          <Button 
-            variant="ghost" 
-            onClick={() => setShowRoleSelection(false)}
-            className="self-start text-foreground/80 hover:text-foreground hover:bg-background/20 mb-8"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          {/* Logo and Back Button */}
+          <div className="flex items-center justify-between mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowRoleSelection(false)}
+              className="text-foreground/80 hover:text-foreground hover:bg-background/20"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+          </div>
 
           {/* Spacer */}
           <div className="flex-1" />
@@ -195,8 +199,9 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
       {/* Content */}
       <div className="relative min-h-screen flex flex-col">
-        {/* Skip Button */}
-        <div className="flex justify-end p-6 pt-safe-top">
+        {/* Header with Logo and Skip */}
+        <div className="flex items-center justify-between p-6 pt-safe-top">
+          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
           <Button 
             variant="ghost" 
             onClick={handleSkip}
