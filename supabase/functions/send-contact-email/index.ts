@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,10 +33,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields");
     }
 
+    // Note: Using Resend test mode - emails go to the Resend account owner
+    // To send to other recipients, verify a domain at resend.com/domains
     const emailResponse = await resend.emails.send({
       from: "NurtureLife Contact <onboarding@resend.dev>",
-      to: ["fortunelekane61@gmail.com"],
-      replyTo: email,
+      to: ["wendydjoumessi112@gmail.com"],
+      reply_to: email,
       subject: `[Contact Form] ${subject}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
