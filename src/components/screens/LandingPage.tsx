@@ -117,7 +117,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
           {/* Navigation */}
           <nav className="flex items-center justify-between mb-16 md:mb-24">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="NurtureLife" className="h-14 md:h-20 w-auto" />
+              <img src={logo} alt="NurtureLife" className="h-20 md:h-28 w-auto" />
             </div>
             <div className="flex items-center gap-3">
               <Button 
@@ -468,7 +468,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
         <div className="w-full px-6 md:px-12 lg:px-20">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="NurtureLife" className="h-14 md:h-16 w-auto" />
+              <img src={logo} alt="NurtureLife" className="h-20 md:h-24 w-auto" />
             </div>
             <div className="flex items-center gap-8 text-muted-foreground">
               <button onClick={() => scrollToSection('about-section')} className="hover:text-foreground transition-colors">About</button>
