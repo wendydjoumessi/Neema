@@ -23,6 +23,7 @@ import {
 import pregnantYogaImg from '@/assets/pregnant-yoga.jpg';
 import pregnantNutritionImg from '@/assets/pregnant-nutrition.jpg';
 import prenatalCheckupImg from '@/assets/prenatal-checkup.jpg';
+import logo from '@/assets/logo.png';
 
 interface HealthScreenProps {
   pregnancy: PregnancyData;
@@ -38,6 +39,7 @@ export function HealthScreen({ pregnancy }: HealthScreenProps) {
       {/* Header */}
       <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
         <div className="pt-4">
+          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-4" />
           <h1 className="font-display text-2xl font-bold text-foreground">
             Health & Wellness
           </h1>
