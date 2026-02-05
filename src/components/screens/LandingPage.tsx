@@ -12,7 +12,7 @@ import {
   Star,
   Play
 } from 'lucide-react';
-import heroImage from '@/assets/hero-pregnant.jpg';
+import heroImage from '@/assets/hero-pregnant-new.jpg';
 import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
