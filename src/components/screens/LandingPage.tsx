@@ -241,18 +241,18 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               return (
                 <Card 
                   key={index} 
-                  className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500"
+                  className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover-scale"
                 >
-                  <div className="relative h-48 md:h-56 overflow-hidden">
+                  <div className="relative h-48 md:h-52 lg:h-48 overflow-hidden">
                     <img 
                       src={feature.image} 
                       alt={feature.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
+                    <div className="absolute bottom-4 left-4 right-4 transition-transform duration-300 group-hover:translate-y-[-4px]">
                       <div className="flex items-center gap-3 text-primary-foreground">
-                        <div className="w-10 h-10 rounded-lg bg-primary/90 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary/90 flex items-center justify-center transition-all duration-300 group-hover:bg-primary group-hover:scale-110">
                           <Icon className="w-5 h-5" />
                         </div>
                         <h3 className="font-serif text-xl font-semibold">{feature.title}</h3>
