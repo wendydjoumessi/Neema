@@ -24,6 +24,10 @@ import spiritualSupport from '@/assets/spiritual-support.jpg';
 import familyPlanningImg from '@/assets/family-planning-new.webp';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import logo from '@/assets/logo.png';
+import aboutPregnancyTracking from '@/assets/about-pregnancy-tracking.jpg';
+import aboutPartnerSupport from '@/assets/about-partner-support.webp';
+import aboutHealthNutrition from '@/assets/about-health-nutrition.jpg';
+import aboutFamilyPlanning from '@/assets/about-family-planning.png';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -392,7 +396,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '400ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnancyTracking} 
+                      src={aboutPregnancyTracking} 
                       alt="Pregnancy tracking feature"
                       className="w-full h-full object-cover"
                     />
@@ -402,7 +406,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '600ms' : '0ms' }}
                   >
                     <img 
-                      src={healthNutrition} 
+                      src={aboutHealthNutrition} 
                       alt="Health and nutrition guidance"
                       className="w-full h-full object-cover"
                     />
@@ -414,7 +418,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '500ms' : '0ms' }}
                   >
                     <img 
-                      src={partnerMode} 
+                      src={aboutPartnerSupport} 
                       alt="Partner support mode"
                       className="w-full h-full object-cover"
                     />
@@ -424,7 +428,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '700ms' : '0ms' }}
                   >
                     <img 
-                      src={familyPlanningImg} 
+                      src={aboutFamilyPlanning} 
                       alt="Family planning tools"
                       className="w-full h-full object-cover"
                     />
