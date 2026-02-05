@@ -24,6 +24,10 @@ import spiritualSupport from '@/assets/spiritual-support.jpg';
 import familyPlanningImg from '@/assets/family-planning-new.webp';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import logo from '@/assets/logo.png';
+import aboutPregnancyTracking from '@/assets/about-pregnancy-tracking.jpg';
+import aboutPartnerSupport from '@/assets/about-partner-support.webp';
+import aboutHealthNutrition from '@/assets/about-health-nutrition.jpg';
+import aboutFamilyPlanning from '@/assets/about-family-planning.png';
 
 interface LandingPageProps {
   onGetStarted: () => void;
