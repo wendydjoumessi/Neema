@@ -30,37 +30,37 @@ interface LandingPageProps {
 const features = [
   {
     icon: Calendar,
-    title: 'Week-by-Week Tracking',
-    description: 'Follow your baby\'s development with detailed weekly updates and milestones.',
+    title: 'Pregnancy Tracking',
+    description: 'Automatic week calculation, weekly updates, delivery countdown, and doctor-verified due dates.',
     image: pregnantWoman1
   },
   {
     icon: Heart,
-    title: 'Health & Wellness',
-    description: 'Personalized nutrition plans, safe exercises, and symptom monitoring.',
+    title: 'Health & Nutrition Guidance',
+    description: 'Trimester-based nutrition, safe exercises, mental wellbeing support, and medication safety alerts.',
     image: pregnantWoman2
   },
   {
     icon: Users,
-    title: 'Partner Support',
-    description: 'Keep your partner involved with a dedicated dashboard and shared journey.',
+    title: 'Partner Mode',
+    description: 'Shared pregnancy dashboard, reminders, and guidance to keep partners involved in the journey.',
     image: pregnantCouple
   },
   {
     icon: Baby,
-    title: 'Birth Preparation',
-    description: 'Comprehensive checklists and contraction timer for the big day.',
+    title: 'Baby & Birth Preparation',
+    description: 'Hospital bag checklists, contraction timer, shopping assistant, and budget-friendly recommendations.',
     image: motherBaby
   },
 ];
 
 const benefits = [
-  'Personalized pregnancy timeline',
-  'Doctor-approved health guidance',
-  'Daily affirmations & support',
-  'Partner involvement tools',
-  'Birth preparation checklists',
-  'Medication safety database',
+  'Week-by-week pregnancy updates',
+  'Danger symptom & medication alerts',
+  'Daily prayers & spiritual support',
+  'Partner dashboard & reminders',
+  'Fertility & ovulation tracking',
+  'Hospital bag & shopping checklists',
 ];
 
 const heroImages = [heroImage, heroImage2, heroImage3];
