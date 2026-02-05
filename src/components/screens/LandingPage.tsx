@@ -395,8 +395,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '400ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantWoman1} 
-                      alt="Happy pregnant woman"
+                      src={pregnancyTracking} 
+                      alt="Pregnancy tracking feature"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -405,8 +405,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '600ms' : '0ms' }}
                   >
                     <img 
-                      src={motherBaby} 
-                      alt="Mother with baby"
+                      src={healthNutrition} 
+                      alt="Health and nutrition guidance"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -417,8 +417,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '500ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantCouple} 
-                      alt="Expecting couple"
+                      src={partnerMode} 
+                      alt="Partner support mode"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -427,8 +427,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '700ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantWoman2} 
-                      alt="Pregnant woman relaxing"
+                      src={familyPlanningImg} 
+                      alt="Family planning tools"
                       className="w-full h-full object-cover"
                     />
                   </div>
