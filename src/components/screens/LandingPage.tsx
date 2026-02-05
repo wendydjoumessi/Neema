@@ -16,12 +16,16 @@ import {
 import heroImage from '@/assets/hero-pregnant-new.jpg';
 import heroImage2 from '@/assets/hero-pregnant-2.jpg';
 import heroImage3 from '@/assets/hero-pregnant-3.webp';
+import pregnancyTracking from '@/assets/pregnancy-tracking.avif';
+import healthNutrition from '@/assets/health-nutrition.webp';
+import partnerMode from '@/assets/partner-mode.webp';
+import birthPrep from '@/assets/birth-prep.webp';
+import spiritualSupport from '@/assets/spiritual-support.jpg';
+import familyPlanningImg from '@/assets/family-planning-new.webp';
 import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import motherBaby from '@/assets/mother-baby.jpg';
-import spiritualBg from '@/assets/spiritual-bg.png';
-import familyPlanning from '@/assets/family-planning.jpg';
 import logo from '@/assets/logo.png';
 
 interface LandingPageProps {
@@ -34,37 +38,37 @@ const features = [
     icon: Calendar,
     title: 'Pregnancy Tracking',
     description: 'Automatic week calculation, weekly updates, delivery countdown, and doctor-verified due dates.',
-    image: pregnantWoman1
+    image: pregnancyTracking
   },
   {
     icon: Heart,
     title: 'Health & Nutrition Guidance',
     description: 'Trimester-based nutrition, safe exercises, mental wellbeing support, and medication safety alerts.',
-    image: pregnantWoman2
+    image: healthNutrition
   },
   {
     icon: Users,
     title: 'Partner Mode',
     description: 'Shared pregnancy dashboard, reminders, and guidance to keep partners involved in the journey.',
-    image: pregnantCouple
+    image: partnerMode
   },
   {
     icon: Baby,
     title: 'Baby & Birth Preparation',
     description: 'Hospital bag checklists, contraction timer, shopping assistant, and budget-friendly recommendations.',
-    image: motherBaby
+    image: birthPrep
   },
   {
     icon: Sparkles,
     title: 'Spiritual & Emotional Support',
     description: 'Daily prayers, encouraging verses, and uplifting messages to nurture your mind and spirit.',
-    image: spiritualBg
+    image: spiritualSupport
   },
   {
     icon: Shield,
     title: 'Family Planning',
     description: 'Fertility tracking, ovulation prediction, contraceptive education, and pregnancy planning tools.',
-    image: familyPlanning
+    image: familyPlanningImg
   },
 ];
 
@@ -231,7 +235,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
