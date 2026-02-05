@@ -20,7 +20,7 @@ export function Footer({ onNavigate, scrollToSection }: FooterProps) {
             <a href="mailto:fortunelekane61@gmail.com" className="hover:text-foreground transition-colors">Support</a>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 NurtureLife. Made with ❤️ for families.
+            © 2026 NurtureLife. Made with ❤️ for families.
           </p>
         </div>
       </div>
