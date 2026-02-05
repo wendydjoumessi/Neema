@@ -11,9 +11,7 @@ import {
   Users, 
   Sparkles,
   ArrowRight,
-  CheckCircle2,
-  Star,
-  Play
+  CheckCircle2
 } from 'lucide-react';
 import heroImage from '@/assets/hero-pregnant-new.jpg';
 import heroImage2 from '@/assets/hero-pregnant-2.jpg';
@@ -63,37 +61,6 @@ const benefits = [
   'Partner involvement tools',
   'Birth preparation checklists',
   'Medication safety database',
-];
-
-const testimonials = [
-  {
-    name: 'Sarah M.',
-    role: 'First-time Mom',
-    content: 'NurtureLife made my pregnancy journey so much easier. The weekly updates kept me informed and the partner feature helped my husband feel included.',
-    rating: 5,
-    image: pregnantWoman1
-  },
-  {
-    name: 'Emily & James',
-    role: 'Parents of Two',
-    content: 'We used this app for both our pregnancies. The contraction timer and hospital bag checklist were lifesavers during delivery!',
-    rating: 5,
-    image: pregnantCouple
-  },
-  {
-    name: 'Maria L.',
-    role: 'Mom-to-be',
-    content: 'The spiritual support section gives me peace of mind. It\'s like having a supportive friend throughout my pregnancy.',
-    rating: 5,
-    image: pregnantWoman2
-  },
-];
-
-const stats = [
-  { value: '50K+', label: 'Happy Families' },
-  { value: '40', label: 'Weeks Covered' },
-  { value: '4.9', label: 'App Rating' },
-  { value: '24/7', label: 'Support' },
 ];
 
 const heroImages = [heroImage, heroImage2, heroImage3];
@@ -198,7 +165,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               Your Journey
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
+            <p className="text-lg md:text-xl text-foreground/80 leading-relaxed mb-8 max-w-xl font-medium">
               From the first heartbeat to the first embrace, NurtureLife guides you through every beautiful milestone of pregnancy and beyond.
             </p>
 
@@ -211,51 +178,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                 Start Your Journey
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="text-lg px-8 py-6 border-2 hover:bg-foreground/5"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Watch Demo
-              </Button>
             </div>
-
-            {/* Trust Indicators */}
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[pregnantWoman1, pregnantWoman2, pregnantCouple].map((img, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-background overflow-hidden">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">50,000+</strong> happy families
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-spiritual text-spiritual" />
-                ))}
-                <span className="text-sm text-muted-foreground ml-1">4.9 rating</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 md:py-20 bg-card border-y border-border">
-        <div className="w-full px-6 md:px-12 lg:px-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <p className="font-serif text-4xl md:text-5xl font-semibold text-primary mb-2">{stat.value}</p>
-                <p className="text-muted-foreground font-medium">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
