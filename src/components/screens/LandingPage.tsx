@@ -20,6 +20,8 @@ import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
 import motherBaby from '@/assets/mother-baby.jpg';
+import spiritualBg from '@/assets/spiritual-bg.png';
+import familyPlanning from '@/assets/family-planning.jpg';
 import logo from '@/assets/logo.png';
 
 interface LandingPageProps {
@@ -51,6 +53,18 @@ const features = [
     title: 'Baby & Birth Preparation',
     description: 'Hospital bag checklists, contraction timer, shopping assistant, and budget-friendly recommendations.',
     image: motherBaby
+  },
+  {
+    icon: Sparkles,
+    title: 'Spiritual & Emotional Support',
+    description: 'Daily prayers, encouraging verses, and uplifting messages to nurture your mind and spirit.',
+    image: spiritualBg
+  },
+  {
+    icon: Shield,
+    title: 'Family Planning',
+    description: 'Fertility tracking, ovulation prediction, contraceptive education, and pregnancy planning tools.',
+    image: familyPlanning
   },
 ];
 
