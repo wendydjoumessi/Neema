@@ -418,7 +418,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '500ms' : '0ms' }}
                   >
                     <img 
-                      src={partnerMode} 
+                      src={aboutPartnerSupport} 
                       alt="Partner support mode"
                       className="w-full h-full object-cover"
                     />
