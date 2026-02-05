@@ -428,7 +428,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '700ms' : '0ms' }}
                   >
                     <img 
-                      src={familyPlanningImg} 
+                      src={aboutFamilyPlanning} 
                       alt="Family planning tools"
                       className="w-full h-full object-cover"
                     />
