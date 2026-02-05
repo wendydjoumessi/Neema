@@ -22,10 +22,6 @@ import partnerMode from '@/assets/partner-mode.webp';
 import birthPrep from '@/assets/birth-prep.webp';
 import spiritualSupport from '@/assets/spiritual-support.jpg';
 import familyPlanningImg from '@/assets/family-planning-new.webp';
-import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
-import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
-import pregnantCouple from '@/assets/pregnant-couple.jpg';
-import motherBaby from '@/assets/mother-baby.jpg';
 import logo from '@/assets/logo.png';
 
 interface LandingPageProps {
