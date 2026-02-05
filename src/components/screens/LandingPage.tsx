@@ -89,7 +89,9 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [aboutVisible, setAboutVisible] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -118,6 +120,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
 
     if (featuresRef.current) {
       observer.observe(featuresRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setAboutVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (aboutRef.current) {
+      observer.observe(aboutRef.current);
     }
 
     return () => observer.disconnect();
@@ -298,10 +318,10 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* Benefits/About Section */}
-      <section id="about-section" className="py-20 md:py-28 bg-muted/50">
+      <section id="about-section" className="py-20 md:py-28 bg-muted/50" ref={aboutRef}>
         <div className="w-full px-6 md:px-12 lg:px-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div>
+            <div className={`transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
               <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
                 Why NurtureLife
               </span>
@@ -317,7 +337,13 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               
               <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-3">
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-3 transition-all duration-500 ${
+                      aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}
+                    style={{ transitionDelay: aboutVisible ? `${300 + index * 80}ms` : '0ms' }}
+                  >
                     <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
                       <CheckCircle2 className="w-4 h-4 text-secondary" />
                     </div>
@@ -329,7 +355,10 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               <Button 
                 size="lg" 
                 onClick={onGetStarted}
-                className="nurture-gradient-primary text-primary-foreground shadow-lg"
+                className={`nurture-gradient-primary text-primary-foreground shadow-lg transition-all duration-500 ${
+                  aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+                style={{ transitionDelay: aboutVisible ? '800ms' : '0ms' }}
               >
                 Get Started Free
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -337,17 +366,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
             </div>
 
             {/* Image Collage */}
-            <div className="relative">
+            <div className={`relative transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
+                 style={{ transitionDelay: aboutVisible ? '200ms' : '0ms' }}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
-                  <div className="photo-frame aspect-[4/5]">
+                  <div 
+                    className={`photo-frame aspect-[4/5] transition-all duration-500 ${aboutVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    style={{ transitionDelay: aboutVisible ? '400ms' : '0ms' }}
+                  >
                     <img 
                       src={pregnantWoman1} 
                       alt="Happy pregnant woman"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="photo-frame aspect-square">
+                  <div 
+                    className={`photo-frame aspect-square transition-all duration-500 ${aboutVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    style={{ transitionDelay: aboutVisible ? '600ms' : '0ms' }}
+                  >
                     <img 
                       src={motherBaby} 
                       alt="Mother with baby"
@@ -356,14 +392,20 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                   </div>
                 </div>
                 <div className="space-y-4 pt-8">
-                  <div className="photo-frame aspect-square">
+                  <div 
+                    className={`photo-frame aspect-square transition-all duration-500 ${aboutVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    style={{ transitionDelay: aboutVisible ? '500ms' : '0ms' }}
+                  >
                     <img 
                       src={pregnantCouple} 
                       alt="Expecting couple"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="photo-frame aspect-[4/5]">
+                  <div 
+                    className={`photo-frame aspect-[4/5] transition-all duration-500 ${aboutVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    style={{ transitionDelay: aboutVisible ? '700ms' : '0ms' }}
+                  >
                     <img 
                       src={pregnantWoman2} 
                       alt="Pregnant woman relaxing"
@@ -374,7 +416,12 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               </div>
               
               {/* Floating Card */}
-              <Card className="absolute -bottom-6 -left-6 p-4 shadow-xl bg-card/95 backdrop-blur border-0 hidden md:block">
+              <Card 
+                className={`absolute -bottom-6 -left-6 p-4 shadow-xl bg-card/95 backdrop-blur border-0 hidden md:block transition-all duration-500 ${
+                  aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+                style={{ transitionDelay: aboutVisible ? '900ms' : '0ms' }}
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 nurture-gradient-secondary rounded-full flex items-center justify-center">
                     <Shield className="w-6 h-6 text-secondary-foreground" />
