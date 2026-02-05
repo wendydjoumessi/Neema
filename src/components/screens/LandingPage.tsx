@@ -69,7 +69,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({ delay: 4000, stopOnInteraction: false })
   ]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -324,57 +324,6 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                 </div>
               </Card>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 md:py-28">
-        <div className="w-full px-6 md:px-12 lg:px-20">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 bg-accent/20 rounded-full text-accent-foreground text-sm font-medium mb-4">
-              Testimonials
-            </span>
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              Loved by Families
-              <span className="text-primary"> Worldwide</span>
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Real stories from real parents who've used NurtureLife throughout their pregnancy journey.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card 
-                key={index} 
-                className="border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <CardContent className="p-6 md:p-8">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-spiritual text-spiritual" />
-                    ))}
-                  </div>
-                  <p className="text-foreground mb-6 leading-relaxed italic">
-                    "{testimonial.content}"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                      <img 
-                        src={testimonial.image} 
-                        alt={testimonial.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
