@@ -406,7 +406,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '600ms' : '0ms' }}
                   >
                     <img 
-                      src={healthNutrition} 
+                      src={aboutHealthNutrition} 
                       alt="Health and nutrition guidance"
                       className="w-full h-full object-cover"
                     />
