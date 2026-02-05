@@ -22,10 +22,7 @@ import partnerMode from '@/assets/partner-mode.webp';
 import birthPrep from '@/assets/birth-prep.webp';
 import spiritualSupport from '@/assets/spiritual-support.jpg';
 import familyPlanningImg from '@/assets/family-planning-new.webp';
-import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
-import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
-import motherBaby from '@/assets/mother-baby.jpg';
 import logo from '@/assets/logo.png';
 
 interface LandingPageProps {
@@ -90,8 +87,10 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [featuresVisible, setFeaturesVisible] = useState(false);
   const [aboutVisible, setAboutVisible] = useState(false);
+  const [ctaVisible, setCtaVisible] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -138,6 +137,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
 
     if (aboutRef.current) {
       observer.observe(aboutRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCtaVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (ctaRef.current) {
+      observer.observe(ctaRef.current);
     }
 
     return () => observer.disconnect();
@@ -375,8 +392,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '400ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantWoman1} 
-                      alt="Happy pregnant woman"
+                      src={pregnancyTracking} 
+                      alt="Pregnancy tracking feature"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -385,8 +402,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '600ms' : '0ms' }}
                   >
                     <img 
-                      src={motherBaby} 
-                      alt="Mother with baby"
+                      src={healthNutrition} 
+                      alt="Health and nutrition guidance"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -397,8 +414,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '500ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantCouple} 
-                      alt="Expecting couple"
+                      src={partnerMode} 
+                      alt="Partner support mode"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -407,8 +424,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '700ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnantWoman2} 
-                      alt="Pregnant woman relaxing"
+                      src={familyPlanningImg} 
+                      alt="Family planning tools"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -438,7 +455,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
+      <section className="relative py-20 md:py-28 overflow-hidden" ref={ctaRef}>
         <div className="absolute inset-0">
           <img 
             src={pregnantCouple} 
@@ -449,14 +466,28 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
         </div>
         
         <div className="relative w-full px-6 md:px-12 lg:px-20 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-background mb-6">
+          <h2 
+            className={`font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-background mb-6 transition-all duration-700 ${
+              ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
             Ready to Start Your Journey?
           </h2>
-          <p className="text-background/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+          <p 
+            className={`text-background/80 text-lg md:text-xl max-w-2xl mx-auto mb-10 transition-all duration-700 ${
+              ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: ctaVisible ? '150ms' : '0ms' }}
+          >
             Join our community of expecting parents and experience the joy of a 
             well-supported pregnancy journey.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div 
+            className={`flex flex-col sm:flex-row gap-4 justify-center transition-all duration-700 ${
+              ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: ctaVisible ? '300ms' : '0ms' }}
+          >
             <Button 
               size="lg" 
               onClick={onGetStarted}
