@@ -145,6 +145,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCtaVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (ctaRef.current) {
+      observer.observe(ctaRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
