@@ -69,7 +69,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({ delay: 4000, stopOnInteraction: false })
   ]);
-  const [, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -110,6 +110,22 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
             ))}
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />
+          
+          {/* Carousel Indicators */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  selectedIndex === index 
+                    ? 'bg-primary w-8' 
+                    : 'bg-foreground/40 hover:bg-foreground/60'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
         
         <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
