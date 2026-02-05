@@ -1,5 +1,8 @@
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { 
   Heart, 
   Baby, 
@@ -13,6 +16,8 @@ import {
   Play
 } from 'lucide-react';
 import heroImage from '@/assets/hero-pregnant-new.jpg';
+import heroImage2 from '@/assets/hero-pregnant-2.jpg';
+import heroImage3 from '@/assets/hero-pregnant-3.webp';
 import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
 import pregnantCouple from '@/assets/pregnant-couple.jpg';
@@ -91,7 +96,28 @@ const stats = [
   { value: '24/7', label: 'Support' },
 ];
 
+const heroImages = [heroImage, heroImage2, heroImage3];
+
 export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
+    Autoplay({ delay: 4000, stopOnInteraction: false })
+  ]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -104,13 +130,19 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center">
         {/* Background Image */}
-        <div className="absolute inset-0">
-          <img 
-            src={heroImage} 
-            alt="Pregnant woman in peaceful setting" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
+        <div className="absolute inset-0 overflow-hidden" ref={emblaRef}>
+          <div className="flex h-full">
+            {heroImages.map((image, index) => (
+              <div key={index} className="flex-[0_0_100%] min-w-0 h-full">
+                <img 
+                  src={image} 
+                  alt={`Pregnant woman ${index + 1}`}
+                  className="w-full h-full object-cover transition-opacity duration-700"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/50 to-transparent" />
         </div>
         
         <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
