@@ -396,7 +396,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
                     style={{ transitionDelay: aboutVisible ? '400ms' : '0ms' }}
                   >
                     <img 
-                      src={pregnancyTracking} 
+                      src={aboutPregnancyTracking} 
                       alt="Pregnancy tracking feature"
                       className="w-full h-full object-cover"
                     />
