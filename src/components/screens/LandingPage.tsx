@@ -88,6 +88,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
     Autoplay({ delay: 4000, stopOnInteraction: false })
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const featuresRef = useRef<HTMLDivElement>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -102,6 +104,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setFeaturesVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (featuresRef.current) {
+      observer.observe(featuresRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
