@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -88,6 +88,8 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
     Autoplay({ delay: 4000, stopOnInteraction: false })
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const featuresRef = useRef<HTMLDivElement>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -102,6 +104,24 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setFeaturesVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (featuresRef.current) {
+      observer.observe(featuresRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -218,9 +238,9 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* Features Section */}
-      <section id="features-section" className="py-20 md:py-28">
+      <section id="features-section" className="py-20 md:py-28" ref={featuresRef}>
         <div className="w-full px-6 md:px-12 lg:px-20">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <span className="inline-block px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium mb-4">
               Features
             </span>
@@ -241,7 +261,15 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               return (
                 <Card 
                   key={index} 
-                  className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover-scale"
+                  className={`group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover-scale ${
+                    featuresVisible 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-12'
+                  }`}
+                  style={{ 
+                    transitionDelay: featuresVisible ? `${index * 100}ms` : '0ms',
+                    transitionProperty: 'opacity, transform, box-shadow'
+                  }}
                 >
                   <div className="relative h-48 md:h-52 lg:h-48 overflow-hidden">
                     <img 
