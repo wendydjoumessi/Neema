@@ -142,7 +142,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               </div>
             ))}
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />
         </div>
         
         <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
