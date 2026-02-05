@@ -90,8 +90,10 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [featuresVisible, setFeaturesVisible] = useState(false);
   const [aboutVisible, setAboutVisible] = useState(false);
+  const [ctaVisible, setCtaVisible] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
