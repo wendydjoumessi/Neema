@@ -327,12 +327,12 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
               </span>
               <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-6">
                 A Trusted Companion for Your
-                <span className="text-primary"> Pregnancy Journey</span>
+                <span className="text-primary"> Pregnancy & Family Planning Journey</span>
               </h2>
               <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                Join thousands of families who trust NurtureLife to guide them through 
-                one of life's most beautiful experiences. Our app combines medical expertise 
-                with emotional support.
+                Whether you're planning to conceive or already expecting, NurtureLife is here to guide you 
+                through every step. Our app combines medical expertise with emotional and spiritual support 
+                to help you feel confident and prepared.
               </p>
               
               <div className="grid sm:grid-cols-2 gap-4 mb-8">
