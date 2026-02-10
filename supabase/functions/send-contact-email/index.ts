@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
     // To send to other recipients, verify a domain at resend.com/domains
     const emailResponse = await resend.emails.send({
       from: "NurtureLife Contact <onboarding@resend.dev>",
-      to: ["wendydjoumessi112@gmail.com"],
+      to: ["fortunelekane61@gmail.com"],
       reply_to: email,
       subject: `[Contact Form] ${subject}`,
       html: `
