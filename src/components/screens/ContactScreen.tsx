@@ -102,13 +102,13 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
       {name === 'message' ? (
         <textarea id={name} name={name} rows={6} value={formData[name]} onChange={handleInputChange} placeholder={placeholder}
           aria-invalid={!!errors[name]}
-          className={cn(inputCls, 'py-3', errors[name] && 'border-neema-sos')} />
+          className={cn(inputCls, 'py-3', errors[name] && 'border-neema-dark')} />
       ) : (
         <input id={name} name={name} type={type} value={formData[name]} onChange={handleInputChange} placeholder={placeholder}
           aria-invalid={!!errors[name]}
-          className={cn(inputCls, 'min-h-[52px]', errors[name] && 'border-neema-sos')} />
+          className={cn(inputCls, 'min-h-[52px]', errors[name] && 'border-neema-dark')} />
       )}
-      {errors[name] && <p className="text-sm font-medium text-neema-sos">{errors[name]}</p>}
+      {errors[name] && <p className="text-sm font-semibold text-neema-dark">{errors[name]}</p>}
     </div>
   );
 
