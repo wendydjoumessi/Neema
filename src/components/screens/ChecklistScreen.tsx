@@ -62,9 +62,9 @@ export function ChecklistScreen({ checklist, onToggleItem }: ChecklistScreenProp
   return (
     <div className="pb-6 animate-fade-in">
       {/* Header */}
-      <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
+      <div className="neema-gradient-hero px-6 pt-safe-top pb-6">
         <div className="pt-4 mb-6">
-          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-4" />
+          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-4" />
           <h1 className="font-display text-2xl font-bold text-foreground">
             Baby Preparation
           </h1>
@@ -252,14 +252,14 @@ function ContractionTimer({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        <div className="w-48 h-48 rounded-full nurture-gradient-primary flex items-center justify-center nurture-shadow-glow mb-8">
+        <div className="w-48 h-48 rounded-full neema-gradient-primary flex items-center justify-center neema-shadow-glow mb-8">
           <span className="text-5xl font-bold text-primary-foreground">
             {formatTime(seconds)}
           </span>
         </div>
 
         <Button
-          variant={isRunning ? 'destructive' : 'nurture'}
+          variant={isRunning ? 'destructive' : 'neema'}
           size="xl"
           onClick={isRunning ? stopContraction : startContraction}
           className="w-full max-w-xs"

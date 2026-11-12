@@ -67,7 +67,7 @@ export function ProfileScreen({
   return (
     <div className="pb-6 animate-fade-in">
       {/* Profile Header */}
-      <div className={`px-6 pt-safe-top pb-8 ${isPartnerMode ? 'nurture-gradient-partner' : 'nurture-gradient-primary'}`}>
+      <div className={`px-6 pt-safe-top pb-8 ${isPartnerMode ? 'neema-gradient-partner' : 'neema-gradient-primary'}`}>
         <div className="pt-4 flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
             <UserIcon className="w-10 h-10 text-white" />
@@ -210,7 +210,7 @@ export function ProfileScreen({
       {/* App Version */}
       <div className="px-6 mt-8 text-center">
         <p className="text-xs text-muted-foreground">
-          NurtureLife v1.0.0
+          Neema v1.0.0
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           Made with 💕 for families everywhere

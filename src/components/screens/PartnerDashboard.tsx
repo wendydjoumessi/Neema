@@ -61,7 +61,7 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
           <div className="absolute inset-0 bg-gradient-to-b from-partner/40 via-background/60 to-background" />
           <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top flex items-center justify-between">
             <div>
-              <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-2" />
+              <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-2" />
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-partner/20 backdrop-blur-sm rounded-full">
                 <Heart className="w-3 h-3 text-partner-foreground" />
                 <span className="text-xs font-medium text-partner-foreground">Partner Mode</span>
@@ -101,7 +101,7 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
       {/* Today's Support Tip */}
       <div className="px-4 md:px-8 lg:px-12 mt-6">
         <Card className="border-0 overflow-hidden">
-          <div className="nurture-gradient-partner">
+          <div className="neema-gradient-partner">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center shrink-0">
@@ -146,7 +146,7 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
       {/* Baby Update for Partner */}
       <div className="px-4 md:px-8 lg:px-12 mt-6">
         <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="nurture-gradient-warm">
+          <div className="neema-gradient-warm">
             <CardContent className="p-5">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
@@ -225,7 +225,7 @@ export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProp
         <Card className="border-0 shadow-lg overflow-hidden group cursor-pointer hover:shadow-xl transition-all">
           <CardContent className="p-0">
             <div className="flex items-center gap-4 p-4">
-              <div className="w-14 h-14 rounded-xl nurture-gradient-partner flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl neema-gradient-partner flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-partner-foreground" />
               </div>
               <div className="flex-1 min-w-0">

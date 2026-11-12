@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* NurtureLife - Elegant, Warm, and Professional Color Palette */
+    /* Neema - Elegant, Warm, and Professional Color Palette */
     --background: 30 25% 97%;
     --foreground: 20 15% 15%;
 
@@ -181,47 +181,47 @@
 }
 
 @layer components {
-  .nurture-gradient-primary {
+  .neema-gradient-primary {
     background: var(--gradient-primary);
   }
 
-  .nurture-gradient-secondary {
+  .neema-gradient-secondary {
     background: var(--gradient-secondary);
   }
 
-  .nurture-gradient-warm {
+  .neema-gradient-warm {
     background: var(--gradient-warm);
   }
 
-  .nurture-gradient-spiritual {
+  .neema-gradient-spiritual {
     background: var(--gradient-spiritual);
   }
 
-  .nurture-gradient-partner {
+  .neema-gradient-partner {
     background: var(--gradient-partner);
   }
 
-  .nurture-gradient-hero {
+  .neema-gradient-hero {
     background: var(--gradient-hero);
   }
 
-  .nurture-gradient-overlay {
+  .neema-gradient-overlay {
     background: var(--gradient-overlay);
   }
 
-  .nurture-shadow-soft {
+  .neema-shadow-soft {
     box-shadow: var(--shadow-soft);
   }
 
-  .nurture-shadow-card {
+  .neema-shadow-card {
     box-shadow: var(--shadow-card);
   }
 
-  .nurture-shadow-elevated {
+  .neema-shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
 
-  .nurture-shadow-glow {
+  .neema-shadow-glow {
     box-shadow: var(--shadow-glow);
   }
 
@@ -254,12 +254,12 @@
   }
 
   /* Card hover effects */
-  .nurture-card {
+  .neema-card {
     @apply bg-card rounded-xl p-4 transition-all duration-300 border border-border/50;
     box-shadow: var(--shadow-card);
   }
 
-  .nurture-card:hover {
+  .neema-card:hover {
     box-shadow: var(--shadow-elevated);
     @apply -translate-y-0.5;
   }

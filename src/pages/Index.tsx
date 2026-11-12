@@ -17,7 +17,7 @@ import { ContactScreen } from '@/components/screens/ContactScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
 import { defaultChecklist } from '@/data/pregnancyData';
 
-function NurtureLifeApp() {
+function NeemaApp() {
   const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main' | 'contact'>('landing');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
@@ -185,7 +185,7 @@ function NurtureLifeApp() {
 const Index = () => {
   return (
     <AppProvider>
-      <NurtureLifeApp />
+      <NeemaApp />
     </AppProvider>
   );
 };

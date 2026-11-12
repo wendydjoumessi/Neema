@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Note: Using Resend test mode - emails go to the Resend account owner
     // To send to other recipients, verify a domain at resend.com/domains
     const emailResponse = await resend.emails.send({
-      from: "NurtureLife Contact <onboarding@resend.dev>",
+      from: "Neema Contact <onboarding@resend.dev>",
       to: ["wendydjoumessi112@gmail.com"],
       reply_to: email,
       subject: `[Contact Form] ${subject}`,
@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="white-space: pre-wrap;">${message}</p>
           </div>
           <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
-            This email was sent from the NurtureLife contact form.
+            This email was sent from the Neema contact form.
           </p>
         </div>
       `,

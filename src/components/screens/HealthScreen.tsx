@@ -37,9 +37,9 @@ export function HealthScreen({ pregnancy }: HealthScreenProps) {
   return (
     <div className="pb-6 animate-fade-in">
       {/* Header */}
-      <div className="nurture-gradient-hero px-6 pt-safe-top pb-6">
+      <div className="neema-gradient-hero px-6 pt-safe-top pb-6">
         <div className="pt-4">
-          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto mb-4" />
+          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-4" />
           <h1 className="font-display text-2xl font-bold text-foreground">
             Health & Wellness
           </h1>

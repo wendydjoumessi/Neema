@@ -77,7 +77,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
 
         <div className="flex-1">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto rounded-full nurture-gradient-secondary flex items-center justify-center mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full neema-gradient-secondary flex items-center justify-center mb-4">
               <Calendar className="w-8 h-8 text-secondary-foreground" />
             </div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -131,7 +131,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
         </div>
 
         <Button 
-          variant="nurture" 
+          variant="neema" 
           size="lg" 
           className="w-full"
           onClick={() => setStep(2)}
@@ -159,7 +159,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
 
         <div className="flex-1">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto rounded-full nurture-gradient-warm flex items-center justify-center mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full neema-gradient-warm flex items-center justify-center mb-4">
               <Stethoscope className="w-8 h-8 text-tertiary-foreground" />
             </div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -199,7 +199,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
         </div>
 
         <Button 
-          variant="nurture" 
+          variant="neema" 
           size="lg" 
           className="w-full"
           onClick={() => setStep(3)}
@@ -224,7 +224,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
 
       <div className="flex-1">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-full nurture-gradient-primary flex items-center justify-center mb-4 animate-bounce-gentle">
+          <div className="w-16 h-16 mx-auto rounded-full neema-gradient-primary flex items-center justify-center mb-4 animate-bounce-gentle">
             <Baby className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -253,7 +253,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
 
       <div className="space-y-3">
         <Button 
-          variant="nurture" 
+          variant="neema" 
           size="lg" 
           className="w-full"
           onClick={handleComplete}

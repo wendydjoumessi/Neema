@@ -74,7 +74,7 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
         {/* Navigation */}
         <nav className="flex items-center justify-between mb-16 md:mb-24">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="NurtureLife" className="h-20 md:h-28 w-auto" />
+            <img src={logo} alt="Neema" className="h-20 md:h-28 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <Button 
@@ -103,7 +103,7 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
             </Button>
             <Button 
               onClick={onGetStarted}
-              className="nurture-gradient-primary text-primary-foreground hover:opacity-90 shadow-lg"
+              className="neema-gradient-primary text-primary-foreground hover:opacity-90 shadow-lg"
             >
               Get Started
             </Button>
@@ -124,14 +124,14 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
           </h1>
           
           <p className="text-lg md:text-xl text-foreground/80 leading-relaxed mb-8 max-w-xl font-medium">
-            From the first heartbeat to the first embrace, NurtureLife guides you through every beautiful milestone of pregnancy and beyond.
+            From the first heartbeat to the first embrace, Neema guides you through every beautiful milestone of pregnancy and beyond.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Button 
               size="lg" 
               onClick={onGetStarted}
-              className="nurture-gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]"
+              className="neema-gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]"
             >
               Start Your Journey
               <ArrowRight className="w-5 h-5 ml-2" />

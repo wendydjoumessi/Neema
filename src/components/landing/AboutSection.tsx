@@ -48,14 +48,14 @@ export function AboutSection({ onGetStarted }: AboutSectionProps) {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
             <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-              Why NurtureLife
+              Why Neema
             </span>
             <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-6">
               A Trusted Companion for Your
               <span className="text-primary"> Pregnancy & Family Planning Journey</span>
             </h2>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Whether you're planning to conceive or already expecting, NurtureLife is here to guide you 
+              Whether you're planning to conceive or already expecting, Neema is here to guide you 
               through every step. Our app combines medical expertise with emotional and spiritual support 
               to help you feel confident and prepared.
             </p>
@@ -80,7 +80,7 @@ export function AboutSection({ onGetStarted }: AboutSectionProps) {
             <Button 
               size="lg" 
               onClick={onGetStarted}
-              className={`nurture-gradient-primary text-primary-foreground shadow-lg transition-all duration-500 ${
+              className={`neema-gradient-primary text-primary-foreground shadow-lg transition-all duration-500 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
               style={{ transitionDelay: isVisible ? '800ms' : '0ms' }}
@@ -148,7 +148,7 @@ export function AboutSection({ onGetStarted }: AboutSectionProps) {
               style={{ transitionDelay: isVisible ? '900ms' : '0ms' }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 nurture-gradient-secondary rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 neema-gradient-secondary rounded-full flex items-center justify-center">
                   <Shield className="w-6 h-6 text-secondary-foreground" />
                 </div>
                 <div>
