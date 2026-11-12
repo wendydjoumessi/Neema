@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Heart, Mail, ArrowLeft, Send, CheckCircle, MapPin, Phone } from 'lucide-react';
+import { Mail, ArrowLeft, Send, CheckCircle, Clock, Phone } from 'lucide-react';
+import logo from '@/assets/logo.png';
+import { cn } from '@/lib/utils';
+import { OutlineButton } from '@/neema/ui';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
@@ -19,6 +17,9 @@ const contactSchema = z.object({
   subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be less than 200 characters"),
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message must be less than 2000 characters")
 });
+
+
+const inputCls = 'w-full rounded-xl border border-neema-border bg-white px-4 text-base text-neema-ink placeholder:text-neema-muted transition-colors duration-150 focus:border-neema-primary focus:outline-none focus:ring-2 focus:ring-neema-primary/30';
 
 export function ContactScreen({ onBack }: ContactScreenProps) {
   const [formData, setFormData] = useState({
@@ -95,231 +96,99 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
     setErrors({});
   };
 
+  const field = (name: keyof typeof formData, label: string, placeholder: string, type = 'text') => (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={name} className="text-[13px] font-semibold text-neema-ink">{label}</label>
+      {name === 'message' ? (
+        <textarea id={name} name={name} rows={6} value={formData[name]} onChange={handleInputChange} placeholder={placeholder}
+          aria-invalid={!!errors[name]}
+          className={cn(inputCls, 'py-3', errors[name] && 'border-neema-sos')} />
+      ) : (
+        <input id={name} name={name} type={type} value={formData[name]} onChange={handleInputChange} placeholder={placeholder}
+          aria-invalid={!!errors[name]}
+          className={cn(inputCls, 'min-h-[52px]', errors[name] && 'border-neema-sos')} />
+      )}
+      {errors[name] && <p className="text-sm font-medium text-neema-sos">{errors[name]}</p>}
+    </div>
+  );
+
+  const info = [
+    { Icon: Mail, title: 'Email us', text: <a href="mailto:fortunelekane61@gmail.com" className="break-all font-semibold text-neema-dark underline-offset-2 hover:underline">fortunelekane61@gmail.com</a>, tint: 'bg-neema-primary-soft text-neema-dark' },
+    { Icon: Clock, title: 'Response time', text: 'We usually reply within 24–48 hours.', tint: 'bg-neema-ochre-soft text-neema-ochre-ink' },
+    { Icon: Phone, title: 'Support hours', text: 'Monday – Friday, 9:00 – 18:00 (WAT)', tint: 'bg-neema-success-soft text-neema-success-ink' },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur-lg border-b border-border z-40">
-        <div className="w-full px-6 md:px-12 lg:px-20 py-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              onClick={onBack}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 neema-gradient-primary rounded-xl flex items-center justify-center">
-                <Heart className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-serif text-xl font-semibold text-foreground">Neema</span>
-            </div>
-            <div className="w-20" /> {/* Spacer for centering */}
-          </div>
+    <div className="min-h-screen bg-neema-cream font-sans text-base text-neema-ink">
+      <header className="sticky top-0 z-40 border-b border-neema-line bg-neema-cream">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 py-2 md:px-10">
+          <button type="button" onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
+            <ArrowLeft className="h-5 w-5" /> Back
+          </button>
+          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
         </div>
       </header>
 
-      <main className="w-full px-6 md:px-12 lg:px-20 py-12 md:py-20">
-        <div className="max-w-5xl mx-auto">
-          {/* Page Header */}
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-              Get in Touch
-            </span>
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4">
-              We'd Love to
-              <span className="text-primary"> Hear From You</span>
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Have questions, feedback, or just want to say hello? 
-              We're here to help and would love to connect with you.
-            </p>
+      <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-10 md:py-16">
+        <div className="mx-auto mb-10 max-w-2xl text-center">
+          <span className="mb-4 inline-block rounded-full bg-neema-primary-soft px-4 py-1.5 text-[13px] font-semibold text-neema-dark">Get in touch</span>
+          <h1 className="text-3xl font-bold leading-tight text-neema-ink md:text-4xl">We’d love to hear from you</h1>
+          <p className="mt-3 text-lg text-neema-muted-strong">Questions, feedback or ideas for Neema? Send us a message and we’ll reply by email.</p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-4">
+            {info.map(({ Icon, title, text, tint }) => (
+              <section key={title} className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-neema-card">
+                <span className={cn('flex h-12 w-12 flex-none items-center justify-center rounded-xl', tint)}><Icon className="h-6 w-6" /></span>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold leading-6">{title}</h2>
+                  <div className="mt-0.5 text-neema-muted-strong">{text}</div>
+                </div>
+              </section>
+            ))}
+            <a href="tel:119" className="flex min-h-[48px] items-center justify-center gap-2 rounded-full border-[1.5px] border-neema-sos bg-neema-sos-soft px-5 font-semibold text-neema-sos">
+              <Phone className="h-5 w-5" /> Emergency? Call 119 (SAMU)
+            </a>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Contact Information */}
-            <div className="lg:col-span-1 space-y-6">
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 neema-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-1">Email Us</h3>
-                      <p className="text-muted-foreground text-sm mb-2">
-                        Send us an email anytime
-                      </p>
-                      <a 
-                        href="mailto:fortunelekane61@gmail.com"
-                        className="text-primary hover:underline font-medium"
-                      >
-                        fortunelekane61@gmail.com
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 neema-gradient-secondary rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-6 h-6 text-secondary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-1">Response Time</h3>
-                      <p className="text-muted-foreground text-sm">
-                        We typically respond within 24-48 hours
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-6 h-6 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-1">Support Hours</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Monday - Friday<br />
-                        9:00 AM - 6:00 PM
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <Card className="border-0 shadow-xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-serif text-2xl">Send us a Message</CardTitle>
-                  <CardDescription>
-                    Fill out the form below and we'll get back to you as soon as possible.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 pt-4">
-                  {isSubmitted ? (
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 neema-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                        <CheckCircle className="w-10 h-10 text-primary-foreground" />
-                      </div>
-                      <h3 className="font-serif text-2xl font-semibold text-foreground mb-3">
-                        Message Sent!
-                      </h3>
-                      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                        Thank you for reaching out! We'll get back to you within 24-48 hours.
-                      </p>
-                      <Button onClick={resetForm} variant="outline">
-                        Send Another Message
-                      </Button>
-                    </div>
+          <section className="rounded-2xl bg-white p-5 shadow-neema-card md:p-8 lg:col-span-2">
+            {isSubmitted ? (
+              <div className="flex flex-col items-center py-10 text-center">
+                <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-neema-success-soft text-neema-success-ink">
+                  <CheckCircle className="h-10 w-10" />
+                </span>
+                <h2 className="text-2xl font-bold">Message sent</h2>
+                <p className="mt-2 max-w-sm text-neema-muted-strong">Thank you for reaching out. We’ll reply to the email address you gave us.</p>
+                <OutlineButton onClick={resetForm} className="mt-6 max-w-xs">Send another message</OutlineButton>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+                <div>
+                  <h2 className="text-2xl font-bold">Send us a message</h2>
+                  <p className="mt-1 text-neema-muted-strong">All fields are required.</p>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  {field('name', 'Your name', 'e.g. Amina Fouda')}
+                  {field('email', 'Email address', 'you@example.com', 'email')}
+                </div>
+                {field('subject', 'Subject', 'How can we help?')}
+                {field('message', 'Message', 'Tell us more…')}
+                <button type="submit" disabled={isSubmitting} className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-neema-dark px-4 font-semibold text-white transition-transform duration-150 active:scale-[0.98] disabled:opacity-60">
+                  {isSubmitting ? (
+                    <><span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Sending…</>
                   ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Your Name *</Label>
-                          <Input
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="John Doe"
-                            className={errors.name ? 'border-destructive' : ''}
-                          />
-                          {errors.name && (
-                            <p className="text-sm text-destructive">{errors.name}</p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address *</Label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            placeholder="john@example.com"
-                            className={errors.email ? 'border-destructive' : ''}
-                          />
-                          {errors.email && (
-                            <p className="text-sm text-destructive">{errors.email}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="subject">Subject *</Label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={handleInputChange}
-                          placeholder="How can we help you?"
-                          className={errors.subject ? 'border-destructive' : ''}
-                        />
-                        {errors.subject && (
-                          <p className="text-sm text-destructive">{errors.subject}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="message">Message *</Label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          placeholder="Tell us more about your inquiry..."
-                          rows={6}
-                          className={errors.message ? 'border-destructive' : ''}
-                        />
-                        {errors.message && (
-                          <p className="text-sm text-destructive">{errors.message}</p>
-                        )}
-                      </div>
-
-                      <Button 
-                        type="submit" 
-                        size="lg"
-                        className="w-full neema-gradient-primary text-primary-foreground"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-5 h-5 mr-2" />
-                            Send Message
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                    <><Send className="h-5 w-5" /> Send message</>
                   )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                </button>
+              </form>
+            )}
+          </section>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 bg-card border-t border-border">
-        <div className="w-full px-6 md:px-12 lg:px-20 text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2024 Neema. Made with ❤️ for families.
-          </p>
-        </div>
+      <footer className="border-t border-neema-line bg-white py-8">
+        <p className="px-5 text-center text-sm text-neema-muted-strong">© 2026 Neema. Educational information only — always consult a qualified health worker.</p>
       </footer>
     </div>
   );
