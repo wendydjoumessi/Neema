@@ -15,10 +15,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-primary/10 hover:text-primary",
         link: "text-primary underline-offset-4 hover:underline",
-        // NurtureLife custom variants
-        nurture: "nurture-gradient-primary text-primary-foreground shadow-md hover:shadow-lg hover:brightness-105",
-        partner: "nurture-gradient-partner text-partner-foreground shadow-md hover:shadow-lg hover:brightness-105",
-        spiritual: "nurture-gradient-spiritual text-spiritual-foreground shadow-md hover:shadow-lg hover:brightness-105",
+        // Neema custom variants
+        neema: "neema-gradient-primary text-primary-foreground shadow-md hover:shadow-lg hover:brightness-105",
+        partner: "neema-gradient-partner text-partner-foreground shadow-md hover:shadow-lg hover:brightness-105",
+        spiritual: "neema-gradient-spiritual text-spiritual-foreground shadow-md hover:shadow-lg hover:brightness-105",
         success: "bg-success text-success-foreground hover:bg-success/90 shadow-sm",
         warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm",
         soft: "bg-primary-light text-primary-dark hover:bg-primary/20",

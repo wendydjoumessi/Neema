@@ -59,7 +59,7 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
         
         <div className="relative px-4 md:px-8 lg:px-12 pt-safe-top pb-6">
           <div className="flex items-center justify-between mb-4 pt-4">
-            <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+            <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
             <Button variant="ghost" size="icon" className="relative w-10 h-10 rounded-full bg-card shadow-sm">
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-background" />
@@ -105,7 +105,7 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
                 </div>
 
                 {/* Right side - Visual indicator */}
-                <div className="hidden md:flex w-40 nurture-gradient-warm items-center justify-center p-6">
+                <div className="hidden md:flex w-40 neema-gradient-warm items-center justify-center p-6">
                   <div className="text-center">
                     <div className="w-20 h-20 rounded-full bg-background/50 backdrop-blur flex items-center justify-center mb-2 mx-auto">
                       <Baby className="w-10 h-10 text-primary" />
@@ -151,7 +151,7 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
         </div>
 
         <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="nurture-gradient-warm">
+          <div className="neema-gradient-warm">
             <CardContent className="p-5 md:p-6">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
@@ -213,7 +213,7 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
         <Card className="border-0 shadow-lg overflow-hidden group cursor-pointer hover:shadow-xl transition-all">
           <CardContent className="p-0">
             <div className="flex items-center gap-4 p-4">
-              <div className="w-14 h-14 rounded-xl nurture-gradient-primary flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl neema-gradient-primary flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-primary-foreground" />
               </div>
               <div className="flex-1">
@@ -231,7 +231,7 @@ export function DashboardScreen({ pregnancy, onNavigate }: DashboardScreenProps)
       {/* Tips */}
       <div className="px-4 md:px-8 lg:px-12 mt-6">
         <Card className="border-0 overflow-hidden">
-          <div className="nurture-gradient-spiritual">
+          <div className="neema-gradient-spiritual">
             <CardContent className="p-5 md:p-6">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center shrink-0">

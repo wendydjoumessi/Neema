@@ -66,7 +66,7 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
     const user: User = {
       id: 'guest',
       name: 'Guest User',
-      email: 'guest@nurturelife.app',
+      email: 'guest@neema.app',
       role: defaultRole,
     };
     onAuth(user);
@@ -95,12 +95,12 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
             <ArrowLeft className="w-5 h-5" />
             Back
           </button>
-          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
         </div>
 
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl font-semibold text-foreground">
-            Welcome to NurtureLife
+            Welcome to Neema
           </h1>
           <p className="text-muted-foreground mt-2">
             {defaultRole === 'mother' 
@@ -176,7 +176,7 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="w-full h-14 text-lg nurture-gradient-primary text-primary-foreground shadow-xl"
+                  className="w-full h-14 text-lg neema-gradient-primary text-primary-foreground shadow-xl"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Logging in...' : 'Log In'}
@@ -262,7 +262,7 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="w-full h-14 text-lg nurture-gradient-primary text-primary-foreground shadow-xl"
+                  className="w-full h-14 text-lg neema-gradient-primary text-primary-foreground shadow-xl"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating account...' : 'Create Account'}

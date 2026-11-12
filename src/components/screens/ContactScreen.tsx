@@ -110,10 +110,10 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
               Back
             </Button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 nurture-gradient-primary rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 neema-gradient-primary rounded-xl flex items-center justify-center">
                 <Heart className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-serif text-xl font-semibold text-foreground">NurtureLife</span>
+              <span className="font-serif text-xl font-semibold text-foreground">Neema</span>
             </div>
             <div className="w-20" /> {/* Spacer for centering */}
           </div>
@@ -143,7 +143,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 nurture-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 neema-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
                       <Mail className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div>
@@ -165,7 +165,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 nurture-gradient-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 neema-gradient-secondary rounded-xl flex items-center justify-center flex-shrink-0">
                       <Phone className="w-6 h-6 text-secondary-foreground" />
                     </div>
                     <div>
@@ -208,7 +208,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
                 <CardContent className="p-6 pt-4">
                   {isSubmitted ? (
                     <div className="text-center py-12">
-                      <div className="w-20 h-20 nurture-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                      <div className="w-20 h-20 neema-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle className="w-10 h-10 text-primary-foreground" />
                       </div>
                       <h3 className="font-serif text-2xl font-semibold text-foreground mb-3">
@@ -289,7 +289,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
                       <Button 
                         type="submit" 
                         size="lg"
-                        className="w-full nurture-gradient-primary text-primary-foreground"
+                        className="w-full neema-gradient-primary text-primary-foreground"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
@@ -317,7 +317,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
       <footer className="py-8 bg-card border-t border-border">
         <div className="w-full px-6 md:px-12 lg:px-20 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 NurtureLife. Made with ❤️ for families.
+            © 2024 Neema. Made with ❤️ for families.
           </p>
         </div>
       </footer>

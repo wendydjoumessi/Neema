@@ -79,7 +79,7 @@ export function FamilyPlanningScreen() {
   return (
     <div className="pb-6 animate-fade-in">
       {/* Header */}
-      <div className="nurture-gradient-hero px-4 md:px-8 pt-safe-top pb-6">
+      <div className="neema-gradient-hero px-4 md:px-8 pt-safe-top pb-6">
         <div className="pt-4">
           <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
             Family Planning

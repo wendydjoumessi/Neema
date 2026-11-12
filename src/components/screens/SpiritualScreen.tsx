@@ -40,7 +40,7 @@ export function SpiritualScreen() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-spiritual/30 via-background/50 to-background" />
         <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top">
-          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-spiritual/20 backdrop-blur-sm rounded-full mb-3">
@@ -59,7 +59,7 @@ export function SpiritualScreen() {
       {/* Today's Prayer */}
       <div className="px-4 md:px-8 lg:px-12 -mt-4">
         <Card className="relative overflow-hidden border-0 shadow-xl">
-          <div className="nurture-gradient-spiritual">
+          <div className="neema-gradient-spiritual">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="font-serif text-lg flex items-center gap-2 text-spiritual-foreground">
@@ -127,7 +127,7 @@ export function SpiritualScreen() {
           Daily Affirmation
         </h2>
         <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="nurture-gradient-primary">
+          <div className="neema-gradient-primary">
             <CardContent className="p-6 md:p-8 text-center">
               <Heart className="w-8 h-8 text-primary-foreground mx-auto mb-4 animate-heart-beat" />
               <p className="text-lg md:text-xl font-medium text-primary-foreground leading-relaxed mb-6">
@@ -187,7 +187,7 @@ export function SpiritualScreen() {
               <p className="text-muted-foreground mb-6">
                 Take a moment to relax and connect with your baby
               </p>
-              <Button className="nurture-gradient-primary text-primary-foreground shadow-lg px-8">
+              <Button className="neema-gradient-primary text-primary-foreground shadow-lg px-8">
                 Start 5-Minute Session
               </Button>
             </CardContent>

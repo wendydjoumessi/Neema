@@ -23,7 +23,7 @@ const slides = [
   {
     image: heroImage,
     icon: Heart,
-    title: 'Welcome to NurtureLife',
+    title: 'Welcome to Neema',
     description: 'Your personal companion through the beautiful journey of pregnancy. Track, learn, and prepare with confidence.',
     color: 'primary'
   },
@@ -111,7 +111,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+            <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
           </div>
 
           {/* Spacer */}
@@ -142,7 +142,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
               </div>
               <CardContent className="p-5 text-center -mt-8 relative">
-                <div className="w-16 h-16 mx-auto rounded-full nurture-gradient-primary flex items-center justify-center mb-4 shadow-lg border-4 border-card">
+                <div className="w-16 h-16 mx-auto rounded-full neema-gradient-primary flex items-center justify-center mb-4 shadow-lg border-4 border-card">
                   <Baby className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
@@ -167,7 +167,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
               </div>
               <CardContent className="p-5 text-center -mt-8 relative">
-                <div className="w-16 h-16 mx-auto rounded-full nurture-gradient-partner flex items-center justify-center mb-4 shadow-lg border-4 border-card">
+                <div className="w-16 h-16 mx-auto rounded-full neema-gradient-partner flex items-center justify-center mb-4 shadow-lg border-4 border-card">
                   <Users className="w-8 h-8 text-partner-foreground" />
                 </div>
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
@@ -201,7 +201,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
       <div className="relative min-h-screen flex flex-col">
         {/* Header with Logo and Skip */}
         <div className="flex items-center justify-between p-6 pt-safe-top">
-          <img src={logo} alt="NurtureLife" className="h-12 md:h-14 w-auto" />
+          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
           <Button 
             variant="ghost" 
             onClick={handleSkip}
@@ -264,7 +264,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               onClick={handleNext}
               className={`flex-1 h-14 text-lg font-medium shadow-xl ${
                 isLastSlide 
-                  ? 'nurture-gradient-primary text-primary-foreground' 
+                  ? 'neema-gradient-primary text-primary-foreground' 
                   : 'bg-foreground text-background hover:bg-foreground/90'
               }`}
             >

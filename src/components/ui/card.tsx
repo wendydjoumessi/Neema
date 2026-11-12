@@ -8,16 +8,16 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "nurture-shadow-card",
-        elevated: "nurture-shadow-elevated hover:-translate-y-0.5",
-        soft: "border-0 nurture-shadow-soft",
+        default: "neema-shadow-card",
+        elevated: "neema-shadow-elevated hover:-translate-y-0.5",
+        soft: "border-0 neema-shadow-soft",
         outline: "border-2 border-primary/20 shadow-none",
-        gradient: "border-0 nurture-gradient-primary text-primary-foreground",
-        "gradient-secondary": "border-0 nurture-gradient-secondary",
-        "gradient-warm": "border-0 nurture-gradient-warm",
-        partner: "border-0 nurture-gradient-partner text-partner-foreground",
-        spiritual: "border-0 nurture-gradient-spiritual",
-        glass: "border-0 bg-card/80 backdrop-blur-lg nurture-shadow-soft",
+        gradient: "border-0 neema-gradient-primary text-primary-foreground",
+        "gradient-secondary": "border-0 neema-gradient-secondary",
+        "gradient-warm": "border-0 neema-gradient-warm",
+        partner: "border-0 neema-gradient-partner text-partner-foreground",
+        spiritual: "border-0 neema-gradient-spiritual",
+        glass: "border-0 bg-card/80 backdrop-blur-lg neema-shadow-soft",
       },
     },
     defaultVariants: {
