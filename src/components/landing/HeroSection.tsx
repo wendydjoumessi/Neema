@@ -1,11 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Lock, WifiOff } from 'lucide-react';
 import heroImage from '@/assets/hero-pregnant-new.jpg';
-import heroImage2 from '@/assets/hero-pregnant-2.jpg';
-import heroImage3 from '@/assets/hero-pregnant-3.webp';
 import logo from '@/assets/logo.png';
 
 interface HeroSectionProps {
@@ -14,128 +8,62 @@ interface HeroSectionProps {
   scrollToSection: (sectionId: string) => void;
 }
 
-const heroImages = [heroImage, heroImage2, heroImage3];
+const navLink = 'hidden min-h-[48px] items-center rounded-full px-4 font-semibold text-neema-ink hover:bg-neema-sand md:inline-flex';
 
 export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroSectionProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    Autoplay({ delay: 4000, stopOnInteraction: false })
-  ]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
   return (
-    <section className="relative min-h-screen flex items-center">
-      {/* Background Image */}
-      <div className="absolute inset-0 overflow-hidden" ref={emblaRef}>
-        <div className="flex h-full">
-          {heroImages.map((image, index) => (
-            <div key={index} className="flex-[0_0_100%] min-w-0 h-full">
-              <img 
-                src={image} 
-                alt={`Pregnant woman ${index + 1}`}
-                className="w-full h-full object-cover transition-opacity duration-700"
-              />
-            </div>
-          ))}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />
-        
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {heroImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => emblaApi?.scrollTo(index)}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                selectedIndex === index 
-                  ? 'bg-primary w-8' 
-                  : 'bg-foreground/40 hover:bg-foreground/60'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-      
-      <div className="relative w-full px-6 md:px-12 lg:px-20 py-8">
-        {/* Navigation */}
-        <nav className="flex items-center justify-between mb-16 md:mb-24">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Neema" className="h-20 md:h-28 w-auto" />
-          </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
-              onClick={() => scrollToSection('about-section')}
-            >
-              About
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
-              onClick={() => scrollToSection('features-section')}
-            >
-              Features
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden md:inline-flex text-foreground hover:bg-foreground/5"
-              onClick={() => onNavigate?.('contact')}
-            >
-              Contact
-            </Button>
-            <Button 
-              onClick={onGetStarted}
-              className="neema-gradient-primary text-primary-foreground hover:opacity-90 shadow-lg"
-            >
-              Get Started
-            </Button>
+    <section className="overflow-hidden bg-neema-cream">
+      <div className="mx-auto w-full max-w-6xl px-5 pb-14 pt-4 md:px-10 md:pb-20">
+        <nav aria-label="Main" className="mb-8 flex items-center justify-between gap-3 md:mb-14">
+          <img src={logo} alt="Neema — Care for Every Stage" className="h-16 w-auto md:h-20" />
+          <div className="flex items-center gap-1">
+            <button type="button" className={navLink} onClick={() => scrollToSection('services-section')}>Services</button>
+            <button type="button" className={navLink} onClick={() => scrollToSection('about-section')}>Why Neema</button>
+            <button type="button" className={navLink} onClick={() => onNavigate?.('contact')}>Contact</button>
+            <button type="button" onClick={onGetStarted} className="ml-2 min-h-[48px] rounded-xl bg-neema-dark px-5 font-semibold text-white shadow-md hover:bg-[#9E3B1D]">
+              Get started
+            </button>
           </div>
         </nav>
 
-        {/* Hero Content */}
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Your pregnancy companion</span>
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <span className="mb-5 inline-flex items-center rounded-full bg-neema-primary-soft px-4 py-1.5 text-sm font-semibold text-neema-dark">
+              Free · English &amp; Français · Made for Cameroon
+            </span>
+            <h1 className="font-sans text-4xl font-bold leading-[1.15] tracking-normal text-neema-ink md:text-5xl lg:text-[56px]">
+              Care for every stage, <span className="text-neema-dark">from planning to after birth.</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-neema-muted-strong md:text-xl">
+              Neema is a free companion for pregnancy, the months after birth and family planning. Local, medically reviewed guidance week by week, an assistant that answers your questions, and help one tap away when something feels wrong.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform hover:bg-[#9E3B1D] active:scale-[0.98]">
+                Start free <ArrowRight className="h-5 w-5" />
+              </button>
+              <button type="button" onClick={() => scrollToSection('services-section')} className="inline-flex min-h-[56px] items-center justify-center rounded-xl border border-neema-border bg-white px-7 text-lg font-semibold text-neema-ink">
+                See all services
+              </button>
+            </div>
+            <ul className="mt-8 grid gap-3 text-neema-ink sm:grid-cols-3">
+              <li className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 flex-none text-neema-success-ink" />Medically reviewed</li>
+              <li className="flex items-center gap-2"><Lock className="h-5 w-5 flex-none text-neema-success-ink" />Private &amp; discreet</li>
+              <li className="flex items-center gap-2"><WifiOff className="h-5 w-5 flex-none text-neema-success-ink" />Works offline, SMS backup</li>
+            </ul>
           </div>
-          
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
-            Embrace Every 
-            <span className="text-primary"> Moment</span> of 
-            Your Journey
-          </h1>
-          
-          <p className="text-lg md:text-xl text-foreground/80 leading-relaxed mb-8 max-w-xl font-medium">
-            From the first heartbeat to the first embrace, Neema guides you through every beautiful milestone of pregnancy and beyond.
-          </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button 
-              size="lg" 
-              onClick={onGetStarted}
-              className="neema-gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]"
-            >
-              Start Your Journey
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+          <div className="relative">
+            <div aria-hidden="true" className="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-neema-primary/20" />
+            <div aria-hidden="true" className="absolute -bottom-6 -left-4 h-28 w-28 rounded-full bg-neema-ochre/30" />
+            <img
+              src={heroImage}
+              alt="A smiling pregnant woman using the Neema app at home"
+              className="relative aspect-[4/3] w-full rounded-3xl object-cover shadow-xl lg:aspect-[4/5]"
+            />
+            <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/95 p-4 shadow-neema-card sm:left-auto sm:w-72">
+              <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-neema-dark">Week 24 · Trimester 2</div>
+              <div className="mt-1 font-semibold text-neema-ink">Baby can hear your voice. Talk, sing or pray aloud.</div>
+            </div>
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-neema-cream font-sans text-base text-neema-ink">
       <HeroSection 
         onGetStarted={onGetStarted} 
         onNavigate={onNavigate}
