@@ -19,6 +19,30 @@ export default {
         display: ["Playfair Display", "Georgia", "serif"],
       },
       colors: {
+        // Neema design system (v1.9). "sos" is for SOS and danger touch points only.
+        neema: {
+          primary: "#D95D39",
+          dark: "#B54523",
+          ochre: "#E09F3E",
+          cream: "#F7F4EF",
+          sand: "#EFE9E0",
+          ink: "#2B2D42",
+          muted: "#6C757D",
+          "muted-strong": "#5E666D",
+          line: "#E8E2D9",
+          border: "#D8D0C5",
+          sos: "#C1121F",
+          "sos-soft": "#FCECEE",
+          success: "#2B9348",
+          "success-soft": "#E4F3E8",
+          "success-ink": "#1E6B34",
+          "ochre-soft": "#FBEFD9",
+          "ochre-ink": "#7A4E0E",
+          "primary-soft": "#FBE9E3",
+          lilac: "#E9E6F0",
+          "lilac-ink": "#3E3560",
+          water: "#3A7CA5",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -104,6 +128,10 @@ export default {
         "safe-top": "env(safe-area-inset-top, 0px)",
         "safe-bottom": "env(safe-area-inset-bottom, 0px)",
         "nav-height": "5rem",
+      },
+      boxShadow: {
+        "neema-card": "0 1px 2px rgba(43,45,66,0.06), 0 4px 12px rgba(43,45,66,0.06)",
+        "neema-hero": "0 6px 18px rgba(181,69,35,0.28)",
       },
       keyframes: {
         "accordion-down": {

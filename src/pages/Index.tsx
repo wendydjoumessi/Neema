@@ -16,8 +16,9 @@ import { ProfileScreen } from '@/components/screens/ProfileScreen';
 import { ContactScreen } from '@/components/screens/ContactScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
 import { defaultChecklist } from '@/data/pregnancyData';
+import { NeemaApp } from '@/neema/NeemaApp';
 
-function NeemaApp() {
+function AppFlow() {
   const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main' | 'contact'>('landing');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
@@ -135,7 +136,24 @@ function NeemaApp() {
     );
   }
 
-  // Main app with bottom navigation
+  // Mothers get the Neema experience. Earlier screens stay reachable from Profile › More from Neema.
+  if (!isPartnerMode && pregnancy) {
+    return (
+      <NeemaApp
+        user={user}
+        pregnancy={pregnancy}
+        onLogout={handleLogout}
+        extras={[
+          { id: 'tracking', label: 'Week-by-week tracker', description: 'Baby’s development and your body, week by week', render: () => <WeeklyTrackingScreen pregnancy={pregnancy} /> },
+          { id: 'checklist', label: 'Contraction timer & birth checklist', description: 'Time contractions and track your hospital bag', render: () => <ChecklistScreen checklist={checklist} onToggleItem={toggleChecklistItem} /> },
+          { id: 'spiritual', label: 'Spiritual support', description: 'Daily prayers and encouraging words', render: () => <SpiritualScreen /> },
+          { id: 'partner', label: 'Partner view', description: 'See what your partner sees in Neema', render: () => <PartnerDashboard pregnancy={pregnancy} onNavigate={() => undefined} /> },
+        ]}
+      />
+    );
+  }
+
+  // Partners keep the existing layout with bottom navigation
   const renderContent = () => {
     if (!pregnancy) return null;
 
@@ -185,7 +203,7 @@ function NeemaApp() {
 const Index = () => {
   return (
     <AppProvider>
-      <NeemaApp />
+      <AppFlow />
     </AppProvider>
   );
 };
