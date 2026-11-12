@@ -62,7 +62,7 @@ export function AboutSection({ onGetStarted }: AboutSectionProps) {
             Neema is an education and navigation tool, not a medical provider. It does not diagnose or prescribe, and it always tells you when to see a qualified health worker.
           </p>
           <div className="mt-8 flex justify-center">
-            <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero hover:bg-[#9E3B1D]">
+            <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98]">
               Get started free <ArrowRight className="h-5 w-5" />
             </button>
           </div>
