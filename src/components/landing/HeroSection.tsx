@@ -20,7 +20,7 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
             <button type="button" className={navLink} onClick={() => scrollToSection('services-section')}>Services</button>
             <button type="button" className={navLink} onClick={() => scrollToSection('about-section')}>Why Neema</button>
             <button type="button" className={navLink} onClick={() => onNavigate?.('contact')}>Contact</button>
-            <button type="button" onClick={onGetStarted} className="ml-2 min-h-[48px] rounded-xl bg-neema-dark px-5 font-semibold text-white shadow-md hover:bg-[#9E3B1D]">
+            <button type="button" onClick={onGetStarted} className="ml-2 min-h-[48px] rounded-xl bg-neema-dark px-5 font-semibold text-white shadow-md transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98]">
               Get started
             </button>
           </div>
@@ -38,7 +38,7 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
               Neema is a free companion for pregnancy, the months after birth and family planning. Local, medically reviewed guidance week by week, an assistant that answers your questions, and help one tap away when something feels wrong.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform hover:bg-[#9E3B1D] active:scale-[0.98]">
+              <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98] active:scale-[0.98]">
                 Start free <ArrowRight className="h-5 w-5" />
               </button>
               <button type="button" onClick={() => scrollToSection('services-section')} className="inline-flex min-h-[56px] items-center justify-center rounded-xl border border-neema-border bg-white px-7 text-lg font-semibold text-neema-ink">
@@ -60,7 +60,7 @@ export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroS
               alt="A smiling pregnant woman using the Neema app at home"
               className="relative aspect-[4/3] w-full rounded-3xl object-cover shadow-xl lg:aspect-[4/5]"
             />
-            <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/95 p-4 shadow-neema-card sm:left-auto sm:w-72">
+            <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white p-4 shadow-neema-card sm:left-auto sm:w-72">
               <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-neema-dark">Week 24 · Trimester 2</div>
               <div className="mt-1 font-semibold text-neema-ink">Baby can hear your voice. Talk, sing or pray aloud.</div>
             </div>

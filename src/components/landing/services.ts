@@ -42,7 +42,7 @@ export const SERVICES: Service[] = [
       'Never diagnoses or prescribes',
       'Danger signs go straight to SOS',
     ],
-    Icon: MessageCircle, tint: 'bg-neema-lilac', ink: 'text-[#4A3F6B]',
+    Icon: MessageCircle, tint: 'bg-neema-lilac', ink: 'text-neema-lilac-ink',
   },
   {
     id: 'diet',
@@ -107,7 +107,7 @@ export const SERVICES: Service[] = [
       'Partner home with weekly guidance',
       'Emergency alerts by push or SMS, even on basic phones',
     ],
-    Icon: Users, tint: 'bg-neema-lilac', ink: 'text-[#4A3F6B]',
+    Icon: Users, tint: 'bg-neema-lilac', ink: 'text-neema-lilac-ink',
   },
   {
     id: 'tips',

@@ -16,7 +16,7 @@ export function FeaturesSection() {
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map(({ id, title, summary, includes, Icon, tint, ink }) => (
-            <article key={id} className="flex flex-col gap-4 rounded-2xl border border-neema-line bg-neema-cream p-6">
+            <article key={id} className="flex flex-col gap-4 rounded-2xl border border-neema-line bg-neema-cream p-6 transition-shadow duration-200 hover:shadow-neema-card">
               <div className="flex items-center gap-3">
                 <span className={`flex h-12 w-12 flex-none items-center justify-center rounded-xl ${tint} ${ink}`}>
                   <Icon className="h-6 w-6" />
@@ -38,7 +38,7 @@ export function FeaturesSection() {
 
         <div className="mt-10 rounded-2xl bg-neema-lilac p-6 md:p-8">
           <div className="mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-[#4A3F6B]" />
+            <Clock className="h-5 w-5 text-neema-lilac-ink" />
             <h3 className="font-sans text-lg font-semibold tracking-normal text-neema-ink">Coming soon</h3>
           </div>
           <ul className="flex flex-wrap gap-2">
