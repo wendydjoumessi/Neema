@@ -1,84 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import pregnantCouple from '@/assets/pregnant-couple.jpg';
+import emblem from '@/assets/neema-emblem.png';
 
 interface CTASectionProps {
   onGetStarted: () => void;
 }
 
 export function CTASection({ onGetStarted }: CTASectionProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden" ref={sectionRef}>
-      <div className="absolute inset-0">
-        <img 
-          src={pregnantCouple} 
-          alt="" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-foreground/85" />
-      </div>
-      
-      <div className="relative w-full px-6 md:px-12 lg:px-20 text-center">
-        <h2 
-          className={`font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-background mb-6 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          Ready to Start Your Journey?
-        </h2>
-        <p 
-          className={`text-background/80 text-lg md:text-xl max-w-2xl mx-auto mb-10 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: isVisible ? '150ms' : '0ms' }}
-        >
-          Join our community of expecting parents and experience the joy of a 
-          well-supported pregnancy journey.
+    <section className="relative overflow-hidden bg-neema-dark py-16 text-white md:py-20">
+      <div aria-hidden="true" className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-neema-primary" />
+      <div aria-hidden="true" className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-neema-ochre/60" />
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-5 text-center">
+        <img src={emblem} alt="" className="mb-6 h-20 w-20 rounded-2xl bg-white object-cover p-1" />
+        <h2 className="font-sans text-3xl font-bold tracking-normal md:text-4xl">Start your journey with Neema</h2>
+        <p className="mt-4 text-lg text-white/90 md:text-xl">
+          Free for every family, in English or French. Invite your partner or a trusted support person whenever you’re ready.
         </p>
-        <div 
-          className={`flex flex-col sm:flex-row gap-4 justify-center transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: isVisible ? '300ms' : '0ms' }}
-        >
-          <Button 
-            size="lg" 
-            onClick={onGetStarted}
-            className="bg-background text-foreground hover:bg-background/90 text-lg px-8 py-6 shadow-xl"
-          >
-            Get Started Free
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <Button 
-            size="lg" 
-            variant="outline"
-            className="border-background/50 text-background hover:bg-background/10 text-lg px-8 py-6"
-          >
-            Learn More
-          </Button>
-        </div>
+        <button type="button" onClick={onGetStarted} className="mt-8 inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-white px-8 text-lg font-semibold text-neema-dark shadow-xl hover:bg-neema-cream">
+          Get started free <ArrowRight className="h-5 w-5" />
+        </button>
       </div>
     </section>
   );

@@ -1,162 +1,70 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Shield, CheckCircle2, ArrowRight } from 'lucide-react';
-import aboutPregnancyTracking from '@/assets/about-pregnancy-tracking.jpg';
-import aboutPartnerSupport from '@/assets/about-partner-support.webp';
-import aboutHealthNutrition from '@/assets/about-health-nutrition.jpg';
-import aboutFamilyPlanning from '@/assets/about-family-planning.png';
+import { ArrowRight, Baby, CalendarHeart, Users, Languages, WifiOff, Lock, BadgeCheck, Salad, Phone } from 'lucide-react';
+import nutritionImage from '@/assets/about-health-nutrition.jpg';
+import familyImage from '@/assets/family-planning-new.webp';
 
 interface AboutSectionProps {
   onGetStarted: () => void;
 }
 
-const benefits = [
-  'Week-by-week pregnancy updates',
-  'Danger symptom & medication alerts',
-  'Daily prayers & spiritual support',
-  'Partner dashboard & reminders',
-  'Fertility & ovulation tracking',
-  'Hospital bag & shopping checklists',
+const audiences = [
+  { Icon: Baby, title: 'Mothers', text: 'During pregnancy and in the months after birth: weekly care, diet, routines, shopping and support.' },
+  { Icon: CalendarHeart, title: 'Women planning a family', text: 'Trying to conceive or avoiding pregnancy: cycle tracking and every method explained.' },
+  { Icon: Users, title: 'Partners & support persons', text: 'Husbands, mothers and sisters get guidance and alerts the mother chooses to share, even by SMS.' },
+];
+
+const reasons = [
+  { Icon: Salad, title: 'Local, not imported', text: 'Advice built on Cameroonian foods, markets and facilities, not foreign products.' },
+  { Icon: Languages, title: 'English and French', text: 'Content in both languages, with audio so you can listen instead of read.' },
+  { Icon: WifiOff, title: 'Works offline', text: 'Built for entry-level phones and patchy data, with SMS backup for reminders and alerts.' },
+  { Icon: Lock, title: 'Private and discreet', text: 'PIN lock and discreet mode for shared phones. Your data is never sold and there are no ads.' },
+  { Icon: BadgeCheck, title: 'Medically reviewed', text: 'All health content, danger-sign rules and medicine data are approved by a qualified clinician.' },
+  { Icon: Phone, title: 'Help when it matters', text: 'Danger signs lead to clear next steps, the nearest maternity facilities and a one-tap call to 119.' },
 ];
 
 export function AboutSection({ onGetStarted }: AboutSectionProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section id="about-section" className="py-20 md:py-28 bg-muted/50" ref={sectionRef}>
-      <div className="w-full px-6 md:px-12 lg:px-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
-            <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-              Why Neema
-            </span>
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-6">
-              A Trusted Companion for Your
-              <span className="text-primary"> Pregnancy & Family Planning Journey</span>
-            </h2>
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Whether you're planning to conceive or already expecting, Neema is here to guide you 
-              through every step. Our app combines medical expertise with emotional and spiritual support 
-              to help you feel confident and prepared.
-            </p>
-            
-            <div className="grid sm:grid-cols-2 gap-4 mb-8">
-              {benefits.map((benefit, index) => (
-                <div 
-                  key={index} 
-                  className={`flex items-center gap-3 transition-all duration-500 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                  }`}
-                  style={{ transitionDelay: isVisible ? `${300 + index * 80}ms` : '0ms' }}
-                >
-                  <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-secondary" />
+    <section id="about-section" className="scroll-mt-4 bg-neema-cream py-16 md:py-24">
+      <div className="mx-auto w-full max-w-6xl px-5 md:px-10">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <span className="mb-4 inline-block rounded-full bg-neema-primary-soft px-4 py-1.5 text-sm font-semibold text-neema-dark">Who Neema is for</span>
+            <h2 className="font-sans text-3xl font-bold tracking-normal text-neema-ink md:text-4xl">A companion for the whole family</h2>
+            <div className="mt-8 flex flex-col gap-5">
+              {audiences.map(({ Icon, title, text }) => (
+                <div key={title} className="flex gap-4">
+                  <span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-white text-neema-dark shadow-neema-card"><Icon className="h-6 w-6" /></span>
+                  <div>
+                    <h3 className="font-sans text-lg font-semibold tracking-normal text-neema-ink">{title}</h3>
+                    <p className="text-neema-muted-strong">{text}</p>
                   </div>
-                  <span className="text-foreground font-medium">{benefit}</span>
                 </div>
               ))}
             </div>
-
-            <Button 
-              size="lg" 
-              onClick={onGetStarted}
-              className={`neema-gradient-primary text-primary-foreground shadow-lg transition-all duration-500 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-              style={{ transitionDelay: isVisible ? '800ms' : '0ms' }}
-            >
-              Get Started Free
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <img src={nutritionImage} alt="A pregnant woman preparing fresh fruit and vegetables at home" className="aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" />
+            <img src={familyImage} alt="Cupped hands holding a paper cut-out of a family" className="mt-10 aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" />
+          </div>
+        </div>
 
-          {/* Image Collage */}
-          <div className={`relative transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
-               style={{ transitionDelay: isVisible ? '200ms' : '0ms' }}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div 
-                  className={`photo-frame aspect-[4/5] transition-all duration-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
-                  style={{ transitionDelay: isVisible ? '400ms' : '0ms' }}
-                >
-                  <img 
-                    src={aboutPregnancyTracking} 
-                    alt="Pregnancy tracking feature"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div 
-                  className={`photo-frame aspect-square transition-all duration-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
-                  style={{ transitionDelay: isVisible ? '600ms' : '0ms' }}
-                >
-                  <img 
-                    src={aboutHealthNutrition} 
-                    alt="Health and nutrition guidance"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+        <div className="mt-16">
+          <h2 className="mb-8 text-center font-sans text-3xl font-bold tracking-normal text-neema-ink md:text-4xl">Why families choose Neema</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {reasons.map(({ Icon, title, text }) => (
+              <div key={title} className="rounded-2xl bg-white p-5 shadow-neema-card">
+                <Icon className="mb-3 h-6 w-6 text-neema-dark" />
+                <h3 className="font-sans text-lg font-semibold tracking-normal text-neema-ink">{title}</h3>
+                <p className="mt-1 text-neema-muted-strong">{text}</p>
               </div>
-              <div className="space-y-4 pt-8">
-                <div 
-                  className={`photo-frame aspect-square transition-all duration-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
-                  style={{ transitionDelay: isVisible ? '500ms' : '0ms' }}
-                >
-                  <img 
-                    src={aboutPartnerSupport} 
-                    alt="Partner support mode"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div 
-                  className={`photo-frame aspect-[4/5] transition-all duration-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
-                  style={{ transitionDelay: isVisible ? '700ms' : '0ms' }}
-                >
-                  <img 
-                    src={aboutFamilyPlanning} 
-                    alt="Family planning tools"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating Card */}
-            <Card 
-              className={`absolute -bottom-6 -left-6 p-4 shadow-xl bg-card/95 backdrop-blur border-0 hidden md:block transition-all duration-500 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{ transitionDelay: isVisible ? '900ms' : '0ms' }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 neema-gradient-secondary rounded-full flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Doctor Approved</p>
-                  <p className="text-sm text-muted-foreground">Medically reviewed content</p>
-                </div>
-              </div>
-            </Card>
+            ))}
+          </div>
+          <p className="mx-auto mt-8 max-w-3xl text-center text-[15px] leading-[22px] text-neema-muted-strong">
+            Neema is an education and navigation tool, not a medical provider. It does not diagnose or prescribe, and it always tells you when to see a qualified health worker.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero hover:bg-[#9E3B1D]">
+              Get started free <ArrowRight className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>
