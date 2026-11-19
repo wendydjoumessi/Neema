@@ -1,20 +1,23 @@
-import { HeroSection, FeaturesSection, AboutSection, CTASection, Footer } from '@/components/landing';
+import { HeroSection, FeaturesSection, AboutSection, CTASection, Footer, SiteHeader } from '@/components/landing';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  /** Returning users: go straight to log in. */
+  onLogin?: () => void;
   onNavigate?: (section: string) => void;
 }
 
-export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onLogin, onNavigate }: LandingPageProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      window.scrollTo({ top: element.getBoundingClientRect().top + window.scrollY - 72, behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="min-h-screen bg-neema-cream font-sans text-base text-neema-ink">
+    <div id="top" className="min-h-screen bg-neema-cream font-sans text-base text-neema-ink">
+      <SiteHeader onGetStarted={onGetStarted} onLogin={onLogin} onNavigate={onNavigate} scrollToSection={scrollToSection} />
       <HeroSection 
         onGetStarted={onGetStarted} 
         onNavigate={onNavigate}

@@ -6,6 +6,7 @@ export type Profile = Tables<'profiles'>;
 export type MedicalProfile = Tables<'medical_profiles'>;
 export type PregnancyRow = Tables<'pregnancies'>;
 export type Role = 'mother' | 'partner';
+export type Journey = 'ttc' | 'preg' | 'pp' | 'avoid';
 
 /** Bump when the consent text changes, so people are asked again. */
 export const CONSENT_VERSION = '2026-11';
@@ -14,6 +15,8 @@ export type Account = {
   profile: Profile | null;
   medical: MedicalProfile | null;
   pregnancy: PregnancyRow | null;
+  /** The most recent birth, for mothers in the after-birth journey. */
+  birth: PregnancyRow | null;
   appState: Record<string, unknown> | null;
 };
 
@@ -35,11 +38,11 @@ export function friendlyError(error: unknown): string {
 // Authentication
 // ---------------------------------------------------------------------------
 
-export async function signUp(input: { name: string; email: string; password: string; role: Role }) {
+export async function signUp(input: { name: string; email: string; password: string; role: Role; journey?: Journey }) {
   const { data, error } = await supabase.auth.signUp({
     email: input.email.trim(),
     password: input.password,
-    options: { data: { full_name: input.name.trim(), role: input.role }, emailRedirectTo: window.location.origin },
+    options: { data: { full_name: input.name.trim(), role: input.role, journey: input.journey ?? 'preg' }, emailRedirectTo: window.location.origin },
   });
   if (error) throw error;
   // With email confirmation on, there is no session until the link is opened.
@@ -71,18 +74,21 @@ export async function updatePassword(password: string) {
 // ---------------------------------------------------------------------------
 
 export async function loadAccount(userId: string): Promise<Account> {
-  const [profile, medical, pregnancy, state] = await Promise.all([
+  const [profile, medical, pregnancy, birth, state] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
     supabase.from('medical_profiles').select('*').eq('user_id', userId).maybeSingle(),
     supabase.from('pregnancies').select('*').eq('user_id', userId).eq('status', 'active').maybeSingle(),
+    supabase.from('pregnancies').select('*').eq('user_id', userId).eq('status', 'born')
+      .order('outcome_date', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('app_state').select('state').eq('user_id', userId).maybeSingle(),
   ]);
-  const err = profile.error || medical.error || pregnancy.error || state.error;
+  const err = profile.error || medical.error || pregnancy.error || birth.error || state.error;
   if (err) throw err;
   return {
     profile: profile.data,
     medical: medical.data,
     pregnancy: pregnancy.data,
+    birth: birth.data,
     appState: (state.data?.state as Record<string, unknown> | undefined) ?? null,
   };
 }
@@ -122,6 +128,18 @@ export async function savePregnancy(userId: string, p: PregnancyData, entry: { l
   const res = existing.data
     ? await supabase.from('pregnancies').update(row).eq('id', existing.data.id).select('*').single()
     : await supabase.from('pregnancies').insert(row).select('*').single();
+  if (res.error) throw res.error;
+  return res.data;
+}
+
+/** Record a birth: closes the active pregnancy if there is one, otherwise adds a new record. */
+export async function saveBirth(userId: string, birthDate: string, nickname: string) {
+  const existing = await supabase.from('pregnancies').select('id').eq('user_id', userId).eq('status', 'active').maybeSingle();
+  if (existing.error) throw existing.error;
+  const fields = { status: 'born' as const, outcome_date: birthDate, ...(nickname ? { baby_nickname: nickname } : {}) };
+  const res = existing.data
+    ? await supabase.from('pregnancies').update(fields).eq('id', existing.data.id).select('*').single()
+    : await supabase.from('pregnancies').insert({ user_id: userId, due_date: birthDate, ...fields }).select('*').single();
   if (res.error) throw res.error;
   return res.data;
 }
@@ -176,6 +194,7 @@ export function pregnancyFromRow(row: PregnancyRow): PregnancyData {
     currentWeek,
     trimester: currentWeek <= 13 ? 1 : currentWeek <= 27 ? 2 : 3,
     babyName: row.baby_nickname ?? undefined,
+    birthDate: row.status === 'born' && row.outcome_date ? new Date(row.outcome_date + 'T00:00:00') : undefined,
   };
 }
 

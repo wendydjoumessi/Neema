@@ -23,13 +23,15 @@ import { MedicalProfileScreen, type MedicalInput } from '@/components/screens/Me
 import { LoadingScreen, NewPasswordScreen } from '@/components/screens/NewPasswordScreen';
 import type { PregnancyEntry } from '@/components/screens/PregnancySetupScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { JourneyScreen } from '@/components/screens/JourneyScreen';
+import { BirthScreen } from '@/components/screens/BirthScreen';
 import {
-  CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveConsent,
-  saveMedicalProfile, savePregnancy, saveProfile, signOut, type Account, type Profile,
+  CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveBirth, saveConsent,
+  saveMedicalProfile, savePregnancy, saveProfile, signOut, type Account, type Journey, type PregnancyRow, type Profile,
 } from '@/lib/account';
 import { MedicineSafety } from '@/components/screens/MedicineSafety';
 
-type Screen = 'loading' | 'error' | 'landing' | 'contact' | 'onboarding' | 'auth' | 'consent' | 'setup' | 'medical' | 'main' | 'new-password';
+type Screen = 'loading' | 'error' | 'landing' | 'contact' | 'onboarding' | 'journey' | 'auth' | 'consent' | 'setup' | 'birth' | 'medical' | 'main' | 'new-password';
 
 const DAY = 86_400_000;
 const samplePartnerPregnancy = (userId: string): PregnancyData => ({
@@ -46,6 +48,8 @@ function AppFlow() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
+  /** What she chose in "What brings you to Neema?" (an existing account's saved journey wins). */
+  const [selectedJourney, setSelectedJourney] = useState<Journey>('preg');
   const [user, setUser] = useState<User | null>(null);
   /** Signed-in account id; null for guests (nothing is saved). */
   const [userId, setUserId] = useState<string | null>(null);
@@ -66,11 +70,16 @@ function AppFlow() {
       return;
     }
     setIsPartnerMode(false);
-    if (acc?.pregnancy) {
-      setPregnancy(pregnancyFromRow(acc.pregnancy));
-      setCurrentScreen('main');
-    } else if (acc?.profile && (acc.profile.journey === 'ttc' || acc.profile.journey === 'avoid')) {
+    const journey: Journey = acc?.profile?.journey ?? selectedJourney;
+    setSelectedJourney(journey);
+    if (journey === 'ttc' || journey === 'avoid') {
       setPregnancy(notPregnant(id));
+      setCurrentScreen('main');
+    } else if (journey === 'pp') {
+      if (acc?.birth) { setPregnancy(pregnancyFromRow(acc.birth)); setCurrentScreen('main'); }
+      else setCurrentScreen('birth');
+    } else if (acc?.pregnancy) {
+      setPregnancy(pregnancyFromRow(acc.pregnancy));
       setCurrentScreen('main');
     } else {
       setCurrentScreen('setup');
@@ -112,6 +121,11 @@ function AppFlow() {
 
   const handleRoleSelect = (role: 'mother' | 'partner') => {
     setSelectedRole(role);
+    setCurrentScreen(role === 'mother' ? 'journey' : 'auth');
+  };
+
+  const handleJourneySelect = (journey: Journey) => {
+    setSelectedJourney(journey);
     setCurrentScreen('auth');
   };
 
@@ -119,8 +133,7 @@ function AppFlow() {
     setUser(guest);
     setUserId(null);
     setAccount(null);
-    if (guest.role === 'partner') goMain(null, 'partner', guest.id);
-    else setCurrentScreen('setup');
+    goMain(null, guest.role, guest.id);
   };
 
   const handleConsent = async (choices: { sms: boolean; partnerSharing: boolean }) => {
@@ -149,14 +162,35 @@ function AppFlow() {
     }
   };
 
-  const handleNotPregnant = async (journey: 'ttc' | 'avoid') => {
+  const handleNotPregnant = async (journey: 'ttc' | 'avoid' | 'pp') => {
     const id = userId ?? 'guest';
+    setSelectedJourney(journey);
     if (userId) {
       try { await saveProfile(userId, { journey }); } catch { /* the app keeps working; it saves again on the next change */ }
       setAccount((a) => (a && a.profile ? { ...a, profile: { ...a.profile, journey } } : a));
     }
+    if (journey === 'pp') { setCurrentScreen('birth'); return; }
     setPregnancy(notPregnant(id));
     setCurrentScreen('main');
+  };
+
+  const handleBirth = async (birthDate: string, nickname: string) => {
+    setSetupError('');
+    const id = userId ?? 'guest';
+    if (!userId) {
+      setPregnancy(pregnancyFromRow({ id: 'guest-birth', user_id: id, due_date: birthDate, doctor_due_date: null, status: 'born', outcome_date: birthDate, baby_nickname: nickname || null } as PregnancyRow));
+      setCurrentScreen('main');
+      return;
+    }
+    try {
+      const row = await saveBirth(userId, birthDate, nickname);
+      await saveProfile(userId, { journey: 'pp' });
+      setPregnancy(pregnancyFromRow(row));
+      setAccount((a) => (a ? { ...a, birth: row, pregnancy: null, profile: a.profile ? { ...a.profile, journey: 'pp' } : a.profile } : a));
+      setCurrentScreen(account?.medical ? 'main' : 'medical');
+    } catch {
+      setSetupError('We couldn’t save this. Check your connection and try again.');
+    }
   };
 
   const handleMedicalSave = async (data: MedicalInput) => {
@@ -178,8 +212,12 @@ function AppFlow() {
 
   /** Save settings and progress: preferences go to the profile, the rest to app_state. */
   const handlePersist = useCallback((state: PersistedState) => {
-    if (!userId) return;
     const { lang, journey, discreet, city, ...rest } = state;
+    // A journey that needs dates she hasn't given yet: ask for them.
+    if (journey === 'preg' && (pregnancy?.id === 'none' || pregnancy?.birthDate)) setCurrentScreen('setup');
+    if (journey === 'pp' && !pregnancy?.birthDate) setCurrentScreen('birth');
+    if ((journey === 'ttc' || journey === 'avoid') && journey !== selectedJourney) setSelectedJourney(journey);
+    if (!userId) return;
     saveProfile(userId, {
       language: lang === 'fr' ? 'fr' : 'en',
       journey: (journey as Profile['journey']) ?? 'preg',
@@ -187,9 +225,7 @@ function AppFlow() {
       city: typeof city === 'string' && city ? city : null,
     }).catch(() => undefined);
     saveAppState(userId, rest).catch(() => undefined);
-    // Switching to "Pregnant" without pregnancy dates: ask for them.
-    if (journey === 'preg' && pregnancy?.id === 'none') setCurrentScreen('setup');
-  }, [userId, pregnancy?.id]);
+  }, [userId, pregnancy?.id, pregnancy?.birthDate, selectedJourney]);
 
   const toggleChecklistItem = (id: string) => {
     setChecklist(prev => 
@@ -258,6 +294,7 @@ function AppFlow() {
     return (
       <LandingPage 
         onGetStarted={() => setCurrentScreen('onboarding')} 
+        onLogin={() => { setSelectedRole('mother'); setCurrentScreen('auth'); }}
         onNavigate={handleLandingNavigate}
       />
     );
@@ -271,13 +308,22 @@ function AppFlow() {
     return <OnboardingScreen onComplete={handleRoleSelect} />;
   }
 
+  if (currentScreen === 'journey') {
+    return <JourneyScreen onSelect={handleJourneySelect} onBack={() => setCurrentScreen('onboarding')} />;
+  }
+
+  if (currentScreen === 'birth') {
+    return <BirthScreen onComplete={handleBirth} onBack={() => (userId ? handleLogout() : setCurrentScreen('journey'))} error={setupError} />;
+  }
+
   if (currentScreen === 'auth') {
     return (
       <AuthScreen 
         onSignedIn={(id) => supabase.auth.getUser().then(({ data }) => openAccount(id, data.user?.email))}
         onGuest={handleGuest}
-        onBack={() => setCurrentScreen('onboarding')}
+        onBack={() => setCurrentScreen(selectedRole === 'mother' ? 'journey' : 'onboarding')}
         defaultRole={selectedRole}
+        journey={selectedJourney}
       />
     );
   }
@@ -291,7 +337,7 @@ function AppFlow() {
       <PregnancySetupScreen 
         onComplete={handlePregnancySetup}
         onNotPregnant={handleNotPregnant}
-        onBack={() => (userId ? handleLogout() : setCurrentScreen('auth'))}
+        onBack={() => (userId ? handleLogout() : setCurrentScreen('journey'))}
         error={setupError}
       />
     );
@@ -309,15 +355,15 @@ function AppFlow() {
   }
 
   // Mothers get the Neema experience. Earlier screens stay reachable from Profile › More from Neema.
-  const seed: PersistedState | undefined = account
-    ? {
+  const seed: PersistedState | undefined = !account
+    ? { journey: selectedJourney }
+    : {
         ...(account.appState ?? {}),
         lang: account.profile?.language,
         journey: account.profile?.journey,
         discreet: account.profile?.discreet_mode,
         city: account.profile?.city ?? undefined,
-      }
-    : undefined;
+      };
   const medicalFacts = [
     account?.medical?.blood_group && { k: 'Blood group', v: account.medical.blood_group === 'unknown' ? 'Not known' : account.medical.blood_group },
     account?.medical?.genotype && { k: 'Genotype', v: account.medical.genotype === 'unknown' ? 'Not known' : account.medical.genotype },

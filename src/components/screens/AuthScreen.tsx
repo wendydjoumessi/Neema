@@ -3,7 +3,7 @@ import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck } fro
 import { cn } from '@/lib/utils';
 import { Segmented } from '@/neema/ui';
 import { User } from '@/types/pregnancy';
-import { friendlyError, requestPasswordReset, signIn, signUp } from '@/lib/account';
+import { friendlyError, requestPasswordReset, signIn, signUp, type Journey } from '@/lib/account';
 import logo from '@/assets/logo.png';
 
 interface AuthScreenProps {
@@ -13,11 +13,13 @@ interface AuthScreenProps {
   onGuest: (user: User) => void;
   onBack: () => void;
   defaultRole: 'mother' | 'partner';
+  /** What she chose in "What brings you to Neema?", saved with a new account. */
+  journey?: Journey;
 }
 
 type Mode = 'login' | 'signup' | 'forgot';
 
-export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole }: AuthScreenProps) {
+export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }: AuthScreenProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<Mode>('login');
@@ -54,7 +56,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole }: AuthScr
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     run(async () => {
-      const { user, needsConfirmation } = await signUp({ name: signupName, email: signupEmail, password: signupPassword, role: defaultRole });
+      const { user, needsConfirmation } = await signUp({ name: signupName, email: signupEmail, password: signupPassword, role: defaultRole, journey });
       if (needsConfirmation) {
         setLoginEmail(signupEmail);
         setMode('login');

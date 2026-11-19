@@ -1,6 +1,5 @@
 import { ArrowRight, ShieldCheck, Lock, WifiOff } from 'lucide-react';
 import heroImage from '@/assets/hero-pregnant-new.jpg';
-import logo from '@/assets/logo.png';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -8,23 +7,10 @@ interface HeroSectionProps {
   scrollToSection: (sectionId: string) => void;
 }
 
-const navLink = 'hidden min-h-[48px] items-center rounded-full px-4 font-semibold text-neema-ink hover:bg-neema-sand md:inline-flex';
-
-export function HeroSection({ onGetStarted, onNavigate, scrollToSection }: HeroSectionProps) {
+export function HeroSection({ onGetStarted, scrollToSection }: HeroSectionProps) {
   return (
     <section className="overflow-hidden bg-neema-cream">
-      <div className="mx-auto w-full max-w-6xl px-5 pb-14 pt-4 md:px-10 md:pb-20">
-        <nav aria-label="Main" className="mb-8 flex items-center justify-between gap-3 md:mb-14">
-          <img src={logo} alt="Neema — Care for Every Stage" className="h-16 w-auto md:h-20" />
-          <div className="flex items-center gap-1">
-            <button type="button" className={navLink} onClick={() => scrollToSection('services-section')}>Services</button>
-            <button type="button" className={navLink} onClick={() => scrollToSection('about-section')}>Why Neema</button>
-            <button type="button" className={navLink} onClick={() => onNavigate?.('contact')}>Contact</button>
-            <button type="button" onClick={onGetStarted} className="ml-2 min-h-[48px] rounded-xl bg-neema-dark px-5 font-semibold text-white shadow-md transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98]">
-              Get started
-            </button>
-          </div>
-        </nav>
+      <div className="mx-auto w-full max-w-6xl px-5 pb-14 pt-6 md:px-10 md:pb-20 md:pt-10">
 
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>

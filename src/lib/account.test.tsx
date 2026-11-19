@@ -29,6 +29,8 @@ function query(table: string) {
   const api = {
     select: () => api,
     eq: (k: string, v: unknown) => { filters.push([k, v]); return api; },
+    order: () => api,
+    limit: () => api,
     update: (p: Row) => { op = 'update'; payload = p; calls.push({ table, op, payload: p }); return api; },
     insert: (p: Row) => { op = 'insert'; payload = p; calls.push({ table, op, payload: p }); return api; },
     upsert: (p: Row) => { op = 'upsert'; payload = p; calls.push({ table, op, payload: p }); return api; },
@@ -161,6 +163,7 @@ describe('accounts', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Start free' }));
     fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
     fireEvent.click(screen.getByRole('button', { name: /I’m a mother/ }));
+    fireEvent.click(screen.getByRole('button', { name: /I’m pregnant/ }));
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'amina@example.com' } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrongpass' } });
     fireEvent.click(within(screen.getByRole('button', { name: 'Log in', hidden: false }).closest('form')!).getByRole('button', { name: 'Log in' }));
@@ -175,5 +178,37 @@ describe('accounts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'I’m trying to get pregnant' }));
     expect(await screen.findByText('TRYING TO CONCEIVE')).toBeInTheDocument();
     expect(db.profiles[0].journey).toBe('ttc');
+  });
+
+  it('asks a mother what brings her, and sends family planning straight to the app', async () => {
+    render(<Index />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Start free' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
+    fireEvent.click(screen.getByRole('button', { name: /I’m a mother/ }));
+    expect(screen.getByRole('heading', { name: 'What brings you to Neema?' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /I want to avoid pregnancy/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue as guest' }));
+    expect(screen.queryByRole('heading', { name: /When did your last period start/ })).not.toBeInTheDocument();
+    expect(await screen.findByText('AVOIDING PREGNANCY')).toBeInTheDocument();
+  });
+
+  it('asks a new mother for her baby’s birth date instead of pregnancy dates', async () => {
+    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'pp', language: 'en', discreet_mode: false, ...consented });
+    render(<Index />);
+    const date = await screen.findByLabelText('Baby’s date of birth');
+    const born = iso(new Date(Date.now() - 21 * 86400000));
+    fireEvent.change(date, { target: { value: born } });
+    fireEvent.click(screen.getByRole('button', { name: /Continue/ }));
+    expect(await screen.findByRole('heading', { name: 'A little about your health' })).toBeInTheDocument();
+    expect(db.pregnancies[0]).toMatchObject({ user_id: 'u1', status: 'born', outcome_date: born });
+  });
+
+  it('reopens a mother after birth on her after-birth home', async () => {
+    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'pp', language: 'en', discreet_mode: false, ...consented });
+    db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'born', due_date: iso(new Date(Date.now() - 21 * 86400000)), outcome_date: iso(new Date(Date.now() - 21 * 86400000)), doctor_due_date: null });
+    render(<Index />);
+    expect(await screen.findByText('3 weeks after birth')).toBeInTheDocument();
   });
 });

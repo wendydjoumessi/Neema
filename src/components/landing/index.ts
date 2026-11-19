@@ -3,3 +3,4 @@ export { FeaturesSection } from './FeaturesSection';
 export { AboutSection } from './AboutSection';
 export { CTASection } from './CTASection';
 export { Footer } from './Footer';
+export { SiteHeader } from './SiteHeader';

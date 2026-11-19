@@ -10,7 +10,7 @@ export type PregnancyEntry = { lastPeriodDate?: string; weeksAtEntry?: number };
 interface PregnancySetupScreenProps {
   onComplete: (data: PregnancyData, entry: PregnancyEntry) => void;
   /** For women who are planning a family and not pregnant now. */
-  onNotPregnant?: (journey: 'ttc' | 'avoid') => void;
+  onNotPregnant?: (journey: 'ttc' | 'avoid' | 'pp') => void;
   onBack: () => void;
   /** Shown above the last step's button, e.g. when saving failed. */
   error?: string;
@@ -135,6 +135,7 @@ export function PregnancySetupScreen({ onComplete, onNotPregnant, onBack, error 
           {onNotPregnant && notPregnant && (
             <div className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-neema-card">
               <p className="font-semibold">What would you like Neema to help with?</p>
+              <button type="button" onClick={() => onNotPregnant('pp')} className="min-h-[52px] rounded-xl border border-neema-border bg-white font-semibold">I recently had my baby</button>
               <button type="button" onClick={() => onNotPregnant('ttc')} className="min-h-[52px] rounded-xl border border-neema-border bg-white font-semibold">I’m trying to get pregnant</button>
               <button type="button" onClick={() => onNotPregnant('avoid')} className="min-h-[52px] rounded-xl border border-neema-border bg-white font-semibold">I want to avoid pregnancy</button>
             </div>

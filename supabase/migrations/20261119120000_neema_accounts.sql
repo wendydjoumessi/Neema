@@ -53,7 +53,7 @@ create trigger profiles_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
 
--- Create the profile when someone signs up. Name and role come from sign-up metadata.
+-- Create the profile when someone signs up. Name, role and journey come from sign-up metadata.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -61,12 +61,15 @@ security definer
 set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, full_name, role)
+  insert into public.profiles (id, full_name, role, journey)
   values (
     new.id,
     left(coalesce(new.raw_user_meta_data ->> 'full_name', ''), 120),
     case when new.raw_user_meta_data ->> 'role' = 'partner' then 'partner'::public.neema_role
-         else 'mother'::public.neema_role end
+         else 'mother'::public.neema_role end,
+    case when new.raw_user_meta_data ->> 'journey' in ('ttc', 'preg', 'pp', 'avoid')
+         then (new.raw_user_meta_data ->> 'journey')::public.neema_journey
+         else 'preg'::public.neema_journey end
   )
   on conflict (id) do nothing;
   return new;
