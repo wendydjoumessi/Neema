@@ -132,7 +132,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
       <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-10 md:py-16">
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <span className="mb-4 inline-block rounded-full bg-neema-primary-soft px-4 py-1.5 text-[13px] font-semibold text-neema-dark">Get in touch</span>
-          <h1 className="text-3xl font-bold leading-tight text-neema-ink md:text-4xl">We’d love to hear from you</h1>
+          <h1 className="font-sans text-3xl font-bold leading-tight text-neema-ink md:text-4xl">We’d love to hear from you</h1>
           <p className="mt-3 text-lg text-neema-muted-strong">Questions, feedback or ideas for Neema? Send us a message and we’ll reply by email.</p>
         </div>
 
@@ -142,7 +142,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
               <section key={title} className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-neema-card">
                 <span className={cn('flex h-12 w-12 flex-none items-center justify-center rounded-xl', tint)}><Icon className="h-6 w-6" /></span>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold leading-6">{title}</h2>
+                  <h2 className="font-sans text-lg font-semibold leading-6">{title}</h2>
                   <div className="mt-0.5 text-neema-muted-strong">{text}</div>
                 </div>
               </section>
@@ -158,14 +158,14 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
                 <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-neema-success-soft text-neema-success-ink">
                   <CheckCircle className="h-10 w-10" />
                 </span>
-                <h2 className="text-2xl font-bold">Message sent</h2>
+                <h2 className="font-sans text-2xl font-bold">Message sent</h2>
                 <p className="mt-2 max-w-sm text-neema-muted-strong">Thank you for reaching out. We’ll reply to the email address you gave us.</p>
                 <OutlineButton onClick={resetForm} className="mt-6 max-w-xs">Send another message</OutlineButton>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
                 <div>
-                  <h2 className="text-2xl font-bold">Send us a message</h2>
+                  <h2 className="font-sans text-2xl font-bold">Send us a message</h2>
                   <p className="mt-1 text-neema-muted-strong">All fields are required.</p>
                 </div>
                 <div className="grid gap-5 md:grid-cols-2">

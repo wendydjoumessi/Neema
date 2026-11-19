@@ -1,12 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Segmented } from '@/neema/ui';
 import { User } from '@/types/pregnancy';
-import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
 import logo from '@/assets/logo.png';
 
 interface AuthScreenProps {
@@ -18,6 +14,7 @@ interface AuthScreenProps {
 export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   
   // Login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -72,230 +69,86 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
     onAuth(user);
   };
 
-  return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img 
-          src={pregnantWoman1} 
-          alt="" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-      </div>
-
-      {/* Content */}
-      <div className="relative min-h-screen flex flex-col px-6 md:px-8 lg:px-12 pt-safe-top pb-8">
-        {/* Header with Back and Logo */}
-        <div className="flex items-center justify-between mb-6 mt-4">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-2 text-foreground/70 hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back
+  const isLogin = mode === 'login';
+  const inputCls = 'min-h-[52px] w-full rounded-xl border border-neema-border bg-white pl-11 pr-4 text-base text-neema-ink placeholder:text-neema-muted transition-colors duration-150 focus:border-neema-primary focus:outline-none focus:ring-2 focus:ring-neema-primary/30';
+  const field = (id: string, label: string, Icon: typeof Mail, props: React.InputHTMLAttributes<HTMLInputElement>, eye = false) => (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[13px] font-semibold text-neema-ink">{label}</label>
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-neema-muted" />
+        <input id={id} required className={cn(inputCls, eye && 'pr-12')} {...props} />
+        {eye && (
+          <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}
+            className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-neema-muted-strong hover:text-neema-ink">
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
-          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
-        </div>
-
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl font-semibold text-foreground">
-            Welcome to Neema
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {defaultRole === 'mother' 
-              ? 'Create your pregnancy journey account'
-              : 'Join as a supportive partner'}
-          </p>
-        </div>
-
-        <div className="flex-1 max-w-md mx-auto w-full">
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted/50 backdrop-blur">
-              <TabsTrigger value="login" className="text-sm font-medium">Log In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-sm font-medium">Sign Up</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <Card className="border-0 shadow-xl bg-card/95 backdrop-blur">
-                  <CardContent className="p-5 space-y-4">
-                    <div>
-                      <Label htmlFor="login-email" className="text-sm font-medium mb-2 block">
-                        Email
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="login-email"
-                          type="email"
-                          placeholder="your@email.com"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          className="h-12 pl-10 bg-background/50"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="login-password" className="text-sm font-medium mb-2 block">
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="login-password"
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          className="h-12 pl-10 pr-10 bg-background/50"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
-                          ) : (
-                            <Eye className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <Button variant="link" className="px-0 text-sm text-primary">
-                      Forgot password?
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  className="w-full h-14 text-lg neema-gradient-primary text-primary-foreground shadow-xl"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Logging in...' : 'Log In'}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <Card className="border-0 shadow-xl bg-card/95 backdrop-blur">
-                  <CardContent className="p-5 space-y-4">
-                    <div>
-                      <Label htmlFor="signup-name" className="text-sm font-medium mb-2 block">
-                        Full Name
-                      </Label>
-                      <div className="relative">
-                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="signup-name"
-                          type="text"
-                          placeholder="Your name"
-                          value={signupName}
-                          onChange={(e) => setSignupName(e.target.value)}
-                          className="h-12 pl-10 bg-background/50"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="signup-email" className="text-sm font-medium mb-2 block">
-                        Email
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          placeholder="your@email.com"
-                          value={signupEmail}
-                          onChange={(e) => setSignupEmail(e.target.value)}
-                          className="h-12 pl-10 bg-background/50"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="signup-password" className="text-sm font-medium mb-2 block">
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="signup-password"
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Create a password"
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
-                          className="h-12 pl-10 pr-10 bg-background/50"
-                          required
-                          minLength={6}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
-                          ) : (
-                            <Eye className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        At least 6 characters
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  className="w-full h-14 text-lg neema-gradient-primary text-primary-foreground shadow-xl"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-background text-muted-foreground">or</span>
-              </div>
-            </div>
-
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="w-full mt-4 h-14 bg-card/50 backdrop-blur border-2"
-              onClick={handleGuestLogin}
-            >
-              Continue as Guest
-            </Button>
-          </div>
-
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </p>
-        </div>
+        )}
       </div>
     </div>
+  );
+  const pwType = showPassword ? 'text' : 'password';
+
+  return (
+    <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
+      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+        <header className="flex items-center justify-between">
+          <button type="button" onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
+            <ArrowLeft className="h-5 w-5" /> Back
+          </button>
+          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+        </header>
+
+        <div className="mt-6">
+          <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
+          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{isLogin ? 'Welcome back' : 'Create your account'}</h1>
+          <p className="mt-2 text-lg text-neema-muted-strong">
+            {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
+          </p>
+        </div>
+
+        <Segmented className="mt-6" label="Account" value={mode} onChange={setMode}
+          options={[{ id: 'login', label: 'Log in' }, { id: 'signup', label: 'Sign up' }]} />
+
+        <section className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
+          {isLogin ? (
+            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+              {field('login-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: loginEmail, onChange: (e) => setLoginEmail(e.target.value), autoComplete: 'email' })}
+              {field('login-password', 'Password', Lock, { type: pwType, placeholder: 'Your password', value: loginPassword, onChange: (e) => setLoginPassword(e.target.value), autoComplete: 'current-password' }, true)}
+              <button type="button" className="-mt-1 self-end min-h-[44px] px-1 text-sm font-semibold text-neema-dark hover:underline">Forgot password?</button>
+              <SubmitBtn loading={isLoading}>Log in</SubmitBtn>
+            </form>
+          ) : (
+            <form onSubmit={handleSignup} className="flex flex-col gap-4">
+              {field('signup-name', 'Full name', UserIcon, { type: 'text', placeholder: 'e.g. Amina Fouda', value: signupName, onChange: (e) => setSignupName(e.target.value), autoComplete: 'name' })}
+              {field('signup-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: signupEmail, onChange: (e) => setSignupEmail(e.target.value), autoComplete: 'email' })}
+              {field('signup-password', 'Password', Lock, { type: pwType, placeholder: 'Create a password', value: signupPassword, onChange: (e) => setSignupPassword(e.target.value), autoComplete: 'new-password', minLength: 6 }, true)}
+              <SubmitBtn loading={isLoading}>Create account</SubmitBtn>
+            </form>
+          )}
+        </section>
+
+        <div className="my-6 flex items-center gap-3 text-sm text-neema-muted-strong">
+          <span className="h-px flex-1 bg-neema-line" /> or <span className="h-px flex-1 bg-neema-line" />
+        </div>
+        <button type="button" onClick={handleGuestLogin}
+          className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
+          Continue as guest
+        </button>
+
+        <p className="mt-auto flex items-start justify-center gap-2 pt-8 text-center text-sm text-neema-muted-strong">
+          <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-neema-success-ink" />
+          Your data stays private. Neema never sells it and shows no ads.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SubmitBtn({ loading, children }: { loading: boolean; children: React.ReactNode }) {
+  return (
+    <button type="submit" disabled={loading}
+      className="mt-1 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-neema-dark px-4 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 active:scale-[0.98] disabled:opacity-60">
+      {loading ? <><span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Please wait…</> : children}
+    </button>
   );
 }

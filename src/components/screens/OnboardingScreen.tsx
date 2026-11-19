@@ -1,276 +1,127 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Heart, 
-  Baby, 
-  Users, 
-  Sparkles,
-  ArrowRight,
-  ArrowLeft
-} from 'lucide-react';
-import heroImage from '@/assets/hero-pregnant.jpg';
-import pregnantWoman1 from '@/assets/pregnant-woman-1.jpg';
-import pregnantCouple from '@/assets/pregnant-couple.jpg';
-import motherBaby from '@/assets/mother-baby.jpg';
+import { ArrowLeft, ArrowRight, Baby, CalendarHeart, HeartPulse, Users, ShieldCheck, Languages, WifiOff, type LucideIcon } from 'lucide-react';
+import heroImage from '@/assets/hero-pregnant-new.jpg';
 import logo from '@/assets/logo.png';
+import { cn } from '@/lib/utils';
 
 interface OnboardingScreenProps {
   onComplete: (role: 'mother' | 'partner') => void;
 }
 
-const slides = [
-  {
-    image: heroImage,
-    icon: Heart,
-    title: 'Welcome to Neema',
-    description: 'Your personal companion through the beautiful journey of pregnancy. Track, learn, and prepare with confidence.',
-    color: 'primary'
-  },
-  {
-    image: pregnantWoman1,
-    icon: Baby,
-    title: 'Track Your Journey',
-    description: 'Follow your baby\'s weekly development with detailed insights, size comparisons, and milestones that matter.',
-    color: 'secondary'
-  },
-  {
-    image: pregnantCouple,
-    icon: Users,
-    title: 'Include Your Partner',
-    description: 'Share this special journey together. Your partner gets their own dashboard with updates, tips, and ways to support you.',
-    color: 'partner'
-  },
-  {
-    image: motherBaby,
-    icon: Sparkles,
-    title: 'Prepare with Confidence',
-    description: 'From health guidance to birth preparation, we\'ve got you covered every step of the way. Let\'s begin!',
-    color: 'spiritual'
-  },
+type Slide = { Icon: LucideIcon; tint: string; eyebrow: string; title: string; description: string };
+
+const slides: Slide[] = [
+  { Icon: HeartPulse, tint: 'bg-neema-primary-soft text-neema-dark', eyebrow: 'Welcome', title: 'Care for every stage', description: 'A free companion for pregnancy, the months after birth and family planning, in English and French.' },
+  { Icon: Baby, tint: 'bg-neema-ochre-soft text-neema-ochre-ink', eyebrow: 'Week by week', title: 'Follow your baby’s growth', description: 'Weekly updates on your baby and your body, with simple advice using foods from your own market.' },
+  { Icon: Users, tint: 'bg-neema-lilac text-neema-lilac-ink', eyebrow: 'Together', title: 'Bring your partner along', description: 'Invite your husband, mother or sister. You choose what they see, and alerts can reach them by SMS.' },
+  { Icon: CalendarHeart, tint: 'bg-neema-success-soft text-neema-success-ink', eyebrow: 'Ready', title: 'Prepared and supported', description: 'From danger signs to the hospital bag and daily encouragement, Neema is with you every step.' },
+];
+
+const trust = [
+  { Icon: ShieldCheck, label: 'Medically reviewed' },
+  { Icon: Languages, label: 'English & Français' },
+  { Icon: WifiOff, label: 'Works offline' },
 ];
 
 export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
-  const slide = slides[currentSlide];
-  const Icon = slide.icon;
-  const isLastSlide = currentSlide === slides.length - 1;
+  const [current, setCurrent] = useState(0);
+  const [showRoles, setShowRoles] = useState(false);
+  const slide = slides[current];
+  const isLast = current === slides.length - 1;
 
-  const handleNext = () => {
-    if (isLastSlide) {
-      setShowRoleSelection(true);
-    } else {
-      setCurrentSlide(prev => prev + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide(prev => prev - 1);
-    }
-  };
-
-  const handleSkip = () => {
-    setShowRoleSelection(true);
-  };
-
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'primary': return 'bg-primary text-primary-foreground';
-      case 'secondary': return 'bg-secondary text-secondary-foreground';
-      case 'partner': return 'bg-partner text-partner-foreground';
-      case 'spiritual': return 'bg-spiritual text-spiritual-foreground';
-      default: return 'bg-primary text-primary-foreground';
-    }
-  };
-
-  // Role Selection Screen
-  if (showRoleSelection) {
+  if (showRoles) {
+    const roles = [
+      { id: 'mother' as const, Icon: Baby, tint: 'bg-neema-primary-soft text-neema-dark', title: 'I’m a mother', text: 'Pregnant, after birth, or planning a family.' },
+      { id: 'partner' as const, Icon: Users, tint: 'bg-neema-lilac text-neema-lilac-ink', title: 'I’m a support person', text: 'Husband, mother, sister or trusted friend.' },
+    ];
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0">
-          <img 
-            src={pregnantCouple} 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
-        </div>
-
-        {/* Content */}
-        <div className="relative min-h-screen flex flex-col p-6 md:p-8 lg:p-12 pt-safe-top pb-safe-bottom">
-          {/* Logo and Back Button */}
-          <div className="flex items-center justify-between mb-8">
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowRoleSelection(false)}
-              className="text-foreground/80 hover:text-foreground hover:bg-background/20"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
+      <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
+        <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+          <header className="flex items-center justify-between">
+            <button type="button" onClick={() => setShowRoles(false)} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
+              <ArrowLeft className="h-5 w-5" /> Back
+            </button>
+            <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+          </header>
+          <div className="mt-8">
+            <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Getting started</div>
+            <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">Who will use Neema?</h1>
+            <p className="mt-2 text-lg text-neema-muted-strong">We’ll tailor your guidance to you.</p>
           </div>
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Title */}
-          <div className="mb-8">
-            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-3">
-              Who are you?
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Choose your role to personalize your experience
-            </p>
+          <div className="mt-8 flex flex-col gap-4">
+            {roles.map(({ id, Icon, tint, title, text }) => (
+              <button key={id} type="button" onClick={() => onComplete(id)}
+                className="group flex items-center gap-4 rounded-2xl border-2 border-transparent bg-white p-5 text-left shadow-neema-card transition-all duration-150 hover:border-neema-primary active:scale-[0.98]">
+                <span className={cn('flex h-14 w-14 flex-none items-center justify-center rounded-2xl', tint)}><Icon className="h-7 w-7" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-sans text-lg font-semibold">{title}</span>
+                  <span className="block text-neema-muted-strong">{text}</span>
+                </span>
+                <ArrowRight className="h-5 w-5 flex-none text-neema-dark transition-transform duration-150 group-hover:translate-x-0.5" />
+              </button>
+            ))}
           </div>
-
-          {/* Role Cards */}
-          <div className="grid gap-4 md:grid-cols-2 mb-8">
-            <Card 
-              className="cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-[1.02] shadow-xl overflow-hidden"
-              onClick={() => onComplete('mother')}
-            >
-              <div className="relative h-32 overflow-hidden">
-                <img 
-                  src={pregnantWoman1} 
-                  alt="" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-              </div>
-              <CardContent className="p-5 text-center -mt-8 relative">
-                <div className="w-16 h-16 mx-auto rounded-full neema-gradient-primary flex items-center justify-center mb-4 shadow-lg border-4 border-card">
-                  <Baby className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                  I'm Expecting
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Track your pregnancy journey with personalized insights and support
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="cursor-pointer border-2 border-transparent hover:border-partner transition-all duration-300 hover:scale-[1.02] shadow-xl overflow-hidden"
-              onClick={() => onComplete('partner')}
-            >
-              <div className="relative h-32 overflow-hidden">
-                <img 
-                  src={pregnantCouple} 
-                  alt="" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-              </div>
-              <CardContent className="p-5 text-center -mt-8 relative">
-                <div className="w-16 h-16 mx-auto rounded-full neema-gradient-partner flex items-center justify-center mb-4 shadow-lg border-4 border-card">
-                  <Users className="w-8 h-8 text-partner-foreground" />
-                </div>
-                <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                  I'm a Partner
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Support your partner and stay connected throughout the journey
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <p className="mt-auto pt-8 text-center text-sm text-neema-muted-strong">You can invite a support person later from your profile.</p>
         </div>
       </div>
     );
   }
 
+  const { Icon } = slide;
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img 
-          src={slide.image} 
-          alt="" 
-          className="w-full h-full object-cover transition-all duration-700"
-          key={currentSlide}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-      </div>
-
-      {/* Content */}
-      <div className="relative min-h-screen flex flex-col">
-        {/* Header with Logo and Skip */}
-        <div className="flex items-center justify-between p-6 pt-safe-top">
-          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
-          <Button 
-            variant="ghost" 
-            onClick={handleSkip}
-            className="text-foreground/80 hover:text-foreground hover:bg-background/20"
-          >
+    <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
+      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+        <header className="flex items-center justify-between">
+          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+          <button type="button" onClick={() => setShowRoles(true)} className="min-h-[48px] rounded-full px-4 font-semibold text-neema-muted-strong transition-colors duration-150 hover:bg-neema-sand hover:text-neema-ink">
             Skip
-          </Button>
+          </button>
+        </header>
+
+        <div className="relative mt-4">
+          {current === 0 ? (
+            <img src={heroImage} alt="A smiling pregnant woman using Neema on her phone" className="aspect-[4/3] w-full rounded-3xl object-cover shadow-neema-card" />
+          ) : (
+            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-3xl bg-white shadow-neema-card">
+              <span className={cn('flex h-28 w-28 items-center justify-center rounded-full', slide.tint)}><Icon className="h-14 w-14" /></span>
+            </div>
+          )}
         </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+        <div key={current} className="mt-8">
+          <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">{slide.eyebrow}</div>
+          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{slide.title}</h1>
+          <p className="mt-3 text-lg leading-relaxed text-neema-muted-strong">{slide.description}</p>
+        </div>
 
-        {/* Bottom Content */}
-        <div className="p-6 md:p-8 lg:p-12 pb-safe-bottom">
-          {/* Icon */}
-          <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl ${getColorClasses(slide.color)} flex items-center justify-center mb-6 shadow-lg animate-scale-in`}>
-            <Icon className="w-7 h-7 md:w-8 md:h-8" />
-          </div>
+        {current === 0 && (
+          <ul className="mt-6 flex flex-wrap gap-2">
+            {trust.map(({ Icon: T, label }) => (
+              <li key={label} className="inline-flex items-center gap-1.5 rounded-full bg-neema-success-soft px-3 py-1 text-[13px] font-semibold text-neema-success-ink"><T className="h-4 w-4" />{label}</li>
+            ))}
+          </ul>
+        )}
 
-          {/* Text Content */}
-          <div className="mb-8 animate-slide-up" key={`content-${currentSlide}`}>
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4 leading-tight">
-              {slide.title}
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-lg">
-              {slide.description}
-            </p>
-          </div>
-
-          {/* Progress Indicators */}
-          <div className="flex items-center gap-2 mb-8">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  index === currentSlide 
-                    ? 'w-8 bg-primary' 
-                    : 'w-2 bg-foreground/20 hover:bg-foreground/30'
-                }`}
-              />
+        <div className="mt-auto pt-8">
+          <div className="mb-6 flex items-center justify-center gap-2" role="tablist" aria-label="Onboarding steps">
+            {slides.map((s, i) => (
+              <button key={s.title} type="button" role="tab" aria-selected={i === current} aria-label={`Step ${i + 1}`} onClick={() => setCurrent(i)}
+                className="flex h-6 items-center px-1">
+                <span className={cn('block h-2 rounded-full transition-all duration-200', i === current ? 'w-8 bg-neema-dark' : 'w-2 bg-neema-border')} />
+              </button>
             ))}
           </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-4">
-            {currentSlide > 0 && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handlePrev}
-                className="w-14 h-14 rounded-full p-0 border-2 bg-background/50 backdrop-blur"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+          <div className="flex gap-3">
+            {current > 0 && (
+              <button type="button" onClick={() => setCurrent(current - 1)} aria-label="Previous"
+                className="flex h-14 w-14 flex-none items-center justify-center rounded-xl border border-neema-border bg-white text-neema-ink transition-transform duration-150 active:scale-[0.98]">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
             )}
-            
-            <Button
-              size="lg"
-              onClick={handleNext}
-              className={`flex-1 h-14 text-lg font-medium shadow-xl ${
-                isLastSlide 
-                  ? 'neema-gradient-primary text-primary-foreground' 
-                  : 'bg-foreground text-background hover:bg-foreground/90'
-              }`}
-            >
-              {isLastSlide ? 'Get Started' : 'Continue'}
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            <button type="button" onClick={() => (isLast ? setShowRoles(true) : setCurrent(current + 1))}
+              className="flex min-h-[56px] flex-1 items-center justify-center gap-2 rounded-xl bg-neema-dark px-4 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 active:scale-[0.98]">
+              {isLast ? 'Get started' : 'Next'} <ArrowRight className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>

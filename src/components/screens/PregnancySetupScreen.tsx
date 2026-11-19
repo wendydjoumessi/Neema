@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import type { ReactNode } from 'react';
+import logo from '@/assets/logo.png';
 import { Calendar, ArrowLeft, ArrowRight, Baby, CalendarDays, Stethoscope } from 'lucide-react';
 import { format, addDays, differenceInWeeks } from 'date-fns';
 import { PregnancyData } from '@/types/pregnancy';
@@ -64,212 +62,100 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
     onComplete(pregnancyData);
   };
 
-  if (step === 1) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col px-6 pt-safe-top pb-8">
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground mb-6 mt-4"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back
-        </button>
+  const inputCls = 'min-h-[56px] w-full rounded-xl border border-neema-border bg-white px-4 text-lg text-neema-ink placeholder:text-neema-muted transition-colors duration-150 focus:border-neema-primary focus:outline-none focus:ring-2 focus:ring-neema-primary/30';
+  const back = step === 1 ? onBack : () => setStep(step - 1);
 
-        <div className="flex-1">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto rounded-full neema-gradient-secondary flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-secondary-foreground" />
-            </div>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-              When did your last period start?
-            </h2>
-            <p className="text-muted-foreground">
-              This helps us calculate your due date
-            </p>
-          </div>
-
-          <Card variant="soft" className="mb-6">
-            <CardContent className="p-4">
-              <Label htmlFor="lmp-date" className="text-sm font-medium mb-2 block">
-                First day of last menstrual period
-              </Label>
-              <Input
-                id="lmp-date"
-                type="date"
-                value={lastPeriodDate}
-                onChange={(e) => setLastPeriodDate(e.target.value)}
-                className="h-14 text-lg"
-                max={format(new Date(), 'yyyy-MM-dd')}
-              />
-            </CardContent>
-          </Card>
-
-          <div className="text-center text-muted-foreground text-sm mb-6">
-            or
-          </div>
-
-          <Card variant="soft">
-            <CardContent className="p-4">
-              <Label htmlFor="weeks" className="text-sm font-medium mb-2 block">
-                I know my gestational age
-              </Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  id="weeks"
-                  type="number"
-                  placeholder="0"
-                  min="1"
-                  max="42"
-                  value={gestationalWeeks}
-                  onChange={(e) => setGestationalWeeks(e.target.value)}
-                  className="h-14 text-lg text-center"
-                />
-                <span className="text-muted-foreground">weeks pregnant</span>
-              </div>
-            </CardContent>
-          </Card>
+  const Shell = ({ Icon, tint, title, sub, children, footer }: { Icon: typeof Calendar; tint: string; title: string; sub: string; children: ReactNode; footer: ReactNode }) => (
+    <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
+      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+        <header className="flex items-center justify-between">
+          <button type="button" onClick={back} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
+            <ArrowLeft className="h-5 w-5" /> Back
+          </button>
+          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+        </header>
+        <div className="mt-4 flex gap-1.5" aria-label={`Setup step ${step} of 3`}>
+          {[1, 2, 3].map((n) => <span key={n} className={`h-1.5 flex-1 rounded-full transition-colors duration-200 ${n <= step ? 'bg-neema-dark' : 'bg-neema-line'}`} />)}
         </div>
-
-        <Button 
-          variant="neema" 
-          size="lg" 
-          className="w-full"
-          onClick={() => setStep(2)}
-          disabled={!lastPeriodDate && !gestationalWeeks}
-        >
-          Continue
-          <ArrowRight className="w-5 h-5" />
-        </Button>
+        <div className="mt-8">
+          <span className={`flex h-14 w-14 items-center justify-center rounded-2xl ${tint}`}><Icon className="h-7 w-7" /></span>
+          <div className="mt-5 text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your pregnancy · {step} of 3</div>
+          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{title}</h1>
+          <p className="mt-2 text-lg text-neema-muted-strong">{sub}</p>
+        </div>
+        <div className="mt-6 flex flex-col gap-4">{children}</div>
+        <div className="mt-auto flex flex-col gap-3 pt-8">{footer}</div>
       </div>
-    );
+    </div>
+  );
+
+  const Primary = ({ children, onClick, disabled }: { children: ReactNode; onClick: () => void; disabled?: boolean }) => (
+    <button type="button" onClick={onClick} disabled={disabled}
+      className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-neema-dark px-4 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none">
+      {children}
+    </button>
+  );
+
+  if (step === 1) {
+    return Shell({
+      Icon: Calendar, tint: 'bg-neema-primary-soft text-neema-dark',
+      title: 'When did your last period start?', sub: 'This helps us work out your due date and current week.',
+      children: (
+        <>
+          <section className="rounded-2xl bg-white p-5 shadow-neema-card">
+            <label htmlFor="lmp-date" className="mb-1.5 block text-[13px] font-semibold">First day of your last period</label>
+            <input id="lmp-date" type="date" value={lastPeriodDate} onChange={(e) => setLastPeriodDate(e.target.value)} max={format(new Date(), 'yyyy-MM-dd')} className={inputCls} />
+          </section>
+          <div className="flex items-center gap-3 text-sm text-neema-muted-strong"><span className="h-px flex-1 bg-neema-line" />or<span className="h-px flex-1 bg-neema-line" /></div>
+          <section className="rounded-2xl bg-white p-5 shadow-neema-card">
+            <label htmlFor="weeks" className="mb-1.5 block text-[13px] font-semibold">I know how many weeks pregnant I am</label>
+            <div className="flex items-center gap-3">
+              <input id="weeks" type="number" inputMode="numeric" placeholder="0" min="1" max="42" value={gestationalWeeks} onChange={(e) => setGestationalWeeks(e.target.value)} className={`${inputCls} w-28 text-center`} />
+              <span className="text-neema-muted-strong">weeks</span>
+            </div>
+          </section>
+        </>
+      ),
+      footer: <Primary onClick={() => setStep(2)} disabled={!lastPeriodDate && !gestationalWeeks}>Continue <ArrowRight className="h-5 w-5" /></Primary>,
+    });
   }
 
   if (step === 2) {
     const estimatedDueDate = calculateDueDate();
-
-    return (
-      <div className="min-h-screen bg-background flex flex-col px-6 pt-safe-top pb-8">
-        <button 
-          onClick={() => setStep(1)}
-          className="flex items-center gap-2 text-muted-foreground mb-6 mt-4"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back
-        </button>
-
-        <div className="flex-1">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto rounded-full neema-gradient-warm flex items-center justify-center mb-4">
-              <Stethoscope className="w-8 h-8 text-tertiary-foreground" />
-            </div>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-              Doctor's due date
-            </h2>
-            <p className="text-muted-foreground">
-              Override if your doctor gave a different date
-            </p>
-          </div>
-
-          <Card variant="gradient-warm" className="mb-6">
-            <CardContent className="p-5 text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <CalendarDays className="w-5 h-5" />
-                <span className="text-sm font-medium opacity-80">Estimated Due Date</span>
-              </div>
-              <p className="text-2xl font-bold">
-                {format(estimatedDueDate, 'MMMM d, yyyy')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="soft">
-            <CardContent className="p-4">
-              <Label htmlFor="doctor-date" className="text-sm font-medium mb-2 block">
-                Doctor's due date (optional)
-              </Label>
-              <Input
-                id="doctor-date"
-                type="date"
-                value={doctorDueDate}
-                onChange={(e) => setDoctorDueDate(e.target.value)}
-                className="h-14 text-lg"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Button 
-          variant="neema" 
-          size="lg" 
-          className="w-full"
-          onClick={() => setStep(3)}
-        >
-          Continue
-          <ArrowRight className="w-5 h-5" />
-        </Button>
-      </div>
-    );
+    return Shell({
+      Icon: Stethoscope, tint: 'bg-neema-ochre-soft text-neema-ochre-ink',
+      title: 'Your due date', sub: 'If your doctor or midwife gave you a date, use theirs.',
+      children: (
+        <>
+          <section className="rounded-2xl bg-neema-dark p-5 text-white shadow-neema-hero">
+            <div className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/90"><CalendarDays className="h-4 w-4" /> Estimated due date</div>
+            <p className="mt-1 text-3xl font-bold">{format(estimatedDueDate, 'd MMMM yyyy')}</p>
+          </section>
+          <section className="rounded-2xl bg-white p-5 shadow-neema-card">
+            <label htmlFor="doctor-date" className="mb-1.5 block text-[13px] font-semibold">Doctor’s due date (optional)</label>
+            <input id="doctor-date" type="date" value={doctorDueDate} onChange={(e) => setDoctorDueDate(e.target.value)} className={inputCls} />
+          </section>
+        </>
+      ),
+      footer: <Primary onClick={() => setStep(3)}>Continue <ArrowRight className="h-5 w-5" /></Primary>,
+    });
   }
 
-  // Step 3: Baby name (optional)
-  return (
-    <div className="min-h-screen bg-background flex flex-col px-6 pt-safe-top pb-8">
-      <button 
-        onClick={() => setStep(2)}
-        className="flex items-center gap-2 text-muted-foreground mb-6 mt-4"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        Back
-      </button>
-
-      <div className="flex-1">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-full neema-gradient-primary flex items-center justify-center mb-4 animate-bounce-gentle">
-            <Baby className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Give your baby a nickname
-          </h2>
-          <p className="text-muted-foreground">
-            We'll use this in your updates (optional)
-          </p>
-        </div>
-
-        <Card variant="soft">
-          <CardContent className="p-4">
-            <Input
-              placeholder="e.g., Little Bean, Peanut..."
-              value={babyName}
-              onChange={(e) => setBabyName(e.target.value)}
-              className="h-14 text-lg text-center"
-            />
-          </CardContent>
-        </Card>
-
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Don't worry, you can change this anytime!
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <Button 
-          variant="neema" 
-          size="lg" 
-          className="w-full"
-          onClick={handleComplete}
-        >
-          Start My Journey
-          <ArrowRight className="w-5 h-5" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="lg" 
-          className="w-full"
-          onClick={handleComplete}
-        >
-          Skip for now
-        </Button>
-      </div>
-    </div>
-  );
+  return Shell({
+    Icon: Baby, tint: 'bg-neema-success-soft text-neema-success-ink',
+    title: 'A nickname for your baby', sub: 'We’ll use it in your weekly updates. This is optional.',
+    children: (
+      <section className="rounded-2xl bg-white p-5 shadow-neema-card">
+        <label htmlFor="baby-name" className="mb-1.5 block text-[13px] font-semibold">Nickname</label>
+        <input id="baby-name" placeholder="e.g. Little one" value={babyName} onChange={(e) => setBabyName(e.target.value)} className={inputCls} />
+        <p className="mt-2 text-sm text-neema-muted-strong">You can change this any time.</p>
+      </section>
+    ),
+    footer: (
+      <>
+        <Primary onClick={handleComplete}>Start my journey <ArrowRight className="h-5 w-5" /></Primary>
+        <button type="button" onClick={handleComplete} className="min-h-[48px] w-full rounded-xl font-semibold text-neema-muted-strong hover:text-neema-ink">Skip for now</button>
+      </>
+    ),
+  });
 }
