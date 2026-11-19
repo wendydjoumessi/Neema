@@ -13,7 +13,7 @@ export function SosSheet({ firstName }: { firstName: string }) {
   const [sent, setSent] = useState(false);
   const n = CONTACTS.filter((c) => picked[c.id]).length;
   const reason = s.dangerWord ? ` Reason: ${s.dangerWord}.` : '';
-  const sms = `URGENT from ${firstName} via Neema: I need help now.${reason} My location: ${s.city} (GPS link). Please call me or come.`;
+  const sms = `URGENT from ${firstName} via Neema: I need help now.${reason} My location: ${s.city ? `${s.city} ` : ''}(GPS link). Please call me or come.`;
   const close = () => { s.setSosOpen(false); s.setDangerWord(''); };
 
   return (

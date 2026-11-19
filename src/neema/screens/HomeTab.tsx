@@ -17,6 +17,10 @@ export function HomeTab({ firstName, pregnancy }: { firstName: string; pregnancy
   const progress = Math.min(100, Math.round((week / 40) * 100));
   const size = babySizeFor(week);
   const journey = JOURNEYS.find((j) => j.id === s.journey)!;
+  const sinceBirth = pregnancy.birthDate ? Math.max(0, Math.floor((Date.now() - pregnancy.birthDate.getTime()) / 86400000)) : null;
+  const ppTitle = sinceBirth === null ? journey.title
+    : sinceBirth < 14 ? `${sinceBirth} day${sinceBirth === 1 ? '' : 's'} after birth`
+    : `${Math.floor(sinceBirth / 7)} weeks after birth`;
   const shopDone = SHOP.filter((i) => s.shop[i.id]).length;
   const today = new Date().toLocaleDateString(s.lang === 'fr' ? 'fr-FR' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -31,7 +35,7 @@ export function HomeTab({ firstName, pregnancy }: { firstName: string; pregnancy
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 px-4 pb-6 pt-2">
       <div className="px-0.5 pt-1">
         <div className="text-2xl font-bold leading-8">{t.greeting}, {firstName}</div>
-        <div className="text-neema-muted-strong">{today} · {s.city}</div>
+        <div className="text-neema-muted-strong">{today}{s.city ? ` · ${s.city}` : ''}</div>
       </div>
 
       {s.journey === 'preg' ? (
@@ -63,7 +67,8 @@ export function HomeTab({ firstName, pregnancy }: { firstName: string; pregnancy
         <section className="relative flex flex-col gap-2 overflow-hidden rounded-2xl bg-neema-dark p-5 text-white shadow-neema-hero">
           <div aria-hidden="true" className="absolute -right-[60px] -top-[60px] h-40 w-40 rounded-full bg-neema-primary" />
           <span className="relative text-[13px] font-bold uppercase leading-[18px] tracking-[0.08em]">{journey.tag}</span>
-          <h1 className="relative text-[32px] font-bold leading-10">{journey.title}</h1>
+          <h1 className="relative text-[32px] font-bold leading-10">{s.journey === 'pp' ? ppTitle : journey.title}</h1>
+          {s.journey === 'pp' && pregnancy.babyName && <p className="relative font-semibold">With {pregnancy.babyName}</p>}
           <p className="relative">{journey.text}</p>
         </section>
       )}

@@ -3,70 +3,87 @@ import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck } fro
 import { cn } from '@/lib/utils';
 import { Segmented } from '@/neema/ui';
 import { User } from '@/types/pregnancy';
+import { friendlyError, requestPasswordReset, signIn, signUp, type Journey } from '@/lib/account';
 import logo from '@/assets/logo.png';
 
 interface AuthScreenProps {
-  onAuth: (user: User) => void;
+  /** Called once the person is signed in with a real account. */
+  onSignedIn: (userId: string) => void;
+  /** Called for "Continue as guest": nothing is saved. */
+  onGuest: (user: User) => void;
   onBack: () => void;
   defaultRole: 'mother' | 'partner';
+  /** What she chose in "What brings you to Neema?", saved with a new account. */
+  journey?: Journey;
 }
 
-export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
+type Mode = 'login' | 'signup' | 'forgot';
+
+export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }: AuthScreenProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  
-  // Login state
+  const [mode, setMode] = useState<Mode>('login');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  
-  // Signup state
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const run = async (fn: () => Promise<void>) => {
+    setError('');
+    setNotice('');
     setIsLoading(true);
-    
-    // Simulate auth
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const user: User = {
-      id: Date.now().toString(),
-      name: loginEmail.split('@')[0],
-      email: loginEmail,
-      role: defaultRole,
-    };
-    
-    onAuth(user);
+    try {
+      await fn();
+    } catch (e) {
+      setError(friendlyError(e));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate auth
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const user: User = {
-      id: Date.now().toString(),
-      name: signupName,
-      email: signupEmail,
-      role: defaultRole,
-    };
-    
-    onAuth(user);
+    run(async () => {
+      const user = await signIn(loginEmail, loginPassword);
+      if (user) onSignedIn(user.id);
+    });
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(async () => {
+      const { user, needsConfirmation } = await signUp({ name: signupName, email: signupEmail, password: signupPassword, role: defaultRole, journey });
+      if (needsConfirmation) {
+        setLoginEmail(signupEmail);
+        setMode('login');
+        setNotice(`We sent a confirmation link to ${signupEmail}. Open it, then log in here.`);
+      } else if (user) {
+        onSignedIn(user.id);
+      }
+    });
+  };
+
+  const handleForgot = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(async () => {
+      await requestPasswordReset(loginEmail);
+      setMode('login');
+      setNotice(`If an account exists for ${loginEmail}, we sent a link to choose a new password.`);
+    });
   };
 
   const handleGuestLogin = () => {
-    const user: User = {
-      id: 'guest',
-      name: 'Guest User',
-      email: 'guest@neema.app',
-      role: defaultRole,
-    };
-    onAuth(user);
+    onGuest({ id: 'guest', name: 'Guest', email: 'guest@neema.app', role: defaultRole });
+  };
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setError('');
+    setNotice('');
   };
 
   const isLogin = mode === 'login';
@@ -100,21 +117,32 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
 
         <div className="mt-6">
           <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
-          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{isLogin ? 'Welcome back' : 'Create your account'}</h1>
+          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{mode === 'forgot' ? 'Reset your password' : isLogin ? 'Welcome back' : 'Create your account'}</h1>
           <p className="mt-2 text-lg text-neema-muted-strong">
             {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
           </p>
         </div>
 
-        <Segmented className="mt-6" label="Account" value={mode} onChange={setMode}
-          options={[{ id: 'login', label: 'Log in' }, { id: 'signup', label: 'Sign up' }]} />
+        {mode !== 'forgot' && (
+          <Segmented className="mt-6" label="Account" value={mode} onChange={switchMode}
+            options={[{ id: 'login', label: 'Log in' }, { id: 'signup', label: 'Sign up' }]} />
+        )}
+        {notice && <p role="status" className="mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
+        {error && <p role="alert" className="mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
 
         <section className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
-          {isLogin ? (
+          {mode === 'forgot' ? (
+            <form onSubmit={handleForgot} className="flex flex-col gap-4">
+              <p className="text-neema-muted-strong">Enter your email and we’ll send you a link to choose a new password.</p>
+              {field('forgot-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: loginEmail, onChange: (e) => setLoginEmail(e.target.value), autoComplete: 'email' })}
+              <SubmitBtn loading={isLoading}>Send reset link</SubmitBtn>
+              <button type="button" onClick={() => switchMode('login')} className="min-h-[48px] font-semibold text-neema-dark">Back to log in</button>
+            </form>
+          ) : isLogin ? (
             <form onSubmit={handleLogin} className="flex flex-col gap-4">
               {field('login-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: loginEmail, onChange: (e) => setLoginEmail(e.target.value), autoComplete: 'email' })}
               {field('login-password', 'Password', Lock, { type: pwType, placeholder: 'Your password', value: loginPassword, onChange: (e) => setLoginPassword(e.target.value), autoComplete: 'current-password' }, true)}
-              <button type="button" className="-mt-1 self-end min-h-[44px] px-1 text-sm font-semibold text-neema-dark hover:underline">Forgot password?</button>
+              <button type="button" onClick={() => switchMode('forgot')} className="-mt-1 self-end min-h-[48px] px-1 text-[15px] font-semibold text-neema-dark hover:underline">Forgot password?</button>
               <SubmitBtn loading={isLoading}>Log in</SubmitBtn>
             </form>
           ) : (
@@ -134,6 +162,7 @@ export function AuthScreen({ onAuth, onBack, defaultRole }: AuthScreenProps) {
           className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
           Continue as guest
         </button>
+        <p className="mt-2 text-center text-[15px] text-neema-muted-strong">As a guest, nothing is saved when you close Neema.</p>
 
         <p className="mt-auto flex items-start justify-center gap-2 pt-8 text-center text-sm text-neema-muted-strong">
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-neema-success-ink" />

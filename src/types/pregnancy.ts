@@ -16,6 +16,8 @@ export interface PregnancyData {
   currentWeek: number;
   trimester: 1 | 2 | 3;
   babyName?: string;
+  /** Set once the baby is born: drives after-birth care. */
+  birthDate?: Date;
 }
 
 export interface WeeklyInfo {
