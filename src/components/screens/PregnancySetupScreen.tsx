@@ -5,12 +5,19 @@ import { Calendar, ArrowLeft, ArrowRight, Baby, CalendarDays, Stethoscope } from
 import { format, addDays, differenceInWeeks } from 'date-fns';
 import { PregnancyData } from '@/types/pregnancy';
 
+export type PregnancyEntry = { lastPeriodDate?: string; weeksAtEntry?: number };
+
 interface PregnancySetupScreenProps {
-  onComplete: (data: PregnancyData) => void;
+  onComplete: (data: PregnancyData, entry: PregnancyEntry) => void;
+  /** For women who are planning a family and not pregnant now. */
+  onNotPregnant?: (journey: 'ttc' | 'avoid') => void;
   onBack: () => void;
+  /** Shown above the last step's button, e.g. when saving failed. */
+  error?: string;
 }
 
-export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScreenProps) {
+export function PregnancySetupScreen({ onComplete, onNotPregnant, onBack, error }: PregnancySetupScreenProps) {
+  const [notPregnant, setNotPregnant] = useState(false);
   const [step, setStep] = useState(1);
   const [lastPeriodDate, setLastPeriodDate] = useState('');
   const [gestationalWeeks, setGestationalWeeks] = useState('');
@@ -40,7 +47,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
 
   const getTrimester = (week: number): 1 | 2 | 3 => {
     if (week <= 13) return 1;
-    if (week <= 26) return 2;
+    if (week <= 27) return 2;
     return 3;
   };
 
@@ -59,7 +66,10 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
       babyName: babyName || undefined,
     };
 
-    onComplete(pregnancyData);
+    onComplete(pregnancyData, {
+      lastPeriodDate: lastPeriodDate || undefined,
+      weeksAtEntry: gestationalWeeks ? parseInt(gestationalWeeks) : undefined,
+    });
   };
 
   const inputCls = 'min-h-[56px] w-full rounded-xl border border-neema-border bg-white px-4 text-lg text-neema-ink placeholder:text-neema-muted transition-colors duration-150 focus:border-neema-primary focus:outline-none focus:ring-2 focus:ring-neema-primary/30';
@@ -116,7 +126,21 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
           </section>
         </>
       ),
-      footer: <Primary onClick={() => setStep(2)} disabled={!lastPeriodDate && !gestationalWeeks}>Continue <ArrowRight className="h-5 w-5" /></Primary>,
+      footer: (
+        <>
+          <Primary onClick={() => setStep(2)} disabled={!lastPeriodDate && !gestationalWeeks}>Continue <ArrowRight className="h-5 w-5" /></Primary>
+          {onNotPregnant && !notPregnant && (
+            <button type="button" onClick={() => setNotPregnant(true)} className="min-h-[48px] w-full rounded-xl font-semibold text-neema-dark">I’m not pregnant right now</button>
+          )}
+          {onNotPregnant && notPregnant && (
+            <div className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-neema-card">
+              <p className="font-semibold">What would you like Neema to help with?</p>
+              <button type="button" onClick={() => onNotPregnant('ttc')} className="min-h-[52px] rounded-xl border border-neema-border bg-white font-semibold">I’m trying to get pregnant</button>
+              <button type="button" onClick={() => onNotPregnant('avoid')} className="min-h-[52px] rounded-xl border border-neema-border bg-white font-semibold">I want to avoid pregnancy</button>
+            </div>
+          )}
+        </>
+      ),
     });
   }
 
@@ -153,6 +177,7 @@ export function PregnancySetupScreen({ onComplete, onBack }: PregnancySetupScree
     ),
     footer: (
       <>
+        {error && <p role="alert" className="rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
         <Primary onClick={handleComplete}>Start my journey <ArrowRight className="h-5 w-5" /></Primary>
         <button type="button" onClick={handleComplete} className="min-h-[48px] w-full rounded-xl font-semibold text-neema-muted-strong hover:text-neema-ink">Skip for now</button>
       </>

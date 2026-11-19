@@ -1,10 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Bell, Home, MessageCircle, Leaf, CalendarDays, ShoppingBag, NotebookText, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PregnancyData, User } from '@/types/pregnancy';
 import emblem from '@/assets/neema-emblem.png';
 import { T } from './data';
-import { NeemaProvider, TabId, useNeema } from './store';
+import { NeemaProvider, PersistedState, TabId, useNeema } from './store';
 import { SosPill } from './ui';
 import { HomeTab } from './screens/HomeTab';
 import { AskTab } from './screens/AskTab';
@@ -19,23 +19,44 @@ import { NotificationsPanel } from './overlays/NotificationsPanel';
 /** Existing NurtureLife-era screens that stay available from Profile › More. */
 export type ExtraScreen = { id: string; label: string; description: string; render: (nav: { goTab: (tab: TabId) => void }) => ReactNode };
 
+/** Account actions available when the user is signed in (not a guest). */
+export type AccountActions = {
+  exportData: () => Promise<void>;
+  requestDeletion: () => Promise<void>;
+};
+
 export interface NeemaAppProps {
   user: User | null;
   pregnancy: PregnancyData;
   onLogout: () => void;
   extras: ExtraScreen[];
+  /** Settings and progress loaded from the user's account. */
+  seed?: PersistedState;
+  /** Called (debounced) when settings or progress change, to save them to the account. */
+  onPersist?: (state: PersistedState) => void;
+  /** Health facts to show on the profile card, e.g. blood group. */
+  profileFacts?: { k: string; v: string }[];
+  account?: AccountActions;
 }
 
 export function NeemaApp(props: NeemaAppProps) {
   return (
-    <NeemaProvider>
+    <NeemaProvider seed={props.seed}>
       <NeemaShell {...props} />
     </NeemaProvider>
   );
 }
 
-function NeemaShell({ user, pregnancy, onLogout, extras }: NeemaAppProps) {
+function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts, account }: NeemaAppProps) {
   const s = useNeema();
+  const serialized = JSON.stringify(s.persisted);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (!onPersist) return;
+    const id = window.setTimeout(() => onPersist(JSON.parse(serialized)), 800);
+    return () => window.clearTimeout(id);
+  }, [serialized, onPersist]);
   const [extraId, setExtraId] = useState<string | null>(null);
   const t = T[s.lang];
   const firstName = (user?.name || 'Amina').split(' ')[0];
@@ -121,7 +142,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras }: NeemaAppProps) {
               {s.tab === 'fp' && <FamilyPlanningTab />}
               {s.tab === 'shop' && <ShopTab />}
               {s.tab === 'profile' && (
-                <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={extras} onOpenExtra={setExtraId} />
+                <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={extras} onOpenExtra={setExtraId} extraFacts={profileFacts} account={account} />
               )}
             </>
           )}

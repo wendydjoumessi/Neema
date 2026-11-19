@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppProvider } from '@/contexts/AppContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { LandingPage } from '@/components/screens/LandingPage';
@@ -17,54 +17,179 @@ import { ContactScreen } from '@/components/screens/ContactScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
 import { defaultChecklist } from '@/data/pregnancyData';
 import { NeemaApp } from '@/neema/NeemaApp';
+import type { PersistedState } from '@/neema/store';
+import { ConsentScreen } from '@/components/screens/ConsentScreen';
+import { MedicalProfileScreen, type MedicalInput } from '@/components/screens/MedicalProfileScreen';
+import { LoadingScreen, NewPasswordScreen } from '@/components/screens/NewPasswordScreen';
+import type { PregnancyEntry } from '@/components/screens/PregnancySetupScreen';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveConsent,
+  saveMedicalProfile, savePregnancy, saveProfile, signOut, type Account, type Profile,
+} from '@/lib/account';
 import { MedicineSafety } from '@/components/screens/MedicineSafety';
 
+type Screen = 'loading' | 'error' | 'landing' | 'contact' | 'onboarding' | 'auth' | 'consent' | 'setup' | 'medical' | 'main' | 'new-password';
+
+const DAY = 86_400_000;
+const samplePartnerPregnancy = (userId: string): PregnancyData => ({
+  id: 'demo',
+  userId,
+  startDate: new Date(Date.now() - 140 * DAY),
+  dueDate: new Date(Date.now() + 140 * DAY),
+  currentWeek: 20,
+  trimester: 2,
+  babyName: 'Little One',
+});
+
 function AppFlow() {
-  const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main' | 'contact'>('landing');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'mother' | 'partner'>('mother');
   const [user, setUser] = useState<User | null>(null);
+  /** Signed-in account id; null for guests (nothing is saved). */
+  const [userId, setUserId] = useState<string | null>(null);
+  const [account, setAccount] = useState<Account | null>(null);
   const [pregnancy, setPregnancy] = useState<PregnancyData | null>(null);
   const [isPartnerMode, setIsPartnerMode] = useState(false);
   const [checklist, setChecklist] = useState(defaultChecklist);
+  const [setupError, setSetupError] = useState('');
+  const recovering = useRef(typeof window !== 'undefined' && window.location.hash.includes('type=recovery'));
 
-  const handleRoleSelect = (role: 'mother' | 'partner') => {
-    setSelectedRole(role);
-    setCurrentScreen('auth');
-  };
-
-  const handleAuth = (authUser: User) => {
-    setUser(authUser);
-    if (authUser.role === 'partner') {
+  const goMain = (acc: Account | null, role: 'mother' | 'partner', id: string) => {
+    if (role === 'partner') {
+      // TODO: show the linked mother's shared data once partner linking is built.
       setIsPartnerMode(true);
-      // Create demo pregnancy data for partner
-      const demoPregnancy: PregnancyData = {
-        id: 'demo',
-        userId: authUser.id,
-        startDate: new Date(Date.now() - 140 * 24 * 60 * 60 * 1000),
-        dueDate: new Date(Date.now() + 140 * 24 * 60 * 60 * 1000),
-        currentWeek: 20,
-        trimester: 2,
-        babyName: 'Little One',
-      };
-      setPregnancy(demoPregnancy);
+      setPregnancy(samplePartnerPregnancy(id));
+      setActiveTab('home');
+      setCurrentScreen('main');
+      return;
+    }
+    setIsPartnerMode(false);
+    if (acc?.pregnancy) {
+      setPregnancy(pregnancyFromRow(acc.pregnancy));
+      setCurrentScreen('main');
+    } else if (acc?.profile && (acc.profile.journey === 'ttc' || acc.profile.journey === 'avoid')) {
+      setPregnancy(notPregnant(id));
       setCurrentScreen('main');
     } else {
       setCurrentScreen('setup');
     }
   };
 
-  const handlePregnancySetup = (data: PregnancyData) => {
-    setPregnancy(data);
+  const openAccount = async (id: string, email: string | undefined) => {
+    setCurrentScreen('loading');
+    try {
+      const acc = await loadAccount(id);
+      const role = acc.profile?.role ?? selectedRole;
+      setAccount(acc);
+      setUserId(id);
+      setUser({ id, name: acc.profile?.full_name || email?.split('@')[0] || '', email: email ?? '', role });
+      if (recovering.current) { setCurrentScreen('new-password'); return; }
+      if (!acc.profile?.consent_terms_at || acc.profile.consent_version !== CONSENT_VERSION) { setCurrentScreen('consent'); return; }
+      goMain(acc, role, id);
+    } catch {
+      setCurrentScreen('error');
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') { recovering.current = true; setCurrentScreen('new-password'); }
+    });
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        const u = data.session?.user;
+        if (u) openAccount(u.id, u.email);
+        else setCurrentScreen((sc) => (sc === 'loading' ? 'landing' : sc));
+      })
+      .catch(() => active && setCurrentScreen('landing'));
+    return () => { active = false; sub.subscription.unsubscribe(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRoleSelect = (role: 'mother' | 'partner') => {
+    setSelectedRole(role);
+    setCurrentScreen('auth');
+  };
+
+  const handleGuest = (guest: User) => {
+    setUser(guest);
+    setUserId(null);
+    setAccount(null);
+    if (guest.role === 'partner') goMain(null, 'partner', guest.id);
+    else setCurrentScreen('setup');
+  };
+
+  const handleConsent = async (choices: { sms: boolean; partnerSharing: boolean }) => {
+    if (!userId) return;
+    await saveConsent(userId, choices);
+    const acc = await loadAccount(userId);
+    setAccount(acc);
+    goMain(acc, user?.role ?? 'mother', userId);
+  };
+
+  const handlePregnancySetup = async (data: PregnancyData, entry: PregnancyEntry) => {
+    setSetupError('');
+    if (!userId) {
+      setPregnancy(data);
+      setCurrentScreen('main');
+      return;
+    }
+    try {
+      const row = await savePregnancy(userId, data, entry);
+      await saveProfile(userId, { journey: 'preg' });
+      setPregnancy(pregnancyFromRow(row));
+      setAccount((a) => (a ? { ...a, pregnancy: row, profile: a.profile ? { ...a.profile, journey: 'preg' } : a.profile } : a));
+      setCurrentScreen(account?.medical ? 'main' : 'medical');
+    } catch {
+      setSetupError('We couldn’t save your pregnancy. Check your connection and try again.');
+    }
+  };
+
+  const handleNotPregnant = async (journey: 'ttc' | 'avoid') => {
+    const id = userId ?? 'guest';
+    if (userId) {
+      try { await saveProfile(userId, { journey }); } catch { /* the app keeps working; it saves again on the next change */ }
+      setAccount((a) => (a && a.profile ? { ...a, profile: { ...a.profile, journey } } : a));
+    }
+    setPregnancy(notPregnant(id));
     setCurrentScreen('main');
   };
 
-  const handleLogout = () => {
+  const handleMedicalSave = async (data: MedicalInput) => {
+    if (userId) {
+      await saveMedicalProfile(userId, data);
+      setAccount((a) => (a ? { ...a, medical: { ...data, user_id: userId, updated_at: new Date().toISOString() } } : a));
+    }
+  };
+
+  const handleLogout = async () => {
+    if (userId) await signOut();
     setUser(null);
+    setUserId(null);
+    setAccount(null);
     setPregnancy(null);
     setIsPartnerMode(false);
     setCurrentScreen('landing');
   };
+
+  /** Save settings and progress: preferences go to the profile, the rest to app_state. */
+  const handlePersist = useCallback((state: PersistedState) => {
+    if (!userId) return;
+    const { lang, journey, discreet, city, ...rest } = state;
+    saveProfile(userId, {
+      language: lang === 'fr' ? 'fr' : 'en',
+      journey: (journey as Profile['journey']) ?? 'preg',
+      discreet_mode: !!discreet,
+      city: typeof city === 'string' && city ? city : null,
+    }).catch(() => undefined);
+    saveAppState(userId, rest).catch(() => undefined);
+    // Switching to "Pregnant" without pregnancy dates: ask for them.
+    if (journey === 'preg' && pregnancy?.id === 'none') setCurrentScreen('setup');
+  }, [userId, pregnancy?.id]);
 
   const toggleChecklistItem = (id: string) => {
     setChecklist(prev => 
@@ -101,6 +226,34 @@ function AppFlow() {
   };
 
   // Render appropriate screen
+  if (currentScreen === 'loading') return <LoadingScreen />;
+
+  if (currentScreen === 'error') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neema-cream p-6 text-center font-sans text-neema-ink">
+        <h1 className="text-2xl font-bold">We couldn’t open your account</h1>
+        <p className="max-w-sm text-neema-muted-strong">Check your data or Wi-Fi connection, then try again.</p>
+        <button type="button" onClick={() => window.location.reload()} className="min-h-[56px] rounded-xl bg-neema-dark px-8 font-semibold text-white">Try again</button>
+        <button type="button" onClick={handleLogout} className="min-h-[48px] font-semibold text-neema-dark">Log out</button>
+      </div>
+    );
+  }
+
+  if (currentScreen === 'new-password') {
+    return (
+      <NewPasswordScreen
+        onDone={() => {
+          recovering.current = false;
+          window.history.replaceState(null, '', window.location.pathname);
+          supabase.auth.getSession().then(({ data }) => {
+            const u = data.session?.user;
+            if (u) openAccount(u.id, u.email); else setCurrentScreen('auth');
+          });
+        }}
+      />
+    );
+  }
+
   if (currentScreen === 'landing') {
     return (
       <LandingPage 
@@ -121,30 +274,67 @@ function AppFlow() {
   if (currentScreen === 'auth') {
     return (
       <AuthScreen 
-        onAuth={handleAuth} 
+        onSignedIn={(id) => supabase.auth.getUser().then(({ data }) => openAccount(id, data.user?.email))}
+        onGuest={handleGuest}
         onBack={() => setCurrentScreen('onboarding')}
         defaultRole={selectedRole}
       />
     );
   }
 
+  if (currentScreen === 'consent') {
+    return <ConsentScreen role={user?.role ?? selectedRole} onAccept={handleConsent} onBack={handleLogout} />;
+  }
+
   if (currentScreen === 'setup') {
     return (
       <PregnancySetupScreen 
         onComplete={handlePregnancySetup}
-        onBack={() => setCurrentScreen('auth')}
+        onNotPregnant={handleNotPregnant}
+        onBack={() => (userId ? handleLogout() : setCurrentScreen('auth'))}
+        error={setupError}
+      />
+    );
+  }
+
+  if (currentScreen === 'medical') {
+    return (
+      <MedicalProfileScreen
+        mode="setup"
+        initial={account?.medical ?? null}
+        onSave={async (data) => { await handleMedicalSave(data); setCurrentScreen('main'); }}
+        onSkip={() => setCurrentScreen('main')}
       />
     );
   }
 
   // Mothers get the Neema experience. Earlier screens stay reachable from Profile › More from Neema.
+  const seed: PersistedState | undefined = account
+    ? {
+        ...(account.appState ?? {}),
+        lang: account.profile?.language,
+        journey: account.profile?.journey,
+        discreet: account.profile?.discreet_mode,
+        city: account.profile?.city ?? undefined,
+      }
+    : undefined;
+  const medicalFacts = [
+    account?.medical?.blood_group && { k: 'Blood group', v: account.medical.blood_group === 'unknown' ? 'Not known' : account.medical.blood_group },
+    account?.medical?.genotype && { k: 'Genotype', v: account.medical.genotype === 'unknown' ? 'Not known' : account.medical.genotype },
+  ].filter(Boolean) as { k: string; v: string }[];
+
   if (!isPartnerMode && pregnancy) {
     return (
       <NeemaApp
         user={user}
         pregnancy={pregnancy}
         onLogout={handleLogout}
+        seed={seed}
+        onPersist={handlePersist}
+        profileFacts={medicalFacts}
+        account={userId ? { exportData: () => exportMyData(userId), requestDeletion: () => requestDeletion(userId) } : undefined}
         extras={[
+          { id: 'medical', label: 'Medical profile', description: 'Blood group, genotype, conditions and allergies', render: () => <MedicalProfileScreen mode="edit" initial={account?.medical ?? null} onSave={handleMedicalSave} /> },
           { id: 'medicines', label: 'Medicine safety check', description: 'Is a medicine safe in pregnancy?', render: () => <div className="bg-neema-cream p-4 pb-8"><MedicineSafety /></div> },
           { id: 'tracking', label: 'Week-by-week tracker', description: 'Baby’s development and your body, week by week', render: () => <WeeklyTrackingScreen pregnancy={pregnancy} /> },
           { id: 'labour', label: 'Contraction timer & labour signs', description: 'Time contractions and know when to go', render: ({ goTab }) => <ChecklistScreen checklist={checklist} onToggleItem={toggleChecklistItem} showChecklist={false} onOpenShopping={() => goTab('shop')} /> },

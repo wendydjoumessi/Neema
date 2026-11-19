@@ -31,7 +31,7 @@ export function HomeTab({ firstName, pregnancy }: { firstName: string; pregnancy
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 px-4 pb-6 pt-2">
       <div className="px-0.5 pt-1">
         <div className="text-2xl font-bold leading-8">{t.greeting}, {firstName}</div>
-        <div className="text-neema-muted-strong">{today} · {s.city}</div>
+        <div className="text-neema-muted-strong">{today}{s.city ? ` · ${s.city}` : ''}</div>
       </div>
 
       {s.journey === 'preg' ? (

@@ -4,24 +4,27 @@ import { cn } from '@/lib/utils';
 import type { PregnancyData, User } from '@/types/pregnancy';
 import { CONTACTS, JOURNEYS, T } from '../data';
 import { useNeema } from '../store';
-import type { ExtraScreen } from '../NeemaApp';
+import type { AccountActions, ExtraScreen } from '../NeemaApp';
 import { Card, H1, H2, OutlineButton, PrimaryButton, Segmented, SwitchRow } from '../ui';
 import { fmtDate } from '../format';
 
 export function ProfileTab({
-  user, pregnancy, onLogout, extras, onOpenExtra,
+  user, pregnancy, onLogout, extras, onOpenExtra, extraFacts = [], account,
 }: {
   user: User | null;
   pregnancy: PregnancyData;
   onLogout: () => void;
   extras: ExtraScreen[];
   onOpenExtra: (id: string) => void;
+  extraFacts?: { k: string; v: string }[];
+  account?: AccountActions;
 }) {
   const s = useNeema();
   const t = T[s.lang];
   const [editing, setEditing] = useState(false);
   const [cityDraft, setCityDraft] = useState(s.city);
-  const [exported, setExported] = useState(false);
+  const [exported, setExported] = useState<'' | 'busy' | 'done' | 'error'>('');
+  const [delError, setDelError] = useState('');
   const [del, setDel] = useState<0 | 1 | 2>(0);
   const [chatsDeleted, setChatsDeleted] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
@@ -30,12 +33,27 @@ export function ProfileTab({
   const name = user?.name || 'Amina';
   const initials = name.split(' ').map((p) => p.charAt(0)).join('').slice(0, 2).toUpperCase();
 
+  const pregnant = pregnancy.id !== 'none';
   const facts = [
     { k: 'Email', v: user?.email || '—' },
-    { k: 'Due date', v: fmtDate(new Date(pregnancy.dueDate)) },
-    { k: 'Week', v: String(pregnancy.currentWeek) },
-    { k: 'Trimester', v: String(pregnancy.trimester) },
+    ...(pregnant
+      ? [
+          { k: 'Due date', v: fmtDate(new Date(pregnancy.dueDate)) },
+          { k: 'Week', v: String(pregnancy.currentWeek) },
+        ]
+      : []),
+    ...extraFacts,
   ];
+
+  const doExport = async () => {
+    if (!account) { setExported('done'); return; }
+    setExported('busy');
+    try { await account.exportData(); setExported('done'); } catch { setExported('error'); }
+  };
+  const confirmDelete = async () => {
+    setDelError('');
+    try { if (account) await account.requestDeletion(); setDel(2); } catch { setDelError('We couldn’t send your request. Check your connection and try again.'); }
+  };
 
   const privacy = [
     { key: 'disc', label: 'Discreet mode', sub: 'Neutral app name (“Notes”) and lock-screen messages', on: s.discreet, toggle: () => s.setDiscreet(!s.discreet) },
@@ -58,7 +76,7 @@ export function ProfileTab({
           <div aria-hidden="true" className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-neema-primary-soft text-2xl font-bold text-neema-dark">{initials}</div>
           <div className="min-w-0">
             <div className="text-lg font-semibold leading-6">{name}</div>
-            <div className="text-neema-muted">{s.city}</div>
+            <div className="text-neema-muted">{s.city || 'Add your neighbourhood and city'}</div>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-2.5">
@@ -76,7 +94,7 @@ export function ProfileTab({
           </div>
         )}
         {editing ? (
-          <PrimaryButton onClick={() => { s.setCity(cityDraft.trim() || s.city); setEditing(false); }} className="min-h-[48px]">Save changes</PrimaryButton>
+          <PrimaryButton onClick={() => { s.setCity(cityDraft.trim()); setEditing(false); }} className="min-h-[48px]">Save changes</PrimaryButton>
         ) : (
           <OutlineButton onClick={() => { setCityDraft(s.city); setEditing(true); }}>Edit profile</OutlineButton>
         )}
@@ -143,9 +161,10 @@ export function ProfileTab({
 
       <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
         <H2>{t.data}</H2>
-        {/* TODO: connect export and deletion to the back end (Law No. 2024/017 data rights). */}
-        <OutlineButton onClick={() => setExported(true)} className="min-h-[56px]"><Download className="h-5 w-5" />{t.export}</OutlineButton>
-        {exported && <div role="status" className="rounded-xl bg-neema-success-soft px-3 py-2.5 text-[15px] font-medium leading-[22px] text-neema-success-ink">We’re preparing your data file: profile, pregnancy log, habits and settings.</div>}
+        {/* Export downloads the data now; deletion is logged in data_requests and completed by staff within 30 days. */}
+        <OutlineButton onClick={doExport} className="min-h-[56px]"><Download className="h-5 w-5" />{exported === 'busy' ? 'Preparing your file…' : t.export}</OutlineButton>
+        {exported === 'done' && <div role="status" className="rounded-xl bg-neema-success-soft px-3 py-2.5 text-[15px] font-medium leading-[22px] text-neema-success-ink">{account ? 'Your data file has downloaded: profile, pregnancy, health profile, habits and settings.' : 'Guests have no saved data. Create an account to keep your information.'}</div>}
+        {exported === 'error' && <div role="alert" className="rounded-xl bg-neema-primary-soft px-3 py-2.5 text-[15px] font-medium leading-[22px] text-neema-dark">We couldn’t prepare your file. Check your connection and try again.</div>}
         <OutlineButton onClick={() => { s.setMessages([]); setChatsDeleted(true); }} className="min-h-[56px]">
           {chatsDeleted ? 'Ask Neema chats deleted' : 'Delete my Ask Neema chats'}
         </OutlineButton>
@@ -158,10 +177,11 @@ export function ProfileTab({
             <div className="text-[15px] leading-[22px] text-neema-muted">This removes your profile, logs, Ask Neema chats and partner links. It can’t be undone.</div>
             <div className="flex gap-2">
               <button type="button" onClick={() => setDel(0)} className="min-h-[48px] flex-1 rounded-xl border border-neema-border bg-white font-semibold">Cancel</button>
-              <button type="button" onClick={() => setDel(2)} className="min-h-[48px] flex-1 rounded-xl bg-neema-dark font-semibold text-white">Delete</button>
+              <button type="button" onClick={confirmDelete} className="min-h-[48px] flex-1 rounded-xl bg-neema-dark font-semibold text-white">Delete</button>
             </div>
           </div>
         )}
+        {delError && <div role="alert" className="rounded-xl bg-neema-primary-soft px-3 py-2.5 text-[15px] leading-[22px] text-neema-dark">{delError}</div>}
         {del === 2 && <div role="status" className="rounded-xl bg-neema-cream px-3 py-2.5 text-[15px] leading-[22px]">Deletion requested. Your data will be erased within 30 days.</div>}
         <p className="text-[13px] font-medium leading-[18px] text-neema-muted">Your health data is encrypted and handled under Cameroon’s Law No. 2024/017 on personal data protection. Neema never sells your data or shows ads.</p>
       </Card>

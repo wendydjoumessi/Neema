@@ -5,9 +5,19 @@ import type { JourneyId, Lang } from './data';
 export type TabId = 'home' | 'ask' | 'diet' | 'fp' | 'shop' | 'profile';
 export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: string; sources?: string[] };
 
-/** useState that also remembers its value on this device (falls back silently if storage is unavailable). */
-function usePersisted<T>(key: string, initial: T): [T, Dispatch<SetStateAction<T>>] {
+/** Settings and progress saved to the user's account (and remembered on this device). */
+export const PERSISTED_KEYS = [
+  'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
+  'pinLock', 'sharePreg', 'shareFp',
+] as const;
+export type PersistedKey = (typeof PERSISTED_KEYS)[number];
+export type PersistedState = Partial<Record<PersistedKey, unknown>>;
+
+/** useState that also remembers its value on this device (falls back silently if storage is unavailable).
+ * A value saved in the user's account (`seed`) wins over the device copy. */
+function usePersisted<T>(key: PersistedKey, initial: T, seed?: PersistedState): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
+    if (seed && seed[key] !== undefined && seed[key] !== null) return seed[key] as T;
     try {
       const raw = window.localStorage.getItem('neema:' + key);
       return raw ? (JSON.parse(raw) as T) : initial;
@@ -25,12 +35,12 @@ function usePersisted<T>(key: string, initial: T): [T, Dispatch<SetStateAction<T
   return [value, setValue];
 }
 
-function useNeemaState() {
+function useNeemaState(seed?: PersistedState) {
   const [tab, setTab] = useState<TabId>('home');
-  const [discreet, setDiscreet] = usePersisted('discreet', false);
-  const [lang, setLang] = usePersisted<Lang>('lang', 'en');
-  const [journey, setJourney] = usePersisted<JourneyId>('journey', 'preg');
-  const [city, setCity] = usePersisted('city', 'Bonamoussadi, Douala');
+  const [discreet, setDiscreet] = usePersisted('discreet', false, seed);
+  const [lang, setLang] = usePersisted<Lang>('lang', 'en', seed);
+  const [journey, setJourney] = usePersisted<JourneyId>('journey', 'preg', seed);
+  const [city, setCity] = usePersisted('city', '', seed);
 
   // Overlays
   const [notifOpen, setNotifOpen] = useState(false);
@@ -40,23 +50,23 @@ function useNeemaState() {
   const [dangerWord, setDangerWord] = useState('');
 
   // Daily habits
-  const [water, setWater] = usePersisted('water', 5);
-  const [iron, setIron] = usePersisted<Record<number, boolean>>('iron', { 0: true, 1: true });
-  const [activeWeek, setActiveWeek] = usePersisted('activeWeek', 95);
+  const [water, setWater] = usePersisted('water', 0, seed);
+  const [iron, setIron] = usePersisted<Record<number, boolean>>('iron', {}, seed);
+  const [activeWeek, setActiveWeek] = usePersisted('activeWeek', 0, seed);
 
   // Checklist
-  const [shop, setShop] = usePersisted<Record<string, boolean>>('shop', { net: true, docs: true, onesies: true });
+  const [shop, setShop] = usePersisted<Record<string, boolean>>('shop', {}, seed);
 
   // Trying to conceive
-  const [ttc, setTtc] = usePersisted<Record<string, boolean>>('ttc', { folic: true });
-  const [cycleLen, setCycleLen] = usePersisted('cycleLen', 28);
-  const [periodLen, setPeriodLen] = usePersisted('periodLen', 5);
-  const [lastPeriod, setLastPeriod] = usePersisted('lastPeriod', '');
+  const [ttc, setTtc] = usePersisted<Record<string, boolean>>('ttc', {}, seed);
+  const [cycleLen, setCycleLen] = usePersisted('cycleLen', 28, seed);
+  const [periodLen, setPeriodLen] = usePersisted('periodLen', 5, seed);
+  const [lastPeriod, setLastPeriod] = usePersisted('lastPeriod', '', seed);
 
   // Privacy
-  const [pinLock, setPinLock] = usePersisted('pinLock', true);
-  const [sharePreg, setSharePreg] = usePersisted('sharePreg', true);
-  const [shareFp, setShareFp] = usePersisted('shareFp', false);
+  const [pinLock, setPinLock] = usePersisted('pinLock', true, seed);
+  const [sharePreg, setSharePreg] = usePersisted('sharePreg', true, seed);
+  const [shareFp, setShareFp] = usePersisted('shareFp', false, seed);
 
   // Ask Neema
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -77,7 +87,12 @@ function useNeemaState() {
     setSosOpen(true);
   };
 
+  const persisted: PersistedState = {
+    discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
+  };
+
   return {
+    persisted,
     tab, setTab, discreet, setDiscreet, lang, setLang, journey, setJourney, city, setCity,
     notifOpen, setNotifOpen, sosOpen, setSosOpen, symptomOpen, setSymptomOpen, symptomResult, setSymptomResult,
     dangerWord, setDangerWord, openSymptom, openSos,
@@ -91,8 +106,8 @@ function useNeemaState() {
 export type NeemaStore = ReturnType<typeof useNeemaState>;
 const NeemaContext = createContext<NeemaStore | null>(null);
 
-export function NeemaProvider({ children }: { children: ReactNode }) {
-  const store = useNeemaState();
+export function NeemaProvider({ children, seed }: { children: ReactNode; seed?: PersistedState }) {
+  const store = useNeemaState(seed);
   return <NeemaContext.Provider value={store}>{children}</NeemaContext.Provider>;
 }
 
