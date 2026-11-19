@@ -1,244 +1,118 @@
+import { useState } from 'react';
+import { MessageCircle, AlertTriangle, CalendarDays, Lightbulb, Ruler, Info } from 'lucide-react';
+import { differenceInDays, format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { PregnancyData } from '@/types/pregnancy';
 import { weeklyData } from '@/data/pregnancyData';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Heart, 
-  Baby, 
-  Calendar,
-  Bell,
-  Gift,
-  MessageCircle,
-  CheckCircle,
-  Clock,
-  ChevronRight,
-  Lightbulb
-} from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
-import pregnantCouple from '@/assets/pregnant-couple.jpg';
-import logo from '@/assets/logo.png';
+import { babySizeFor, milestoneFor } from '@/neema/data';
+import { Card, CheckBox, H2 } from '@/neema/ui';
 
 interface PartnerDashboardProps {
   pregnancy: PregnancyData;
   onNavigate: (screen: string) => void;
 }
 
-const partnerTasks = [
-  { id: 1, title: 'Prepare the nursery', completed: false, dueWeek: 32 },
-  { id: 2, title: 'Install car seat', completed: false, dueWeek: 36 },
-  { id: 3, title: 'Pack hospital bag together', completed: false, dueWeek: 36 },
-  { id: 4, title: 'Attend birthing class', completed: true, dueWeek: 28 },
-  { id: 5, title: 'Plan parental leave', completed: false, dueWeek: 30 },
+// TODO: load the partner's tasks and the mother's shared data from the back end once partners are linked.
+const TASKS = [
+  { id: 'visit', title: 'Go with her to an antenatal visit', week: 20 },
+  { id: 'signs', title: 'Learn the danger signs and when to call 119', week: 24 },
+  { id: 'money', title: 'Save money for the birth and the mama kit', week: 28 },
+  { id: 'transport', title: 'Plan transport to the maternity unit, day and night', week: 32 },
+  { id: 'bag', title: 'Pack the hospital bag together', week: 34 },
+  { id: 'phones', title: 'Save the maternity unit’s and family phone numbers', week: 36 },
 ];
 
-const supportTips = [
-  "Offer a gentle back or foot massage today",
-  "Prepare her favorite healthy snack",
-  "Ask about her feelings and really listen",
-  "Take over a household chore without being asked",
-  "Plan a relaxing date night at home",
+const TIPS = [
+  'Fetch water or cook a meal today so she can rest.',
+  'Ask how she is feeling, and really listen.',
+  'Remind her to take her iron and folic acid tablet with an orange.',
+  'Offer a gentle back or foot rub this evening.',
+  'Make sure she sleeps under the treated bed net tonight.',
 ];
 
 export function PartnerDashboard({ pregnancy, onNavigate }: PartnerDashboardProps) {
-  const currentWeekData = weeklyData.find(w => w.week <= pregnancy.currentWeek) || weeklyData[0];
-  const daysUntilDue = differenceInDays(pregnancy.dueDate, new Date());
-  const progressPercent = Math.min(100, (pregnancy.currentWeek / 40) * 100);
-  const completedTasks = partnerTasks.filter(t => t.completed).length;
-
-  const todaysTip = supportTips[new Date().getDay() % supportTips.length];
+  const [done, setDone] = useState<Record<string, boolean>>({ visit: true });
+  const week = Math.max(1, Math.min(40, pregnancy.currentWeek));
+  const daysToGo = Math.max(0, differenceInDays(pregnancy.dueDate, new Date()));
+  const progress = Math.min(100, Math.round((week / 40) * 100));
+  const size = babySizeFor(week);
+  let stage = weeklyData[0];
+  for (const w of weeklyData) if (w.week <= week) stage = w;
+  const tip = TIPS[new Date().getDay() % TIPS.length];
+  const isSample = pregnancy.id === 'demo';
+  const doneCount = TASKS.filter((t) => done[t.id]).length;
+  const message = encodeURIComponent('Thinking of you and our baby today. Tell me what I can do to help.');
 
   return (
-    <div className="pb-6 animate-fade-in">
-      {/* Header with Real Photo */}
-      <div className="relative overflow-hidden">
-        <div className="relative h-56 md:h-72">
-          <img 
-            src={pregnantCouple} 
-            alt="Happy expecting couple" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-partner/40 via-background/60 to-background" />
-          <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top flex items-center justify-between">
-            <div>
-              <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-2" />
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-partner/20 backdrop-blur-sm rounded-full">
-                <Heart className="w-3 h-3 text-partner-foreground" />
-                <span className="text-xs font-medium text-partner-foreground">Partner Mode</span>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
-              <Bell className="w-5 h-5" />
-            </Button>
-          </div>
+    <div className="flex flex-col gap-4 bg-neema-cream p-4 pb-8 font-sans text-neema-ink [&>*]:shrink-0">
+      {isSample && (
+        <div role="status" className="flex items-start gap-2.5 rounded-xl bg-neema-lilac px-3.5 py-3 text-[15px] leading-[22px]">
+          <Info className="mt-0.5 h-5 w-5 flex-none text-neema-lilac-ink" />
+          <span>You’re seeing sample information. When the mother invites you, Neema will show her pregnancy and the updates she chooses to share.</span>
         </div>
-        
-        {/* Floating Progress Card */}
-        <div className="px-4 md:px-8 lg:px-12 -mt-16">
-          <Card className="overflow-hidden border-0 shadow-xl bg-card/95 backdrop-blur">
-            <CardContent className="p-5 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-partner/10 text-partner">
-                  Week {pregnancy.currentWeek}
-                </div>
-                <div className="text-right">
-                  <p className="font-serif text-3xl md:text-4xl font-semibold text-foreground">{daysUntilDue}</p>
-                  <p className="text-xs text-muted-foreground">days until baby arrives</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Journey Progress</span>
-                  <span className="font-semibold text-partner">{Math.round(progressPercent)}%</span>
-                </div>
-                <Progress value={progressPercent} className="h-2.5" />
-              </div>
-            </CardContent>
-          </Card>
+      )}
+
+      <section className="relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-neema-dark p-5 text-white shadow-neema-hero">
+        <div aria-hidden="true" className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-neema-primary" />
+        <span className="relative text-[13px] font-bold uppercase tracking-[0.08em]">Supporting her · week {week} of 40</span>
+        <h1 className="relative text-[32px] font-bold leading-10">{daysToGo} days to go</h1>
+        <span className="relative">Due {format(pregnancy.dueDate, 'd MMMM yyyy')}</span>
+        <div className="relative h-2.5 overflow-hidden rounded-full bg-white/30" role="img" aria-label={`${progress} percent of pregnancy completed`}>
+          <div className="h-full rounded-full bg-white" style={{ width: `${progress}%` }} />
         </div>
-      </div>
+      </section>
 
-      {/* Today's Support Tip */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <Card className="border-0 overflow-hidden">
-          <div className="neema-gradient-partner">
-            <CardContent className="p-5">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-background/20 flex items-center justify-center shrink-0">
-                  <Lightbulb className="w-5 h-5 text-partner-foreground" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-partner-foreground/70 mb-1">
-                    Today's Support Tip
-                  </p>
-                  <p className="font-medium text-partner-foreground leading-relaxed">
-                    {todaysTip}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </div>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">Ways to Help</h2>
-        <div className="grid grid-cols-3 gap-3 md:gap-4">
-          {[
-            { icon: MessageCircle, label: 'Send Love', color: 'bg-accent/20 text-accent-foreground', hoverColor: 'hover:bg-accent/30' },
-            { icon: Gift, label: 'Surprise Her', color: 'bg-tertiary/40 text-tertiary-foreground', hoverColor: 'hover:bg-tertiary/60' },
-            { icon: Calendar, label: 'Plan Date', color: 'bg-partner/15 text-partner', hoverColor: 'hover:bg-partner/25' },
-          ].map((action, i) => {
-            const Icon = action.icon;
-            return (
-              <button key={i} className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${action.hoverColor} group`}>
-                <div className={`w-14 h-14 rounded-xl ${action.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
-              </button>
-            );
-          })}
+      <section className="flex items-start gap-3 rounded-2xl bg-neema-ochre-soft p-4">
+        <span aria-hidden="true" className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-white text-neema-ochre-ink"><Lightbulb className="h-6 w-6" /></span>
+        <div>
+          <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-neema-ochre-ink">Today’s way to help</div>
+          <p className="font-semibold">{tip}</p>
         </div>
-      </div>
+      </section>
 
-      {/* Baby Update for Partner */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="neema-gradient-warm">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
-                  <Baby className="w-5 h-5 text-primary" />
-                </div>
-                <span className="font-medium">Baby This Week</span>
-              </div>
-              <p className="font-serif text-2xl md:text-3xl font-semibold text-foreground mb-1">
-                {currentWeekData.babySizeComparison}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                About {currentWeekData.babySize} in size
-              </p>
-            </CardContent>
-          </div>
-        </Card>
-      </div>
+      <section aria-label="Quick actions" className="grid grid-cols-3 gap-2.5">
+        <a href={`sms:?body=${message}`} className="flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-2xl bg-neema-primary-soft p-2 text-center text-[15px] font-semibold leading-5">
+          <MessageCircle className="h-6 w-6 text-neema-dark" />Send her a message
+        </a>
+        <button type="button" onClick={() => onNavigate('health')} className="flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-2xl bg-neema-sos-soft p-2 text-center text-[15px] font-semibold leading-5">
+          <AlertTriangle className="h-6 w-6 text-neema-sos" />Danger signs
+        </button>
+        <button type="button" onClick={() => onNavigate('tracking')} className="flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-2xl bg-neema-success-soft p-2 text-center text-[15px] font-semibold leading-5">
+          <CalendarDays className="h-6 w-6 text-neema-success-ink" />Week by week
+        </button>
+      </section>
 
-      {/* Partner Tasks */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground">Your Tasks</h2>
-          <span className="text-sm text-muted-foreground">
-            {completedTasks}/{partnerTasks.length} done
-          </span>
+      <Card className="flex flex-col gap-3">
+        <H2>Baby this week</H2>
+        <div className="flex items-center gap-3 rounded-xl bg-neema-cream px-3.5 py-3">
+          <span aria-hidden="true" className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-neema-ochre-soft text-neema-ochre-ink"><Ruler className="h-6 w-6" /></span>
+          <span className="flex flex-col"><span className="font-semibold">About the size of {size.size}</span><span className="text-[15px] text-neema-muted-strong">Around {size.length}{size.weight ? ` and ${size.weight}` : ''}</span></span>
         </div>
-        
-        <div className="space-y-3">
-          {partnerTasks.map(task => (
-            <Card key={task.id} className={`border-0 shadow-md transition-all duration-300 hover:shadow-lg ${task.completed ? 'bg-muted/50' : ''}`}>
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  task.completed ? 'bg-success text-success-foreground' : 'bg-muted'
-                }`}>
-                  {task.completed ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-medium truncate ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                    {task.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Due by week {task.dueWeek}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <p>{milestoneFor(week)}</p>
+      </Card>
+
+      <Card className="flex flex-col gap-2.5">
+        <H2>What she may be feeling</H2>
+        <ul className="flex flex-col gap-2">
+          {stage.motherChanges.map((c) => <li key={c} className="flex items-start gap-2.5"><span className="mt-2.5 h-2 w-2 flex-none rounded-full bg-neema-primary" />{c}</li>)}
+        </ul>
+      </Card>
+
+      <Card className="flex flex-col px-5 py-4">
+        <div className="mb-1 flex items-baseline justify-between">
+          <H2>Your tasks</H2>
+          <span className="text-[15px] font-semibold text-neema-success-ink">{doneCount} of {TASKS.length} done</span>
         </div>
-      </div>
-
-      {/* What She's Experiencing */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">
-          What She's Experiencing
-        </h2>
-        <Card className="border-0 shadow-lg bg-muted/30">
-          <CardContent className="p-5">
-            <ul className="space-y-3">
-              {currentWeekData.motherChanges.map((change, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                  <span className="text-foreground leading-relaxed">{change}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Due Date Card */}
-      <div className="px-4 md:px-8 lg:px-12 mt-6">
-        <Card className="border-0 shadow-lg overflow-hidden group cursor-pointer hover:shadow-xl transition-all">
-          <CardContent className="p-0">
-            <div className="flex items-center gap-4 p-4">
-              <div className="w-14 h-14 rounded-xl neema-gradient-partner flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-partner-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground">Due Date</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(pregnancy.dueDate, 'MMMM d, yyyy')}
-                </p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {TASKS.map((t) => (
+          <button key={t.id} type="button" aria-pressed={!!done[t.id]} onClick={() => setDone({ ...done, [t.id]: !done[t.id] })} className="flex min-h-[60px] items-center gap-3 border-b border-neema-line py-2 text-left last:border-0">
+            <CheckBox on={!!done[t.id]} />
+            <span className="flex flex-col">
+              <span className={cn('font-semibold', done[t.id] && 'text-neema-muted line-through')}>{t.title}</span>
+              <span className="text-[15px] text-neema-muted">By week {t.week}</span>
+            </span>
+          </button>
+        ))}
+      </Card>
     </div>
   );
 }

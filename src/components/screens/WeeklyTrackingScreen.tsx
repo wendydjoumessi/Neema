@@ -1,259 +1,177 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Baby, Heart, Lightbulb, ChevronLeft, ChevronRight, Ruler, CalendarCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { PregnancyData } from '@/types/pregnancy';
 import { weeklyData } from '@/data/pregnancyData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Baby, 
-  Heart, 
-  Lightbulb,
-  ChevronLeft,
-  ChevronRight,
-  Calendar
-} from 'lucide-react';
-import { format, addWeeks, subWeeks } from 'date-fns';
-import babyIcon from '@/assets/baby-icon.png';
-import logo from '@/assets/logo.png';
+import { babySizeFor, milestoneFor } from '@/neema/data';
+import { Card, H1, H2, Pill, Segmented } from '@/neema/ui';
 
 interface WeeklyTrackingScreenProps {
   pregnancy: PregnancyData;
 }
 
+type Section = 'baby' | 'body' | 'tips';
+
+const MOODS = [
+  { id: 'good', label: 'Good' },
+  { id: 'calm', label: 'Calm' },
+  { id: 'tired', label: 'Tired' },
+  { id: 'low', label: 'Low' },
+  { id: 'worried', label: 'Worried' },
+];
+
+/** The weekly content covers stages of about four weeks: show the stage this week belongs to. */
+function stageFor(week: number) {
+  let best = weeklyData[0];
+  for (const w of weeklyData) if (w.week <= week) best = w;
+  const next = weeklyData.find((w) => w.week > best.week);
+  return { data: best, from: best.week, to: next ? next.week - 1 : 40 };
+}
+
 export function WeeklyTrackingScreen({ pregnancy }: WeeklyTrackingScreenProps) {
-  const [selectedWeek, setSelectedWeek] = useState(pregnancy.currentWeek);
-  
-  const weekData = weeklyData.find(w => w.week === selectedWeek) || 
-    weeklyData.reduce((prev, curr) => 
-      Math.abs(curr.week - selectedWeek) < Math.abs(prev.week - selectedWeek) ? curr : prev
-    );
+  const [week, setWeek] = useState(Math.min(40, Math.max(1, pregnancy.currentWeek)));
+  const [section, setSection] = useState<Section>('baby');
+  const [mood, setMood] = useState('');
+  const stripRef = useRef<HTMLDivElement>(null);
+  const stage = stageFor(week);
+  const size = babySizeFor(week);
+  const trimester = week <= 13 ? 1 : week <= 27 ? 2 : 3;
+  const when = week === pregnancy.currentWeek ? 'This week' : week < pregnancy.currentWeek ? 'Earlier week' : 'Coming up';
 
-  const canGoBack = selectedWeek > 1;
-  const canGoForward = selectedWeek < 40;
-
-  const getTrimesterColor = (trimester: number) => {
-    switch (trimester) {
-      case 1: return 'bg-secondary/20 text-secondary-foreground';
-      case 2: return 'bg-tertiary/30 text-tertiary-foreground';
-      case 3: return 'bg-accent/20 text-accent-foreground';
-      default: return '';
-    }
-  };
+  useEffect(() => {
+    const el = stripRef.current?.querySelector<HTMLElement>(`[data-week="${week}"]`);
+    el?.scrollIntoView?.({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [week]);
 
   return (
-    <div className="pb-6 animate-fade-in">
-      {/* Header */}
-      <div className="neema-gradient-hero px-6 pt-safe-top pb-6">
-        <div className="pt-4 mb-6">
-          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-4" />
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Weekly Tracking
-          </h1>
-          <p className="text-muted-foreground">
-            Explore each week of your pregnancy
-          </p>
+    <div className="flex flex-col gap-4 bg-neema-cream p-4 pb-8 font-sans text-neema-ink [&>*]:shrink-0">
+      <div>
+        <H1>Week by week</H1>
+        <p className="mt-1 text-neema-muted-strong">How your baby and your body change through all 40 weeks.</p>
+      </div>
+
+      <Card className="flex flex-col gap-4 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <button type="button" aria-label="Previous week" disabled={week <= 1} onClick={() => setWeek(week - 1)} className="flex h-12 w-12 items-center justify-center rounded-full bg-neema-cream disabled:opacity-40">
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <div className="text-center">
+            <Pill className="bg-neema-primary-soft text-neema-dark">Trimester {trimester}</Pill>
+            <div className="mt-1 text-[32px] font-bold leading-10">Week {week}</div>
+            <div className="text-[15px] text-neema-muted-strong">{when}</div>
+          </div>
+          <button type="button" aria-label="Next week" disabled={week >= 40} onClick={() => setWeek(week + 1)} className="flex h-12 w-12 items-center justify-center rounded-full bg-neema-cream disabled:opacity-40">
+            <ChevronRight className="h-6 w-6" />
+          </button>
         </div>
+        <div ref={stripRef} role="tablist" aria-label="Choose a week" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+          {Array.from({ length: 40 }, (_, i) => i + 1).map((w) => (
+            <button
+              key={w}
+              type="button"
+              role="tab"
+              data-week={w}
+              aria-selected={w === week}
+              aria-label={`Week ${w}`}
+              onClick={() => setWeek(w)}
+              className={cn(
+                'h-12 w-12 flex-none rounded-xl text-[15px] font-semibold',
+                w === week ? 'bg-neema-dark text-white' : w === pregnancy.currentWeek ? 'border-2 border-neema-primary bg-white' : w < pregnancy.currentWeek ? 'bg-neema-primary-soft' : 'bg-neema-cream',
+              )}
+            >
+              {w}
+            </button>
+          ))}
+        </div>
+      </Card>
 
-        {/* Week Selector */}
-        <Card variant="elevated">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                size="icon-sm"
-                onClick={() => canGoBack && setSelectedWeek(w => w - 1)}
-                disabled={!canGoBack}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
+      <Segmented
+        label="Topic"
+        value={section}
+        onChange={setSection}
+        options={[{ id: 'baby', label: 'Baby' }, { id: 'body', label: 'Your body' }, { id: 'tips', label: 'Tips' }]}
+      />
 
-              <div className="text-center flex-1">
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-2 ${getTrimesterColor(weekData.trimester)}`}>
-                  Trimester {weekData.trimester}
-                </div>
-                <p className="text-3xl font-bold text-foreground">Week {selectedWeek}</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedWeek === pregnancy.currentWeek ? "Current week" : 
-                    selectedWeek < pregnancy.currentWeek ? "Past week" : "Coming up"}
-                </p>
-              </div>
-
-              <Button 
-                variant="ghost" 
-                size="icon-sm"
-                onClick={() => canGoForward && setSelectedWeek(w => w + 1)}
-                disabled={!canGoForward}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </Button>
+      {section === 'baby' && (
+        <>
+          <section className="flex items-center gap-4 rounded-2xl bg-neema-dark p-5 text-white shadow-neema-hero">
+            <span aria-hidden="true" className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-white text-neema-dark"><Ruler className="h-7 w-7" /></span>
+            <div>
+              <div className="text-[13px] font-bold uppercase tracking-[0.08em]">Baby is about the size of</div>
+              <div className="text-2xl font-bold leading-8">{size.size}</div>
+              <div>Around {size.length}{size.weight ? ` and ${size.weight}` : ''}</div>
             </div>
+          </section>
+          <Card className="flex flex-col gap-3">
+            <H2 className="flex items-center gap-2"><Baby className="h-5 w-5 text-neema-primary" />Baby’s development</H2>
+            <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-2.5 font-medium text-neema-ochre-ink">{milestoneFor(week)}</p>
+            <ul className="flex flex-col gap-2.5">
+              {stage.data.babyDevelopment.map((item, i) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-neema-primary-soft text-[13px] font-bold text-neema-dark">{i + 1}</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">Development notes for weeks {stage.from}–{stage.to}.</p>
+          </Card>
+        </>
+      )}
 
-            {/* Week dots */}
-            <div className="flex justify-center gap-1 mt-4 overflow-x-auto hide-scrollbar py-2">
-              {Array.from({ length: 40 }, (_, i) => i + 1).map(week => (
+      {section === 'body' && (
+        <>
+          <Card className="flex flex-col gap-3">
+            <H2 className="flex items-center gap-2"><Heart className="h-5 w-5 text-neema-primary" />Your body in weeks {stage.from}–{stage.to}</H2>
+            <ul className="flex flex-col gap-2.5">
+              {stage.data.motherChanges.map((item) => (
+                <li key={item} className="flex items-start gap-3"><span className="mt-2.5 h-2 w-2 flex-none rounded-full bg-neema-primary" />{item}</li>
+              ))}
+            </ul>
+          </Card>
+          <Card className="flex flex-col gap-3">
+            <H2>How are you feeling today?</H2>
+            <div role="radiogroup" aria-label="Your mood" className="flex flex-wrap gap-2">
+              {MOODS.map((m) => (
                 <button
-                  key={week}
-                  onClick={() => setSelectedWeek(week)}
-                  className={`w-2 h-2 rounded-full transition-all shrink-0 ${
-                    week === selectedWeek 
-                      ? 'w-6 bg-primary' 
-                      : week <= pregnancy.currentWeek 
-                        ? 'bg-primary/40' 
-                        : 'bg-muted'
-                  }`}
-                />
+                  key={m.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={mood === m.id}
+                  onClick={() => setMood(m.id)}
+                  className={cn('min-h-[48px] rounded-full border px-4 font-semibold', mood === m.id ? 'border-neema-dark bg-neema-primary-soft text-neema-dark' : 'border-neema-border bg-white')}
+                >
+                  {m.label}
+                </button>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            {mood && (
+              <p role="status" className="rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
+                {mood === 'low' || mood === 'worried'
+                  ? 'Thank you for sharing. Many women feel this way in pregnancy. If you have felt low or worried most days for two weeks, tell your midwife — help is available.'
+                  : 'Thank you for checking in. Keep resting, eating well and drinking water.'}
+              </p>
+            )}
+          </Card>
+        </>
+      )}
 
-      {/* Content Tabs */}
-      <div className="px-6 mt-6">
-        <Tabs defaultValue="baby" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="baby" className="text-sm">
-              <Baby className="w-4 h-4 mr-2" />
-              Baby
-            </TabsTrigger>
-            <TabsTrigger value="mother" className="text-sm">
-              <Heart className="w-4 h-4 mr-2" />
-              Your Body
-            </TabsTrigger>
-            <TabsTrigger value="tips" className="text-sm">
-              <Lightbulb className="w-4 h-4 mr-2" />
-              Tips
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="baby" className="space-y-4">
-            {/* Baby Size */}
-            <Card variant="gradient-warm">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-background/20 rounded-2xl flex items-center justify-center">
-                    <img 
-                      src={babyIcon} 
-                      alt="Baby" 
-                      className="w-16 h-16 object-contain"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm opacity-80 mb-1">Baby is about</p>
-                    <p className="text-2xl font-bold">{weekData.babySize}</p>
-                    <p className="text-sm opacity-80">
-                      Size of a {weekData.babySizeComparison}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Development Points */}
-            <Card variant="soft">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Baby className="w-5 h-5 text-primary" />
-                  Baby Development
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {weekData.babyDevelopment.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-primary">{i + 1}</span>
-                      </div>
-                      <span className="text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="mother" className="space-y-4">
-            <Card variant="gradient-secondary">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  🤰 Your Body This Week
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {weekData.motherChanges.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Heart className="w-4 h-4 text-primary shrink-0 mt-1" />
-                      <span className="text-secondary-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Emotional Check-in */}
-            <Card variant="elevated">
-              <CardHeader>
-                <CardTitle className="text-lg">How are you feeling?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  It's normal to experience a range of emotions during pregnancy. Take a moment to check in with yourself.
-                </p>
-                <div className="flex justify-center gap-4">
-                  {['😊', '😌', '😔', '😰', '🥰'].map((emoji, i) => (
-                    <button 
-                      key={i}
-                      className="w-12 h-12 rounded-xl bg-muted hover:bg-primary/10 flex items-center justify-center text-2xl transition-transform hover:scale-110"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="tips" className="space-y-4">
-            <Card variant="spiritual">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5" />
-                  Week {selectedWeek} Tips
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-4">
-                  {weekData.tips.map((tip, i) => (
-                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-background/50">
-                      <span className="text-lg">💡</span>
-                      <span className="text-spiritual-foreground">{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Appointment Reminder */}
-            <Card variant="elevated">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-info" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground">Schedule Appointments</p>
-                  <p className="text-sm text-muted-foreground">
-                    Don't forget your prenatal checkups
-                  </p>
-                </div>
-                <Button variant="soft" size="sm">
-                  Add
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+      {section === 'tips' && (
+        <>
+          <Card className="flex flex-col gap-3">
+            <H2 className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-neema-ochre-ink" />Tips for weeks {stage.from}–{stage.to}</H2>
+            {stage.data.tips.map((tip) => (
+              <p key={tip} className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-neema-ink">{tip}</p>
+            ))}
+          </Card>
+          <Card className="flex items-start gap-3">
+            <span aria-hidden="true" className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-neema-success-soft text-neema-success-ink"><CalendarCheck className="h-6 w-6" /></span>
+            <div>
+              <H2>Antenatal visits</H2>
+              <p className="text-neema-muted-strong">WHO recommends at least eight contacts during pregnancy. Bring your antenatal card to every visit.</p>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

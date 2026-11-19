@@ -106,7 +106,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           <div className="mb-6 flex items-center justify-center gap-2" role="tablist" aria-label="Onboarding steps">
             {slides.map((s, i) => (
               <button key={s.title} type="button" role="tab" aria-selected={i === current} aria-label={`Step ${i + 1}`} onClick={() => setCurrent(i)}
-                className="flex h-6 items-center px-1">
+                className="flex h-12 min-w-[48px] items-center justify-center">
                 <span className={cn('block h-2 rounded-full transition-all duration-200', i === current ? 'w-8 bg-neema-dark' : 'w-2 bg-neema-border')} />
               </button>
             ))}

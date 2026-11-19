@@ -71,7 +71,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
             <div className="font-semibold leading-[22px]">{f.name}</div>
             <div className="text-[13px] font-medium leading-[18px] text-neema-muted">{f.local}</div>
             <div className="flex flex-wrap gap-1">
-              {f.tags.map((tag) => <span key={tag} className="rounded-full bg-neema-success-soft px-2 text-xs font-semibold leading-[18px] text-neema-success-ink">{tag}</span>)}
+              {f.tags.map((tag) => <span key={tag} className="rounded-full bg-neema-success-soft px-2 text-[13px] font-semibold leading-[20px] text-neema-success-ink">{tag}</span>)}
             </div>
             <div className="text-[15px] leading-[21px]">{f.benefit}</div>
           </article>
@@ -84,7 +84,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
         <div className="flex h-[52px] items-center gap-2 rounded-xl border border-neema-border px-3">
           <Search className="h-5 w-5 text-neema-muted" />
           <label htmlFor="neema-swap" className="sr-only">Search an ingredient to swap</label>
-          <input id="neema-swap" type="text" placeholder="Search e.g. quinoa, salmon, kale" value={query} onChange={(e) => setQuery(e.target.value)} className="min-w-0 flex-1 bg-transparent text-base outline-none" />
+          <input id="neema-swap" type="text" placeholder="Search e.g. quinoa, salmon, kale" value={query} onChange={(e) => setQuery(e.target.value)} className="h-full min-w-0 flex-1 bg-transparent text-base outline-none" />
         </div>
         {swaps.map((w) => (
           <div key={w.from} className="flex flex-col gap-1 border-b border-neema-line py-2.5">
@@ -148,10 +148,8 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
             ))}
           </div>
         </div>
-        <p className="text-neema-muted">
-          Very tired, breathless, or pale inside your eyelids?{' '}
-          <button type="button" onClick={() => s.openSymptom()} className="font-semibold text-neema-dark underline">Check a symptom</button> and ask for a haemoglobin test. Neema does not diagnose anaemia.
-        </p>
+        <p className="text-neema-muted">Very tired, breathless, or pale inside your eyelids? Check a symptom and ask for a haemoglobin test. Neema does not diagnose anaemia.</p>
+        <button type="button" onClick={() => s.openSymptom()} className="min-h-[48px] rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">Check a symptom</button>
       </Card>
 
       <Card className="flex flex-col gap-2">

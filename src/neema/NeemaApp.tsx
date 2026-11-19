@@ -17,7 +17,7 @@ import { SymptomSheet } from './overlays/SymptomSheet';
 import { NotificationsPanel } from './overlays/NotificationsPanel';
 
 /** Existing NurtureLife-era screens that stay available from Profile › More. */
-export type ExtraScreen = { id: string; label: string; description: string; render: () => ReactNode };
+export type ExtraScreen = { id: string; label: string; description: string; render: (nav: { goTab: (tab: TabId) => void }) => ReactNode };
 
 export interface NeemaAppProps {
   user: User | null;
@@ -111,7 +111,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras }: NeemaAppProps) {
                   <ChevronLeft className="h-5 w-5" /> Back to Profile
                 </button>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">{extra.render()}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto">{extra.render({ goTab: go })}</div>
             </div>
           ) : (
             <>
@@ -137,7 +137,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras }: NeemaAppProps) {
                 type="button"
                 aria-current={on ? 'page' : undefined}
                 onClick={() => go(id)}
-                className={cn('flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-xs font-semibold leading-4', on ? 'text-neema-primary' : 'text-neema-muted')}
+                className={cn('flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[13px] font-semibold leading-4', on ? 'text-neema-primary' : 'text-neema-muted')}
               >
                 <Icon className="h-6 w-6" />
                 {label}

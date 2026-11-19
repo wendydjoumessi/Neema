@@ -1,4 +1,5 @@
-import { MessageCircle, Leaf, ShoppingBag, Activity, Sun, Droplet, ChevronRight, Ruler, NotebookText, ImageIcon } from 'lucide-react';
+import { MessageCircle, Leaf, ShoppingBag, Activity, Sun, Droplet, ChevronRight, Ruler, NotebookText } from 'lucide-react';
+import tipPhoto from '@/assets/about-health-nutrition.jpg';
 import type { PregnancyData } from '@/types/pregnancy';
 import emblem from '@/assets/neema-emblem.png';
 import { JOURNEYS, SHOP, T, babySizeFor, milestoneFor } from '../data';
@@ -68,11 +69,7 @@ export function HomeTab({ firstName, pregnancy }: { firstName: string; pregnancy
       )}
 
       <section className="overflow-hidden rounded-2xl bg-neema-ochre-soft shadow-neema-card">
-        {/* TODO: replace with a licensed photo of a Cameroonian mother (natural light). */}
-        <div className="flex h-[120px] flex-col items-center justify-center gap-1.5 bg-[#F5DDB5] px-6 text-center text-[13px] font-medium leading-[18px] text-neema-ochre-ink">
-          <ImageIcon className="h-6 w-6" />
-          Photo slot · Smiling Cameroonian mother peeling an orange, morning light
-        </div>
+        <img src={tipPhoto} alt="A pregnant woman preparing fresh fruit and vegetables" className="h-40 w-full object-cover object-[center_30%]" />
         <div className="flex flex-col gap-2 px-5 pb-5 pt-4">
           <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white px-2.5 py-0.5 text-[13px] font-bold leading-[18px] text-neema-ochre-ink">
             <Sun className="h-3.5 w-3.5" /> TODAY’S TIP

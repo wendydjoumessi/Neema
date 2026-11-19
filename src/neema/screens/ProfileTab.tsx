@@ -63,7 +63,7 @@ export function ProfileTab({
         </div>
         <dl className="grid grid-cols-2 gap-2.5">
           {facts.map((f) => (
-            <div key={f.k} className="min-w-0 rounded-xl bg-neema-cream px-3 py-2.5">
+            <div key={f.k} className={cn('min-w-0 rounded-xl bg-neema-cream px-3 py-2.5', f.k === 'Email' && 'col-span-2')}>
               <dt className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{f.k}</dt>
               <dd className="break-words font-semibold">{f.v}</dd>
             </div>
