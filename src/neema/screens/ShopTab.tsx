@@ -32,10 +32,10 @@ export function ShopTab() {
             <span className={cn('font-semibold', on && 'line-through')}>{it.name}</span>
             <span className="text-[15px] leading-[21px] text-neema-muted">{it.qty}</span>
             <div className="flex flex-wrap gap-1.5">
-              <span className={cn('rounded-full px-2 text-xs font-semibold leading-[18px]', it.ess ? 'bg-neema-success-soft text-neema-success-ink' : 'bg-neema-sand')}>
+              <span className={cn('rounded-full px-2 text-[13px] font-semibold leading-[20px]', it.ess ? 'bg-neema-success-soft text-neema-success-ink' : 'bg-neema-sand')}>
                 {it.ess ? 'Essential' : 'Nice to have'}
               </span>
-              <span className="rounded-full bg-neema-cream px-2 text-xs font-semibold leading-[18px]">
+              <span className="rounded-full bg-neema-cream px-2 text-[13px] font-semibold leading-[20px]">
                 {groupBy === 'cat' ? STAGE_TAG[it.when as keyof typeof STAGE_TAG] : catTitle(it.cat)}
               </span>
             </div>

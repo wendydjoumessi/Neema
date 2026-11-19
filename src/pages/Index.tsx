@@ -17,6 +17,7 @@ import { ContactScreen } from '@/components/screens/ContactScreen';
 import { PregnancyData, User } from '@/types/pregnancy';
 import { defaultChecklist } from '@/data/pregnancyData';
 import { NeemaApp } from '@/neema/NeemaApp';
+import { MedicineSafety } from '@/components/screens/MedicineSafety';
 
 function AppFlow() {
   const [currentScreen, setCurrentScreen] = useState<'landing' | 'onboarding' | 'auth' | 'setup' | 'main' | 'contact'>('landing');
@@ -144,9 +145,10 @@ function AppFlow() {
         pregnancy={pregnancy}
         onLogout={handleLogout}
         extras={[
+          { id: 'medicines', label: 'Medicine safety check', description: 'Is a medicine safe in pregnancy?', render: () => <div className="bg-neema-cream p-4 pb-8"><MedicineSafety /></div> },
           { id: 'tracking', label: 'Week-by-week tracker', description: 'Baby’s development and your body, week by week', render: () => <WeeklyTrackingScreen pregnancy={pregnancy} /> },
-          { id: 'checklist', label: 'Contraction timer & birth checklist', description: 'Time contractions and track your hospital bag', render: () => <ChecklistScreen checklist={checklist} onToggleItem={toggleChecklistItem} /> },
-          { id: 'spiritual', label: 'Spiritual support', description: 'Daily prayers and encouraging words', render: () => <SpiritualScreen /> },
+          { id: 'labour', label: 'Contraction timer & labour signs', description: 'Time contractions and know when to go', render: ({ goTab }) => <ChecklistScreen checklist={checklist} onToggleItem={toggleChecklistItem} showChecklist={false} onOpenShopping={() => goTab('shop')} /> },
+          { id: 'spiritual', label: 'Spiritual support', description: 'Daily prayer or encouragement, calm breathing', render: () => <SpiritualScreen /> },
           { id: 'partner', label: 'Partner view', description: 'See what your partner sees in Neema', render: () => <PartnerDashboard pregnancy={pregnancy} onNavigate={() => undefined} /> },
         ]}
       />

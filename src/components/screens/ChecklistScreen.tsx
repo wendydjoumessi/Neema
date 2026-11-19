@@ -1,292 +1,184 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Timer, Play, Square, RotateCcw, Shirt, Droplets, Baby, Briefcase, Phone, AlertTriangle, ShoppingBag } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { ChecklistItem } from '@/types/pregnancy';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { 
-  Shirt, 
-  Droplets, 
-  Baby, 
-  Briefcase,
-  Check,
-  Clock,
-  Timer,
-  AlertCircle
-} from 'lucide-react';
-
-import babyShoppingImg from '@/assets/baby-shopping.jpg';
-import babyNurseryImg from '@/assets/baby-nursery.jpg';
-import logo from '@/assets/logo.png';
+import { Card, CheckBox, H1, H2, Segmented } from '@/neema/ui';
 
 interface ChecklistScreenProps {
   checklist: ChecklistItem[];
   onToggleItem: (id: string) => void;
+  /** Show the preparation checklist. Mothers have the full list in the Shopping tab, so they see the labour tools only. */
+  showChecklist?: boolean;
+  /** Called by the "Open my shopping list" link when the checklist is hidden. */
+  onOpenShopping?: () => void;
 }
 
-const categories = [
-  { id: 'clothes', label: 'Clothes', icon: Shirt },
-  { id: 'hygiene', label: 'Hygiene', icon: Droplets },
-  { id: 'equipment', label: 'Equipment', icon: Baby },
-  { id: 'hospital-bag', label: 'Hospital', icon: Briefcase },
+type CategoryId = ChecklistItem['category'];
+const CATEGORIES: { id: CategoryId; label: string; Icon: typeof Shirt }[] = [
+  { id: 'clothes', label: 'Clothes', Icon: Shirt },
+  { id: 'hygiene', label: 'Hygiene', Icon: Droplets },
+  { id: 'equipment', label: 'Equipment', Icon: Baby },
+  { id: 'hospital-bag', label: 'Hospital', Icon: Briefcase },
 ];
 
-export function ChecklistScreen({ checklist, onToggleItem }: ChecklistScreenProps) {
-  const [activeCategory, setActiveCategory] = useState('clothes');
-  const [showContractionTimer, setShowContractionTimer] = useState(false);
+// TODO: clinical reviewer to approve the labour guidance below.
+const GO_WHEN = [
+  'Contractions come regularly, about every 5 minutes, each lasting about a minute, for an hour.',
+  'Go earlier if you live far from the facility, have no transport at night, or this is not your first baby.',
+];
+const GO_NOW = [
+  'Your waters break, especially if the fluid is green or brown',
+  'Bleeding from the vagina',
+  'Baby moves less or stops moving',
+  'Fever, fits, severe headache or blurred vision',
+  'Constant, severe belly pain',
+];
 
-  const getCategoryItems = (category: string) => 
-    checklist.filter(item => item.category === category);
+const fmt = (secs: number) => `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
 
-  const getCategoryProgress = (category: string) => {
-    const items = getCategoryItems(category);
-    const completed = items.filter(item => item.completed).length;
-    return items.length > 0 ? (completed / items.length) * 100 : 0;
+type Contraction = { start: number; duration: number };
+
+function ContractionTimer() {
+  const [running, setRunning] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const [list, setList] = useState<Contraction[]>([]);
+  const startRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  const elapsed = running ? Math.floor((now - startRef.current) / 1000) : 0;
+  const start = () => { startRef.current = Date.now(); setNow(Date.now()); setRunning(true); };
+  const stop = () => {
+    setRunning(false);
+    setList((l) => [{ start: startRef.current, duration: Math.floor((Date.now() - startRef.current) / 1000) }, ...l].slice(0, 20));
   };
-
-  const totalCompleted = checklist.filter(item => item.completed).length;
-  const totalProgress = (totalCompleted / checklist.length) * 100;
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'essential': return 'bg-destructive/10 text-destructive border-destructive/20';
-      case 'recommended': return 'bg-warning/10 text-warning-foreground border-warning/20';
-      case 'optional': return 'bg-muted text-muted-foreground border-muted';
-      default: return '';
-    }
-  };
+  const recent = list.slice(0, 5);
+  const gaps = recent.slice(0, -1).map((c, i) => Math.round((c.start - recent[i + 1].start) / 1000));
+  const avgGap = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : 0;
+  const avgLen = recent.length ? Math.round(recent.reduce((a, c) => a + c.duration, 0) / recent.length) : 0;
 
   return (
-    <div className="pb-6 animate-fade-in">
-      {/* Header */}
-      <div className="neema-gradient-hero px-6 pt-safe-top pb-6">
-        <div className="pt-4 mb-6">
-          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto mb-4" />
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Baby Preparation
-          </h1>
-          <p className="text-muted-foreground">
-            Everything you need before baby arrives
-          </p>
+    <Card className="flex flex-col items-center gap-4 text-center">
+      <H2 className="flex items-center gap-2 self-start"><Timer className="h-5 w-5 text-neema-primary" />Contraction timer</H2>
+      <div
+        aria-live="polite"
+        className={cn('flex h-40 w-40 flex-col items-center justify-center rounded-full text-white transition-colors', running ? 'bg-neema-dark shadow-neema-hero' : 'bg-neema-primary')}
+      >
+        <span className="text-[13px] font-bold uppercase tracking-[0.08em]">{running ? 'Contraction' : 'Ready'}</span>
+        <span className="text-4xl font-bold tabular-nums">{fmt(elapsed)}</span>
+      </div>
+      <button
+        type="button"
+        onClick={running ? stop : start}
+        className={cn('flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-wide active:scale-[0.98]', running ? 'border-2 border-neema-ink bg-white text-neema-ink' : 'bg-neema-dark text-white')}
+      >
+        {running ? <><Square className="h-5 w-5" />STOP — CONTRACTION ENDED</> : <><Play className="h-5 w-5" />START — CONTRACTION BEGINS</>}
+      </button>
+      {recent.length > 0 && (
+        <div className="flex w-full flex-col gap-2 text-left">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-neema-cream px-3 py-2.5"><div className="text-[13px] font-medium text-neema-muted-strong">Average length</div><div className="text-lg font-bold">{fmt(avgLen)}</div></div>
+            <div className="rounded-xl bg-neema-cream px-3 py-2.5"><div className="text-[13px] font-medium text-neema-muted-strong">Average time apart</div><div className="text-lg font-bold">{gaps.length ? fmt(avgGap) : '—'}</div></div>
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {recent.map((c, i) => (
+              <li key={c.start} className="flex justify-between rounded-xl border border-neema-line px-3 py-2.5 text-[15px]">
+                <span>{new Date(c.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span>lasted <span className="font-semibold">{fmt(c.duration)}</span>{gaps[i] ? <> · {fmt(gaps[i])} apart</> : null}</span>
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => setList([])} className="flex min-h-[48px] items-center justify-center gap-2 font-semibold text-neema-dark">
+            <RotateCcw className="h-[18px] w-[18px]" />Clear and start again
+          </button>
         </div>
-
-        {/* Overall Progress */}
-        <Card variant="elevated">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Overall Progress</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalCompleted} / {checklist.length}
-                </p>
-              </div>
-              <div className="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center relative">
-                <span className="text-lg font-bold text-primary">{Math.round(totalProgress)}%</span>
-                <svg className="absolute inset-0 w-full h-full -rotate-90">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="4"
-                    strokeDasharray={`${totalProgress * 1.76} 176`}
-                    className="transition-all duration-500"
-                  />
-                </svg>
-              </div>
-            </div>
-            <Progress value={totalProgress} className="h-2" />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Hero Image */}
-      <div className="px-6 mt-6 mb-6">
-        <Card variant="elevated" className="overflow-hidden">
-          <AspectRatio ratio={16/9}>
-            <img 
-              src={babyShoppingImg} 
-              alt="Shopping for baby items" 
-              className="w-full h-full object-cover"
-            />
-          </AspectRatio>
-          <CardContent className="p-4">
-            <h3 className="font-display text-lg font-semibold text-foreground">Get Ready for Baby</h3>
-            <p className="text-sm text-muted-foreground">Everything you need to prepare before the big day</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="px-6 mb-6">
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 flex-col gap-2"
-            onClick={() => setShowContractionTimer(true)}
-          >
-            <Timer className="w-6 h-6 text-primary" />
-            <span className="text-sm">Contraction Timer</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 flex-col gap-2"
-          >
-            <Check className="w-6 h-6 text-success" />
-            <span className="text-sm">Birth Plan</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Category Tabs */}
-      <div className="px-6">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="grid grid-cols-4 mb-4">
-            {categories.map(cat => {
-              const Icon = cat.icon;
-              return (
-                <TabsTrigger key={cat.id} value={cat.id} className="flex-col gap-1 py-3">
-                  <Icon className="w-4 h-4" />
-                  <span className="text-xs">{cat.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {categories.map(cat => (
-            <TabsContent key={cat.id} value={cat.id} className="space-y-3">
-              {/* Category Progress */}
-              <div className="flex items-center justify-between text-sm mb-4">
-                <span className="text-muted-foreground">
-                  {getCategoryItems(cat.id).filter(i => i.completed).length} of {getCategoryItems(cat.id).length} completed
-                </span>
-                <span className="font-medium text-primary">
-                  {Math.round(getCategoryProgress(cat.id))}%
-                </span>
-              </div>
-
-              {/* Items List */}
-              {getCategoryItems(cat.id).map(item => (
-                <Card 
-                  key={item.id} 
-                  variant={item.completed ? 'soft' : 'elevated'}
-                  className={item.completed ? 'opacity-70' : ''}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Checkbox
-                        checked={item.completed}
-                        onCheckedChange={() => onToggleItem(item.id)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={`font-medium ${item.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                            {item.name}
-                          </p>
-                          <Badge variant="outline" className={`text-xs shrink-0 ${getPriorityColor(item.priority)}`}>
-                            {item.priority}
-                          </Badge>
-                        </div>
-                        {item.quantity && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Quantity: {item.quantity}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
-
-      {/* Contraction Timer Modal */}
-      {showContractionTimer && (
-        <ContractionTimer onClose={() => setShowContractionTimer(false)} />
       )}
-    </div>
+    </Card>
   );
 }
 
-function ContractionTimer({ onClose }: { onClose: () => void }) {
-  const [isRunning, setIsRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [contractions, setContractions] = useState<{ duration: number; interval?: number }[]>([]);
-
-  const formatTime = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const remainingSecs = secs % 60;
-    return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
-  };
-
-  const startContraction = () => {
-    setIsRunning(true);
-    const interval = setInterval(() => {
-      setSeconds(s => s + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  };
-
-  const stopContraction = () => {
-    setIsRunning(false);
-    setContractions(prev => [...prev, { duration: seconds }]);
-    setSeconds(0);
-  };
+export function ChecklistScreen({ checklist, onToggleItem, showChecklist = true, onOpenShopping }: ChecklistScreenProps) {
+  const [category, setCategory] = useState<CategoryId>('clothes');
+  const done = checklist.filter((i) => i.completed).length;
+  const pct = checklist.length ? Math.round((100 * done) / checklist.length) : 0;
+  const items = checklist.filter((i) => i.category === category);
 
   return (
-    <div className="fixed inset-0 bg-background/95 z-50 flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="text-center mb-8">
-          <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Contraction Timer
-          </h2>
-          <p className="text-muted-foreground">
-            Track the duration and frequency of contractions
-          </p>
+    <div className="flex flex-col gap-4 bg-neema-cream p-4 pb-8 font-sans text-neema-ink [&>*]:shrink-0">
+      <div>
+        <H1>{showChecklist ? 'Getting ready for birth' : 'Labour and contractions'}</H1>
+        <p className="mt-1 text-neema-muted-strong">Time your contractions and know when to go to the maternity unit.</p>
+      </div>
+
+      <ContractionTimer />
+
+      <Card className="flex flex-col gap-3">
+        <H2>When to go to the maternity unit</H2>
+        <ul className="flex flex-col gap-2">
+          {GO_WHEN.map((t) => <li key={t} className="flex items-start gap-2.5"><span className="mt-2.5 h-2 w-2 flex-none rounded-full bg-neema-primary" />{t}</li>)}
+        </ul>
+        <div className="rounded-xl bg-neema-primary-soft px-3.5 py-3">
+          <div className="mb-1.5 flex items-center gap-2 font-semibold text-neema-dark"><AlertTriangle className="h-5 w-5" />Go straight away if</div>
+          <ul className="flex list-disc flex-col gap-1 pl-5">
+            {GO_NOW.map((t) => <li key={t}>{t}</li>)}
+          </ul>
         </div>
+        <a href="tel:119" className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-[1.5px] border-neema-sos bg-neema-sos-soft font-semibold text-neema-sos">
+          <Phone className="h-5 w-5" />Call 119 for an ambulance
+        </a>
+        <p className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">Educational guidance only. Your midwife may give you different advice — follow hers.</p>
+      </Card>
 
-        <div className="w-48 h-48 rounded-full neema-gradient-primary flex items-center justify-center neema-shadow-glow mb-8">
-          <span className="text-5xl font-bold text-primary-foreground">
-            {formatTime(seconds)}
-          </span>
-        </div>
-
-        <Button
-          variant={isRunning ? 'destructive' : 'neema'}
-          size="xl"
-          onClick={isRunning ? stopContraction : startContraction}
-          className="w-full max-w-xs"
-        >
-          {isRunning ? 'Stop Contraction' : 'Start Contraction'}
-        </Button>
-
-        {contractions.length > 0 && (
-          <div className="mt-8 w-full max-w-xs">
-            <p className="text-sm font-medium text-foreground mb-2">Recent Contractions</p>
-            <div className="space-y-2">
-              {contractions.slice(-5).reverse().map((c, i) => (
-                <div key={i} className="flex justify-between text-sm bg-muted rounded-lg p-3">
-                  <span>#{contractions.length - i}</span>
-                  <span className="font-medium">{formatTime(c.duration)}</span>
-                </div>
-              ))}
+      {showChecklist ? (
+        <>
+          <section className="flex flex-col gap-2.5 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+            <div className="flex items-baseline justify-between">
+              <span className="text-lg font-semibold">{done} of {checklist.length} ready</span>
+              <span className="font-bold text-neema-success-ink">{pct}%</span>
             </div>
+            <div className="h-3 overflow-hidden rounded-full bg-neema-sand" role="img" aria-label={`${done} of ${checklist.length} items ready`}>
+              <div className="h-full rounded-full bg-neema-success" style={{ width: `${pct}%` }} />
+            </div>
+          </section>
+          <Segmented label="Category" value={category} onChange={setCategory} options={CATEGORIES.map((c) => ({ id: c.id, label: c.label }))} />
+          <div className="flex flex-col gap-2.5">
+            {items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={item.completed}
+                onClick={() => onToggleItem(item.id)}
+                className="flex min-h-[60px] items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-neema-card"
+              >
+                <CheckBox on={item.completed} />
+                <span className="flex flex-1 flex-col">
+                  <span className={cn('font-semibold', item.completed && 'text-neema-muted line-through')}>{item.name}</span>
+                  {item.quantity ? <span className="text-[15px] text-neema-muted">Quantity: {item.quantity}</span> : null}
+                </span>
+                <span className={cn('rounded-full px-2.5 text-[13px] font-semibold capitalize leading-[22px]',
+                  item.priority === 'essential' ? 'bg-neema-success-soft text-neema-success-ink' : item.priority === 'recommended' ? 'bg-neema-ochre-soft text-neema-ochre-ink' : 'bg-neema-sand')}>
+                  {item.priority}
+                </span>
+              </button>
+            ))}
           </div>
-        )}
-      </div>
-
-      <div className="p-6 safe-area-bottom">
-        <Button variant="ghost" className="w-full" onClick={onClose}>
-          Close Timer
-        </Button>
-      </div>
+        </>
+      ) : (
+        <Card className="flex items-center gap-3">
+          <span aria-hidden="true" className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-neema-ochre-soft text-neema-ochre-ink"><ShoppingBag className="h-6 w-6" /></span>
+          <div className="flex-1">
+            <H2>Hospital bag and mama kit</H2>
+            <p className="text-neema-muted-strong">Your full checklist is in the Shopping tab.</p>
+          </div>
+          {onOpenShopping && (
+            <button type="button" onClick={onOpenShopping} className="min-h-[48px] rounded-xl bg-neema-dark px-4 font-semibold text-white">Open</button>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

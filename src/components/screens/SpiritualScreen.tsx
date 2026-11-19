@@ -1,199 +1,152 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { BookOpen, ChevronLeft, ChevronRight, Heart, Wind, Share2, Phone } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { dailyPrayers } from '@/data/pregnancyData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Heart, 
-  BookOpen, 
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  Share2,
-  Bookmark
-} from 'lucide-react';
-import pregnantWoman2 from '@/assets/pregnant-woman-2.jpg';
-import logo from '@/assets/logo.png';
+import { Card, H1, H2, Segmented } from '@/neema/ui';
 
-export function SpiritualScreen() {
-  const [currentPrayerIndex, setCurrentPrayerIndex] = useState(0);
-  const currentPrayer = dailyPrayers[currentPrayerIndex];
+type Faith = 'christian' | 'muslim' | 'none';
+type Reading = { title: string; text: string; source?: string };
 
-  const affirmations = [
-    "I am strong and capable of bringing new life into this world.",
-    "My body knows exactly what to do to nurture my baby.",
-    "I release fear and embrace the joy of motherhood.",
-    "Every day, my baby grows healthy and strong.",
-    "I am surrounded by love and support on this journey.",
-    "I trust my body and my instincts as a mother.",
-  ];
+// TODO: faith content must be reviewed by faith advisers (spec: faith content never contradicts medical advice).
+const READINGS: Record<Faith, Reading[]> = {
+  christian: dailyPrayers.map((p) => ({ title: p.title, text: p.content, source: p.verse })),
+  muslim: [
+    { title: 'A dua for a good child', text: 'Ask Allah to bless you and your baby with health, goodness and peace through every day of this pregnancy.', source: '“My Lord, grant me from Yourself a good offspring. Indeed, You are the Hearer of supplication.” — Qur’an 3:38' },
+    { title: 'Ease after hardship', text: 'On the hard days, remember that difficulty does not last. Rest, and trust that ease will come.', source: '“For indeed, with hardship comes ease. Indeed, with hardship comes ease.” — Qur’an 94:5–6' },
+    { title: 'You are given what you can carry', text: 'You are stronger than you feel today. Take one step, and one breath, at a time.', source: '“Allah does not burden a soul beyond that it can bear.” — Qur’an 2:286' },
+  ],
+  none: [
+    { title: 'You are doing well', text: 'Growing a baby is hard work. Every glass of water, every rest and every visit to your midwife is an act of care.' },
+    { title: 'One day at a time', text: 'You don’t need to have everything ready today. Choose one small thing to do, and let the rest wait.' },
+    { title: 'Ask for help', text: 'Let the people around you carry some of the load: cooking, fetching water, or simply listening.' },
+  ],
+};
 
-  const [currentAffirmation, setCurrentAffirmation] = useState(0);
+const AFFIRMATIONS = [
+  'I am strong and capable of bringing new life into this world.',
+  'My body knows how to care for my baby.',
+  'I can ask for help, and I deserve support.',
+  'Every day, my baby and I grow a little stronger.',
+  'I am surrounded by love on this journey.',
+];
+
+const loadFaith = (): Faith => {
+  try { return (window.localStorage.getItem('neema:faith') as Faith) || 'christian'; } catch { return 'christian'; }
+};
+
+function BreathingExercise() {
+  const [running, setRunning] = useState(false);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setTick((t) => t + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
+  useEffect(() => { if (tick >= 60) { setRunning(false); setTick(0); } }, [tick]);
+  const phase = tick % 8 < 4 ? 'Breathe in' : 'Breathe out';
+  const inhale = tick % 8 < 4;
 
   return (
-    <div className="pb-6 animate-fade-in">
-      {/* Hero Section with Real Photo */}
-      <div className="relative h-56 md:h-72 overflow-hidden">
-        <img 
-          src={pregnantWoman2} 
-          alt="Peaceful pregnant woman" 
-          className="w-full h-full object-cover"
+    <Card className="flex flex-col items-center gap-4 text-center">
+      <H2 className="flex items-center gap-2 self-start"><Wind className="h-5 w-5 text-neema-primary" />One-minute calm breathing</H2>
+      <div className="flex h-36 w-36 items-center justify-center">
+        <div
+          aria-live="polite"
+          className={cn('flex items-center justify-center rounded-full bg-neema-primary-soft font-semibold text-neema-dark transition-all duration-[4000ms] ease-in-out',
+            running ? (inhale ? 'h-36 w-36' : 'h-20 w-20') : 'h-28 w-28')}
+        >
+          {running ? phase : 'Ready'}
+        </div>
+      </div>
+      <p className="text-neema-muted-strong">Breathe in slowly for 4 seconds, then out for 4 seconds. Sit or lie on your side.</p>
+      <button type="button" onClick={() => { setRunning(!running); setTick(0); }} className="min-h-[56px] w-full rounded-xl bg-neema-dark font-semibold tracking-wide text-white active:scale-[0.98]">
+        {running ? `STOP · ${60 - tick}s left` : 'START'}
+      </button>
+    </Card>
+  );
+}
+
+export function SpiritualScreen() {
+  const [faith, setFaith] = useState<Faith>(loadFaith);
+  const [index, setIndex] = useState(0);
+  const [aff, setAff] = useState(0);
+  const [shared, setShared] = useState(false);
+  const list = READINGS[faith];
+  const reading = list[Math.min(index, list.length - 1)];
+
+  const chooseFaith = (f: Faith) => {
+    setFaith(f);
+    setIndex(0);
+    try { window.localStorage.setItem('neema:faith', f); } catch { /* keep in memory only */ }
+  };
+
+  const share = async () => {
+    const text = `${reading.title}\n\n${reading.text}${reading.source ? `\n\n${reading.source}` : ''}\n\n— shared from Neema`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else { await navigator.clipboard.writeText(text); setShared(true); }
+    } catch { /* user cancelled */ }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 bg-neema-cream p-4 pb-8 font-sans text-neema-ink [&>*]:shrink-0">
+      <div>
+        <H1>Spiritual and emotional support</H1>
+        <p className="mt-1 text-neema-muted-strong">A daily word of encouragement, in your faith or none.</p>
+      </div>
+
+      <div>
+        <div className="mb-1.5 text-[13px] font-semibold uppercase leading-[18px] text-neema-muted-strong">My daily word</div>
+        <Segmented
+          role="radiogroup"
+          label="Faith"
+          value={faith}
+          onChange={chooseFaith}
+          options={[{ id: 'christian', label: 'Christian' }, { id: 'muslim', label: 'Muslim' }, { id: 'none', label: 'No faith' }]}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-spiritual/30 via-background/50 to-background" />
-        <div className="absolute top-0 left-0 right-0 p-4 md:p-8 pt-safe-top">
-          <img src={logo} alt="Neema" className="h-12 md:h-14 w-auto" />
+      </div>
+
+      <section className="flex flex-col gap-3 rounded-2xl bg-neema-ochre-soft p-5 shadow-neema-card">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[13px] font-bold uppercase tracking-[0.08em] text-neema-ochre-ink">{faith === 'none' ? 'Today’s encouragement' : 'Today’s prayer'}</span>
+          <button type="button" aria-label="Share" onClick={share} className="-m-2 flex h-12 w-12 items-center justify-center rounded-full text-neema-ochre-ink hover:bg-white/60">
+            <Share2 className="h-5 w-5" />
+          </button>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-spiritual/20 backdrop-blur-sm rounded-full mb-3">
-            <Sparkles className="w-4 h-4 text-spiritual" />
-            <span className="text-sm font-medium text-spiritual-foreground">Daily Inspiration</span>
+        <h2 className="text-xl font-bold leading-7">{reading.title}</h2>
+        <p className="leading-relaxed">{reading.text}</p>
+        {reading.source && (
+          <div className="flex gap-2.5 rounded-xl bg-white px-3.5 py-3">
+            <BookOpen className="mt-0.5 h-5 w-5 flex-none text-neema-ochre-ink" />
+            <p className="italic">{reading.source}</p>
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground">
-            Spiritual Support
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Peace, prayers, and encouragement
-          </p>
+        )}
+        {shared && <p role="status" className="text-[15px] font-medium text-neema-success-ink">Copied — paste it into a message.</p>}
+        <div className="flex items-center justify-between border-t border-[#F0DDBA] pt-2">
+          <button type="button" aria-label="Previous" disabled={index === 0} onClick={() => setIndex(index - 1)} className="flex h-12 w-12 items-center justify-center rounded-full disabled:opacity-40"><ChevronLeft className="h-6 w-6" /></button>
+          <span className="text-[15px] font-medium text-neema-ochre-ink">{index + 1} of {list.length}</span>
+          <button type="button" aria-label="Next" disabled={index >= list.length - 1} onClick={() => setIndex(index + 1)} className="flex h-12 w-12 items-center justify-center rounded-full disabled:opacity-40"><ChevronRight className="h-6 w-6" /></button>
         </div>
-      </div>
+      </section>
 
-      {/* Today's Prayer */}
-      <div className="px-4 md:px-8 lg:px-12 -mt-4">
-        <Card className="relative overflow-hidden border-0 shadow-xl">
-          <div className="neema-gradient-spiritual">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-serif text-lg flex items-center gap-2 text-spiritual-foreground">
-                  <Sparkles className="w-5 h-5" />
-                  Today's Prayer
-                </CardTitle>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="w-9 h-9 text-spiritual-foreground/70 hover:text-spiritual-foreground hover:bg-white/10">
-                    <Bookmark className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="w-9 h-9 text-spiritual-foreground/70 hover:text-spiritual-foreground hover:bg-white/10">
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <h3 className="font-serif text-xl md:text-2xl font-semibold text-spiritual-foreground mb-4">
-                {currentPrayer.title}
-              </h3>
-              <p className="text-spiritual-foreground/90 leading-relaxed mb-5">
-                {currentPrayer.content}
-              </p>
-              
-              {currentPrayer.verse && (
-                <div className="bg-background/30 backdrop-blur-sm rounded-xl p-4 mb-5">
-                  <BookOpen className="w-4 h-4 mb-2 text-spiritual-foreground/70" />
-                  <p className="text-sm italic text-spiritual-foreground/80 leading-relaxed">
-                    "{currentPrayer.verse}"
-                  </p>
-                </div>
-              )}
+      <section className="flex flex-col items-center gap-3 rounded-2xl bg-neema-dark p-6 text-center text-white shadow-neema-hero">
+        <Heart className="h-7 w-7" />
+        <p className="text-lg font-semibold leading-7">“{AFFIRMATIONS[aff]}”</p>
+        <button type="button" onClick={() => setAff((aff + 1) % AFFIRMATIONS.length)} className="flex min-h-[48px] items-center gap-1 rounded-xl bg-white/15 px-4 font-semibold">
+          Next affirmation <ChevronRight className="h-5 w-5" />
+        </button>
+      </section>
 
-              <div className="flex items-center justify-between pt-4 border-t border-spiritual-foreground/10">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setCurrentPrayerIndex(i => Math.max(0, i - 1))}
-                  disabled={currentPrayerIndex === 0}
-                  className="text-spiritual-foreground/70 hover:text-spiritual-foreground hover:bg-white/10 disabled:opacity-30"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <span className="text-sm text-spiritual-foreground/70">
-                  {currentPrayerIndex + 1} of {dailyPrayers.length}
-                </span>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setCurrentPrayerIndex(i => Math.min(dailyPrayers.length - 1, i + 1))}
-                  disabled={currentPrayerIndex === dailyPrayers.length - 1}
-                  className="text-spiritual-foreground/70 hover:text-spiritual-foreground hover:bg-white/10 disabled:opacity-30"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
-            </CardContent>
-          </div>
-        </Card>
-      </div>
+      <BreathingExercise />
 
-      {/* Daily Affirmation */}
-      <div className="px-4 md:px-8 lg:px-12 mt-8">
-        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">
-          Daily Affirmation
-        </h2>
-        <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="neema-gradient-primary">
-            <CardContent className="p-6 md:p-8 text-center">
-              <Heart className="w-8 h-8 text-primary-foreground mx-auto mb-4 animate-heart-beat" />
-              <p className="text-lg md:text-xl font-medium text-primary-foreground leading-relaxed mb-6">
-                "{affirmations[currentAffirmation]}"
-              </p>
-              <Button 
-                variant="ghost" 
-                className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
-                onClick={() => setCurrentAffirmation(i => (i + 1) % affirmations.length)}
-              >
-                Next Affirmation
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </CardContent>
-          </div>
-        </Card>
-      </div>
-
-      {/* Stress Relief Tips */}
-      <div className="px-4 md:px-8 lg:px-12 mt-8">
-        <h2 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-4">
-          Stress Relief Tips
-        </h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          {[
-            { emoji: '🧘', title: 'Deep Breathing', desc: 'Take 5 slow, deep breaths to calm your mind' },
-            { emoji: '🚶', title: 'Gentle Walk', desc: 'A short walk can clear your thoughts' },
-            { emoji: '🎵', title: 'Soothing Music', desc: 'Listen to calming melodies for relaxation' },
-            { emoji: '💭', title: 'Positive Visualization', desc: 'Imagine holding your healthy baby' },
-          ].map((tip, i) => (
-            <Card key={i} className="border-0 shadow-md hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">
-                  {tip.emoji}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-foreground">{tip.title}</p>
-                  <p className="text-sm text-muted-foreground">{tip.desc}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Meditation Timer */}
-      <div className="px-4 md:px-8 lg:px-12 mt-8">
-        <Card className="border-0 shadow-lg overflow-hidden">
-          <div className="bg-muted/50">
-            <CardContent className="p-6 md:p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-accent/30 flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🧘‍♀️</span>
-              </div>
-              <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                Guided Meditation
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Take a moment to relax and connect with your baby
-              </p>
-              <Button className="neema-gradient-primary text-primary-foreground shadow-lg px-8">
-                Start 5-Minute Session
-              </Button>
-            </CardContent>
-          </div>
-        </Card>
-      </div>
+      <Card className="flex flex-col gap-2">
+        <H2>When it feels like too much</H2>
+        <p>Feeling low or anxious for more than two weeks is common in pregnancy and after birth, and it can be treated. Tell your midwife or health worker.</p>
+        <p>If you think about harming yourself or your baby, get help now.</p>
+        <a href="tel:119" className="mt-1 flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-[1.5px] border-neema-sos bg-neema-sos-soft font-semibold text-neema-sos">
+          <Phone className="h-5 w-5" />Call 119 now
+        </a>
+      </Card>
     </div>
   );
 }

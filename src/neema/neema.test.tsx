@@ -38,7 +38,7 @@ describe('Neema app', () => {
   it('opens every tab without crashing', () => {
     setup();
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    for (const label of ['Ask Neema', 'Diet', 'Family plan.', 'Shopping', 'Home']) {
+    for (const label of ['Ask Neema', 'Diet', 'Planning', 'Shopping', 'Home']) {
       fireEvent.click(within(nav).getByRole('button', { name: label }));
     }
     expect(screen.getByText('Week 24')).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe('Neema app', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
     fireEvent.click(screen.getByRole('radio', { name: /trying to conceive/ }));
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Family plan.' }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Planning' }));
     expect(screen.getByText('My fertile window')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'One day longer' }));
     expect(screen.getByText('6 days')).toBeInTheDocument();

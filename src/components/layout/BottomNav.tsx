@@ -1,4 +1,4 @@
-import { Home, Calendar, Heart, ShoppingBag, User, Sparkles } from 'lucide-react';
+import { Home, CalendarDays, HeartHandshake, ListChecks, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
@@ -7,66 +7,33 @@ interface BottomNavProps {
   isPartnerMode?: boolean;
 }
 
-const motherTabs = [
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'tracking', label: 'Tracking', icon: Calendar },
-  { id: 'health', label: 'Health', icon: Heart },
-  { id: 'checklist', label: 'Prepare', icon: ShoppingBag },
-  { id: 'profile', label: 'Profile', icon: User },
+// Mothers use the Neema app shell (src/neema/NeemaApp.tsx); this bar serves partners.
+const tabs = [
+  { id: 'home', label: 'Home', Icon: Home },
+  { id: 'tracking', label: 'Progress', Icon: CalendarDays },
+  { id: 'health', label: 'Support', Icon: HeartHandshake },
+  { id: 'checklist', label: 'Tasks', Icon: ListChecks },
+  { id: 'profile', label: 'Profile', Icon: User },
 ];
 
-const partnerTabs = [
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'tracking', label: 'Progress', icon: Calendar },
-  { id: 'health', label: 'Support', icon: Heart },
-  { id: 'checklist', label: 'Tasks', icon: ShoppingBag },
-  { id: 'profile', label: 'Profile', icon: User },
-];
-
-export function BottomNav({ activeTab, onTabChange, isPartnerMode = false }: BottomNavProps) {
-  const tabs = isPartnerMode ? partnerTabs : motherTabs;
-
+export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
-      <div className="w-full">
-        <div className="flex items-center justify-around px-4 md:px-8 py-2 safe-area-bottom">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={cn(
-                  "flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-all duration-200 relative min-w-[64px]",
-                  isActive 
-                    ? isPartnerMode 
-                      ? "bg-partner/10 text-partner" 
-                      : "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                <Icon 
-                  className={cn(
-                    "w-5 h-5 md:w-6 md:h-6 transition-transform duration-200",
-                    isActive && "scale-110"
-                  )} 
-                />
-                <span className="text-xs font-medium">{tab.label}</span>
-                {isActive && (
-                  <div 
-                    className={cn(
-                      "absolute -bottom-2 w-1.5 h-1.5 rounded-full",
-                      isPartnerMode ? "bg-partner" : "bg-primary"
-                    )} 
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <nav aria-label="Main" className="grid flex-none grid-cols-5 border-t border-neema-line bg-white px-1 pb-2.5 pt-1.5">
+      {tabs.map(({ id, label, Icon }) => {
+        const on = activeTab === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            aria-current={on ? 'page' : undefined}
+            onClick={() => onTabChange(id)}
+            className={cn('flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[13px] font-semibold leading-4', on ? 'text-neema-primary' : 'text-neema-muted')}
+          >
+            <Icon className="h-6 w-6" />
+            {label}
+          </button>
+        );
+      })}
     </nav>
   );
 }
