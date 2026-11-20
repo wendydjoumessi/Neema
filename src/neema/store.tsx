@@ -8,7 +8,9 @@ import type { EmergencyContact } from './contacts';
 export type Feeds = { date: string; count: number; last: 'left' | 'right' | '' };
 export type Mood = 'good' | 'ok' | 'low' | 'hard';
 /** Items she adds herself, e.g. from her clinic's maternity list. */
-export type CustomItem = { id: string; name: string; group: 'mother' | 'baby' | 'kit' | 'feed' };
+export type CustomItem = { id: string; name: string; qty?: string; group: 'mother' | 'baby' | 'kit' | 'feed' };
+/** Her changes to Neema's own list items: a new name or quantity, or removed from her list. */
+export type ShopEdit = { name?: string; qty?: string; hidden?: boolean };
 
 export type TabId = 'home' | 'ask' | 'diet' | 'fp' | 'shop' | 'profile';
 export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: string; sources?: string[] };
@@ -16,7 +18,7 @@ export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: str
 /** Settings and progress saved to the user's account (and remembered on this device). */
 export const PERSISTED_KEYS = [
   'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
-  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'contacts',
+  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'shopEdits', 'contacts',
 ] as const;
 export type PersistedKey = (typeof PERSISTED_KEYS)[number];
 export type PersistedState = Partial<Record<PersistedKey, unknown>>;
@@ -66,6 +68,7 @@ function useNeemaState(seed?: PersistedState) {
   const [shop, setShop] = usePersisted<Record<string, boolean>>('shop', {}, seed);
 
   const [shopCustom, setShopCustom] = usePersisted<CustomItem[]>('shopCustom', [], seed);
+  const [shopEdits, setShopEdits] = usePersisted<Record<string, ShopEdit>>('shopEdits', {}, seed);
 
   // Trying to conceive
   const [ttc, setTtc] = usePersisted<Record<string, boolean>>('ttc', {}, seed);
@@ -112,7 +115,7 @@ function useNeemaState(seed?: PersistedState) {
 
   const persisted: PersistedState = {
     discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
-    folic, pills, method, feeds, mood, shopCustom, contacts,
+    folic, pills, method, feeds, mood, shopCustom, shopEdits, contacts,
   };
 
   return {
@@ -123,7 +126,7 @@ function useNeemaState(seed?: PersistedState) {
     water, setWater, iron, setIron, activeWeek, setActiveWeek,
     shop, setShop, ttc, setTtc, cycleLen, setCycleLen, periodLen, setPeriodLen, lastPeriod, setLastPeriod,
     pinLock, setPinLock, sharePreg, setSharePreg, shareFp, setShareFp,
-    folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom, contacts, setContacts,
+    folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom, shopEdits, setShopEdits, contacts, setContacts,
     messages, setMessages,
   };
 }

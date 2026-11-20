@@ -1,5 +1,6 @@
 import { FormEvent, ReactNode, useState } from 'react';
-import { ChevronDown, Share2, Plus, Trash2, PartyPopper, CalendarClock, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Share2, Plus, Trash2, PartyPopper, CalendarClock, ShieldCheck, Pencil, RotateCcw } from 'lucide-react';
+import { fieldErrors, shopItemSchema } from '@/lib/form-validation';
 import { cn } from '@/lib/utils';
 import { BAGS, READY, SHOP, SHOP_CATS, SHOP_STAGES, ShopItem } from '../data';
 import { useNeema, type CustomItem } from '../store';
@@ -17,20 +18,77 @@ type View = 'now' | 'bag' | 'all' | 'pp';
 type Row = { id: string; name: string; qty?: string; tip?: string; guide?: string[]; ess: boolean; custom?: boolean };
 
 const toRow = (it: ShopItem): Row => ({ id: it.id, name: it.name, qty: it.qty, tip: it.tip, guide: 'guide' in it ? it.guide : undefined, ess: it.ess });
-const customRow = (c: CustomItem): Row => ({ id: c.id, name: c.name, qty: 'Added by you', ess: true, custom: true });
+const customRow = (c: CustomItem): Row => ({ id: c.id, name: c.name, qty: c.qty || 'Added by you', ess: true, custom: true });
+
+function ItemEditor({ row, onDone }: { row: Row; onDone: () => void }) {
+  const s = useNeema();
+  const [name, setName] = useState(row.name);
+  const [qty, setQty] = useState(row.qty === 'Added by you' ? '' : row.qty ?? '');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const original = SHOP.find((it) => it.id === row.id);
+  const edited = !row.custom && !!(s.shopEdits[row.id]?.name || s.shopEdits[row.id]?.qty !== undefined);
+
+  const save = (e: FormEvent) => {
+    e.preventDefault();
+    const r = shopItemSchema.safeParse({ name, qty });
+    if (!r.success) { setErrors(fieldErrors(r.error)); document.getElementById(`edit-name-${row.id}`)?.focus(); return; }
+    const v = r.data as { name: string; qty: string };
+    if (row.custom) {
+      s.setShopCustom(s.shopCustom.map((c) => (c.id === row.id ? { ...c, name: v.name, qty: v.qty } : c)));
+    } else {
+      s.setShopEdits({ ...s.shopEdits, [row.id]: { name: v.name === original?.name ? undefined : v.name, qty: v.qty === original?.qty ? undefined : v.qty } });
+    }
+    onDone();
+  };
+  const reset = () => {
+    const { [row.id]: _drop, ...rest } = s.shopEdits;
+    void _drop;
+    s.setShopEdits(rest);
+    onDone();
+  };
+  const field = 'h-12 w-full rounded-xl border bg-white px-3 text-base';
+  return (
+    <form onSubmit={save} noValidate className="mb-3 flex flex-col gap-2.5 rounded-xl bg-neema-cream p-3.5">
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`edit-name-${row.id}`} className="font-semibold">Item</label>
+        <input id={`edit-name-${row.id}`} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} aria-invalid={!!errors.name}
+          className={cn(field, errors.name ? 'border-neema-dark' : 'border-neema-border')} />
+        {errors.name && <p className="text-[15px] font-medium text-neema-dark">{errors.name}</p>}
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`edit-qty-${row.id}`} className="font-semibold">How many <span className="font-normal text-neema-muted-strong">(optional)</span></label>
+        <input id={`edit-qty-${row.id}`} value={qty} maxLength={80} placeholder="e.g. 2 packs" onChange={(e) => setQty(e.target.value)} className={cn(field, 'border-neema-border')} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" onClick={onDone} className="min-h-[48px] rounded-xl border border-neema-border bg-white font-semibold">Cancel</button>
+        <button type="submit" className="min-h-[48px] rounded-xl bg-neema-dark font-semibold text-white">Save</button>
+      </div>
+      {edited && <button type="button" onClick={reset} className="min-h-[48px] font-semibold text-neema-dark">Go back to Neema’s version</button>}
+    </form>
+  );
+}
 
 function ItemRow({ row }: { row: Row }) {
   const s = useNeema();
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'view' | 'edit' | 'remove'>('view');
   const on = !!s.shop[row.id];
-  const hasMore = !!(row.tip || row.guide);
+
+  const remove = () => {
+    const { [row.id]: _tick, ...ticks } = s.shop;
+    void _tick;
+    s.setShop(ticks);
+    if (row.custom) s.setShopCustom(s.shopCustom.filter((c) => c.id !== row.id));
+    else s.setShopEdits({ ...s.shopEdits, [row.id]: { ...s.shopEdits[row.id], hidden: true } });
+  };
+
   return (
     <li className="border-b border-neema-line last:border-b-0">
       <div className="flex items-center gap-2 py-1.5">
         <button type="button" aria-label={`Got it: ${row.name}`} aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [row.id]: !on })} className="-ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
           <CheckBox on={on} />
         </button>
-        <button type="button" onClick={() => (hasMore ? setOpen(!open) : s.setShop({ ...s.shop, [row.id]: !on }))} aria-expanded={hasMore ? open : undefined}
+        <button type="button" onClick={() => { setOpen(!open); setMode('view'); }} aria-expanded={open}
           className="flex min-h-[52px] min-w-0 flex-1 items-center gap-2 text-left">
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="flex flex-wrap items-center gap-x-2">
@@ -39,15 +97,11 @@ function ItemRow({ row }: { row: Row }) {
             </span>
             {row.qty && <span className="text-[15px] leading-[21px] text-neema-muted">{row.qty}</span>}
           </span>
-          {hasMore && <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />}
+          <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />
         </button>
-        {row.custom && (
-          <button type="button" aria-label={`Remove ${row.name}`} onClick={() => s.setShopCustom(s.shopCustom.filter((c) => c.id !== row.id))} className="flex h-12 w-12 flex-none items-center justify-center rounded-xl text-neema-muted hover:bg-neema-cream">
-            <Trash2 className="h-5 w-5" />
-          </button>
-        )}
       </div>
-      {open && (
+      {open && mode === 'edit' && <div className="ml-10"><ItemEditor row={row} onDone={() => setMode('view')} /></div>}
+      {open && mode !== 'edit' && (
         <div className="mb-3 ml-10 flex flex-col gap-2 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
           {row.tip && <p>{row.tip}</p>}
           {row.guide && (
@@ -56,9 +110,59 @@ function ItemRow({ row }: { row: Row }) {
               <ol className="flex list-decimal flex-col gap-1.5 pl-5">{row.guide.map((g) => <li key={g}>{g}</li>)}</ol>
             </>
           )}
+          {mode === 'remove' ? (
+            <div role="alert" className="flex flex-col gap-2 rounded-xl bg-white p-3">
+              <span>Remove “{row.name}” from your list?{row.custom ? '' : ' You can put it back later from Everything.'}</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setMode('view')} className="min-h-[48px] rounded-xl border border-neema-border font-semibold">Keep</button>
+                <button type="button" onClick={remove} className="min-h-[48px] rounded-xl border-2 border-neema-dark font-semibold text-neema-dark">Remove</button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setMode('edit')} aria-label={`Edit ${row.name}`} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold">
+                <Pencil className="h-[18px] w-[18px]" /> Edit
+              </button>
+              <button type="button" onClick={() => setMode('remove')} aria-label={`Remove ${row.name}`} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">
+                <Trash2 className="h-[18px] w-[18px]" /> Remove
+              </button>
+            </div>
+          )}
         </div>
       )}
     </li>
+  );
+}
+
+/** Neema's items she removed, with a way to put each back. */
+function RemovedItems({ removed }: { removed: ShopItem[] }) {
+  const s = useNeema();
+  const [open, setOpen] = useState(false);
+  if (!removed.length) return null;
+  const restore = (id: string) => {
+    const { hidden: _h, ...rest } = s.shopEdits[id] ?? {};
+    void _h;
+    s.setShopEdits({ ...s.shopEdits, [id]: rest });
+  };
+  return (
+    <Card className="flex flex-col gap-1 py-4">
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-[48px] items-center justify-between gap-2 text-left">
+        <span className="font-semibold">Removed from my list ({removed.length})</span>
+        <ChevronDown className={cn('h-5 w-5 text-neema-muted transition-transform', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <ul className="flex flex-col">
+          {removed.map((it) => (
+            <li key={it.id} className="flex items-center justify-between gap-2 border-b border-neema-line py-1.5 last:border-b-0">
+              <span className="text-neema-muted-strong">{it.name}</span>
+              <button type="button" onClick={() => restore(it.id)} aria-label={`Put back ${it.name}`} className="flex min-h-[48px] flex-none items-center gap-1.5 rounded-xl px-3 font-semibold text-neema-dark hover:bg-neema-cream">
+                <RotateCcw className="h-[18px] w-[18px]" /> Put back
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 
@@ -136,23 +240,26 @@ export function ShopTab({ week = 20 }: { week?: number }) {
   const [showNext, setShowNext] = useState(false);
   const [shared, setShared] = useState('');
 
+  // Neema's list with her own edits applied and removed items left out.
+  const items = SHOP.filter((it) => !s.shopEdits[it.id]?.hidden).map((it) => ({ ...it, name: s.shopEdits[it.id]?.name || it.name, qty: s.shopEdits[it.id]?.qty ?? it.qty }));
+  const removed = SHOP.filter((it) => s.shopEdits[it.id]?.hidden);
   const custom = (g: CustomItem['group']) => s.shopCustom.filter((c) => c.group === g).map(customRow);
-  const ppMother = SHOP.filter((i) => i.cat === 'mother' && (i.when === 'pp' || ['pads', 'bras', 'nipple'].includes(i.id))).map(toRow);
-  const ppFeed = [...SHOP.filter((i) => i.cat === 'feed').map(toRow), ...custom('feed')];
-  const ppBaby = SHOP.filter((i) => i.cat === 'baby' && (i.when === 'pp' || ['nappies', 'cotton', 'soap', 'thermo', 'net'].includes(i.id))).map(toRow);
+  const ppMother = items.filter((i) => i.cat === 'mother' && (i.when === 'pp' || ['pads', 'bras', 'nipple'].includes(i.id))).map(toRow);
+  const ppFeed = [...items.filter((i) => i.cat === 'feed').map(toRow), ...custom('feed')];
+  const ppBaby = items.filter((i) => i.cat === 'baby' && (i.when === 'pp' || ['nappies', 'cotton', 'soap', 'thermo', 'net'].includes(i.id))).map(toRow);
   // After birth, progress counts only what she still needs now (not the hospital bag).
   const essentials = afterBirth
     ? [...ppMother, ...ppFeed, ...ppBaby].filter((r) => r.ess)
-    : [...SHOP.filter((i) => i.ess).map(toRow), ...s.shopCustom.map(customRow)];
+    : [...items.filter((i) => i.ess).map(toRow), ...s.shopCustom.map(customRow)];
   const essDone = essentials.filter((r) => s.shop[r.id]).length;
   const pct = essentials.length ? Math.round((100 * essDone) / essentials.length) : 0;
-  const bagRows = SHOP.filter((i) => i.when === 'bag');
+  const bagRows = items.filter((i) => i.when === 'bag');
   const bagDone = bagRows.filter((i) => s.shop[i.id]).length + s.shopCustom.filter((c) => c.group !== 'feed' && s.shop[c.id]).length;
   const bagTotal = bagRows.length + s.shopCustom.filter((c) => c.group !== 'feed').length;
 
   const open = STAGE_ORDER.filter((st) => week >= STAGE_TIMING[st].from);
   const next = STAGE_ORDER.find((st) => week < STAGE_TIMING[st].from);
-  const stageRows = (st: string) => SHOP.filter((i) => i.when === st && !(essOnly && !i.ess)).map(toRow);
+  const stageRows = (st: string) => items.filter((i) => i.when === st && !(essOnly && !i.ess)).map(toRow);
   const nowRows = open.flatMap((st) => stageRows(st)).filter((r) => !s.shop[r.id]);
 
   const share = async () => {
@@ -246,7 +353,7 @@ export function ShopTab({ week = 20 }: { week?: number }) {
           </p>
           {BAGS.map((b) => (
             <Section key={b.id} title={b.title} note={b.note}
-              rows={[...SHOP.filter((i) => i.when === 'bag' && i.cat === b.id).map(toRow), ...custom(b.id as CustomItem['group'])]}>
+              rows={[...items.filter((i) => i.when === 'bag' && i.cat === b.id).map(toRow), ...custom(b.id as CustomItem['group'])]}>
               <AddItem group={b.id as CustomItem['group']} label={b.id === 'kit' ? 'Add an item from your clinic’s list' : 'Add your own item'} />
             </Section>
           ))}
@@ -274,11 +381,12 @@ export function ShopTab({ week = 20 }: { week?: number }) {
           </div>
           {(groupBy === 'cat' ? SHOP_CATS : SHOP_STAGES).map((g) => {
             const rows = [
-              ...SHOP.filter((it) => (groupBy === 'cat' ? it.cat : it.when) === g.id && !(essOnly && !it.ess)).map(toRow),
+              ...items.filter((it) => (groupBy === 'cat' ? it.cat : it.when) === g.id && !(essOnly && !it.ess)).map(toRow),
               ...(groupBy === 'cat' ? custom(g.id as CustomItem['group']) : []),
             ];
             return rows.length ? <Section key={g.id} title={g.title} note={g.note} rows={rows} /> : null;
           })}
+          <RemovedItems removed={removed} />
         </>
       )}
 

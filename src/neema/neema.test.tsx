@@ -124,4 +124,45 @@ describe('Neema app', () => {
     fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
     expect(screen.getByText(/cycle day 4/i)).toBeInTheDocument();
   });
+
+  it('lets her edit, remove and put back items on the shopping list', () => {
+    setup();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Shopping' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Hospital bag' }));
+
+    // Edit one of Neema's items
+    fireEvent.click(screen.getByRole('button', { name: /^Maternity pads/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Maternity pads' }));
+    fireEvent.change(screen.getByLabelText('Item'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByText('Enter the item name.')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Item'), { target: { value: 'Sanitary pads (heavy flow)' } });
+    fireEvent.change(screen.getByLabelText(/How many/), { target: { value: '4 packs' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByText('Sanitary pads (heavy flow)')).toBeInTheDocument();
+    expect(screen.getByText('4 packs')).toBeInTheDocument();
+
+    // Remove it, then put it back from Everything
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Sanitary pads (heavy flow)' }));
+    fireEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }));
+    expect(screen.queryByText('Sanitary pads (heavy flow)')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Everything' }));
+    fireEvent.click(screen.getByRole('button', { name: /Removed from my list \(1\)/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Put back Maternity pads' }));
+    expect(screen.getByText('Sanitary pads (heavy flow)')).toBeInTheDocument();
+
+    // Her own item: add, edit, remove
+    fireEvent.click(screen.getByRole('tab', { name: 'Hospital bag' }));
+    const add = screen.getByLabelText('Add an item from your clinic’s list');
+    fireEvent.change(add, { target: { value: 'Bleach' } });
+    fireEvent.submit(add.closest('form')!);
+    fireEvent.click(screen.getByRole('button', { name: /^Bleach/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Bleach' }));
+    fireEvent.change(screen.getByLabelText(/How many/), { target: { value: '1 bottle' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByText('1 bottle')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Bleach' }));
+    fireEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }));
+    expect(screen.queryByText('Bleach')).not.toBeInTheDocument();
+  });
 });

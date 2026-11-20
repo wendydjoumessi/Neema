@@ -121,7 +121,7 @@ function PregnantHome({ pregnancy }: { pregnancy: PregnancyData }) {
   const daysToGo = Math.max(0, Math.ceil((new Date(pregnancy.dueDate).getTime() - Date.now()) / 86400000));
   const progress = Math.min(100, Math.round((week / 40) * 100));
   const size = babySizeFor(week);
-  const essentials = SHOP.filter((i) => i.ess);
+  const essentials = SHOP.filter((i) => i.ess && !s.shopEdits[i.id]?.hidden);
   const shopDone = essentials.filter((i) => s.shop[i.id]).length;
   return (
     <>
