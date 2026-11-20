@@ -14,7 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_state: {
+        Row: {
+          state: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          state?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          state?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_requests: {
+        Row: {
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["data_request_kind"]
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["data_request_kind"]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["data_request_kind"]
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medical_profiles: {
+        Row: {
+          allergies: string | null
+          blood_group: string | null
+          conditions: string[]
+          current_medicines: string | null
+          date_of_birth: string | null
+          facility_name: string | null
+          genotype: string | null
+          previous_births: number | null
+          previous_caesarean: boolean | null
+          previous_pregnancies: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allergies?: string | null
+          blood_group?: string | null
+          conditions?: string[]
+          current_medicines?: string | null
+          date_of_birth?: string | null
+          facility_name?: string | null
+          genotype?: string | null
+          previous_births?: number | null
+          previous_caesarean?: boolean | null
+          previous_pregnancies?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allergies?: string | null
+          blood_group?: string | null
+          conditions?: string[]
+          current_medicines?: string | null
+          date_of_birth?: string | null
+          facility_name?: string | null
+          genotype?: string | null
+          previous_births?: number | null
+          previous_caesarean?: boolean | null
+          previous_pregnancies?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pregnancies: {
+        Row: {
+          baby_nickname: string | null
+          created_at: string
+          doctor_due_date: string | null
+          due_date: string
+          entered_on: string
+          gestational_weeks_at_entry: number | null
+          id: string
+          last_period_date: string | null
+          outcome_date: string | null
+          status: Database["public"]["Enums"]["pregnancy_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baby_nickname?: string | null
+          created_at?: string
+          doctor_due_date?: string | null
+          due_date: string
+          entered_on?: string
+          gestational_weeks_at_entry?: number | null
+          id?: string
+          last_period_date?: string | null
+          outcome_date?: string | null
+          status?: Database["public"]["Enums"]["pregnancy_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baby_nickname?: string | null
+          created_at?: string
+          doctor_due_date?: string | null
+          due_date?: string
+          entered_on?: string
+          gestational_weeks_at_entry?: number | null
+          id?: string
+          last_period_date?: string | null
+          outcome_date?: string | null
+          status?: Database["public"]["Enums"]["pregnancy_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          consent_health_data_at: string | null
+          consent_partner_sharing: boolean
+          consent_sms: boolean
+          consent_terms_at: string | null
+          consent_version: string | null
+          created_at: string
+          discreet_mode: boolean
+          faith: string | null
+          full_name: string
+          id: string
+          journey: Database["public"]["Enums"]["neema_journey"]
+          language: string
+          phone: string | null
+          role: Database["public"]["Enums"]["neema_role"]
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          consent_health_data_at?: string | null
+          consent_partner_sharing?: boolean
+          consent_sms?: boolean
+          consent_terms_at?: string | null
+          consent_version?: string | null
+          created_at?: string
+          discreet_mode?: boolean
+          faith?: string | null
+          full_name?: string
+          id: string
+          journey?: Database["public"]["Enums"]["neema_journey"]
+          language?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["neema_role"]
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          consent_health_data_at?: string | null
+          consent_partner_sharing?: boolean
+          consent_sms?: boolean
+          consent_terms_at?: string | null
+          consent_version?: string | null
+          created_at?: string
+          discreet_mode?: boolean
+          faith?: string | null
+          full_name?: string
+          id?: string
+          journey?: Database["public"]["Enums"]["neema_journey"]
+          language?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["neema_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +211,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      data_request_kind: "export" | "delete"
+      neema_journey: "ttc" | "preg" | "pp" | "avoid"
+      neema_role: "mother" | "partner"
+      pregnancy_status: "active" | "born" | "loss" | "ended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +341,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      data_request_kind: ["export", "delete"],
+      neema_journey: ["ttc", "preg", "pp", "avoid"],
+      neema_role: ["mother", "partner"],
+      pregnancy_status: ["active", "born", "loss", "ended"],
+    },
   },
 } as const
