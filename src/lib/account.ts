@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import type { PregnancyData } from '@/types/pregnancy';
+import { pregnancySetupSchema, signupSchema } from './form-validation';
 
 export type Profile = Tables<'profiles'>;
 export type MedicalProfile = Tables<'medical_profiles'>;
@@ -28,6 +29,7 @@ export function friendlyError(error: unknown): string {
   if (/invalid login credentials/i.test(msg)) return 'That email and password don’t match. Check them and try again.';
   if (/email not confirmed/i.test(msg)) return 'Please confirm your email first: open the link we sent you.';
   if (/already registered|already exists/i.test(msg)) return 'An account with this email already exists. Log in instead.';
+  if (/pwned|leaked|compromised|breached|known.*weak/i.test(msg)) return 'This password has appeared in a data breach. Choose a different password you haven’t used before.';
   if (/password should be at least|weak password/i.test(msg)) return 'Choose a password with at least 6 characters.';
   if (/rate limit|too many/i.test(msg)) return 'Too many tries. Please wait a minute and try again.';
   if (/failed to fetch|network/i.test(msg)) return 'No connection. Check your data or Wi-Fi and try again.';
@@ -39,10 +41,11 @@ export function friendlyError(error: unknown): string {
 // ---------------------------------------------------------------------------
 
 export async function signUp(input: { name: string; email: string; password: string; role: Role; journey?: Journey }) {
+  const validated = signupSchema.parse(input);
   const { data, error } = await supabase.auth.signUp({
-    email: input.email.trim(),
-    password: input.password,
-    options: { data: { full_name: input.name.trim(), role: input.role, journey: input.journey ?? 'preg' }, emailRedirectTo: window.location.origin },
+    email: validated.email,
+    password: validated.password,
+    options: { data: { full_name: validated.name, role: input.role, journey: input.journey ?? 'preg' }, emailRedirectTo: window.location.origin },
   });
   if (error) throw error;
   // With email confirmation on, there is no session until the link is opened.
@@ -115,13 +118,19 @@ export async function saveMedicalProfile(userId: string, data: Omit<TablesInsert
 }
 
 export async function savePregnancy(userId: string, p: PregnancyData, entry: { lastPeriodDate?: string; weeksAtEntry?: number }) {
+  const validated = pregnancySetupSchema.parse({
+    lastPeriodDate: entry.lastPeriodDate ?? '',
+    gestationalWeeks: entry.weeksAtEntry === undefined ? '' : String(entry.weeksAtEntry),
+    doctorDueDate: p.doctorDueDate ? toIsoDate(p.doctorDueDate) : '',
+    babyName: p.babyName ?? '',
+  });
   const row = {
     user_id: userId,
     last_period_date: entry.lastPeriodDate || null,
     gestational_weeks_at_entry: entry.weeksAtEntry ?? null,
     due_date: toIsoDate(p.dueDate),
     doctor_due_date: p.doctorDueDate ? toIsoDate(p.doctorDueDate) : null,
-    baby_nickname: p.babyName || null,
+    baby_nickname: validated.babyName || null,
   };
   const existing = await supabase.from('pregnancies').select('id').eq('user_id', userId).eq('status', 'active').maybeSingle();
   if (existing.error) throw existing.error;

@@ -1,10 +1,13 @@
-import { useState } from 'react';
-import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck, LoaderCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Segmented } from '@/neema/ui';
 import { User } from '@/types/pregnancy';
 import { friendlyError, requestPasswordReset, signIn, signUp, type Journey } from '@/lib/account';
 import logo from '@/assets/logo.png';
+import { Button } from '@/components/ui/button';
+import { fieldErrors, signupSchema } from '@/lib/form-validation';
+import { toast } from 'sonner';
 
 interface AuthScreenProps {
   /** Called once the person is signed in with a real account. */
@@ -25,6 +28,8 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
   const [mode, setMode] = useState<Mode>('login');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [validation, setValidation] = useState<Record<string, string>>({});
+  const pending = useRef(false);
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -33,6 +38,8 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
   const [signupPassword, setSignupPassword] = useState('');
 
   const run = async (fn: () => Promise<void>) => {
+    if (pending.current) return;
+    pending.current = true;
     setError('');
     setNotice('');
     setIsLoading(true);
@@ -41,6 +48,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     } catch (e) {
       setError(friendlyError(e));
     } finally {
+      pending.current = false;
       setIsLoading(false);
     }
   };
@@ -55,13 +63,27 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    setError('');
+    setNotice('');
+    const result = signupSchema.safeParse({ name: signupName, email: signupEmail, password: signupPassword });
+    if (!result.success) {
+      const errors = fieldErrors(result.error);
+      setValidation(errors);
+      document.getElementById(`signup-${Object.keys(errors)[0]}`)?.focus();
+      return;
+    }
+    setValidation({});
     run(async () => {
-      const { user, needsConfirmation } = await signUp({ name: signupName, email: signupEmail, password: signupPassword, role: defaultRole, journey });
+      const { user, needsConfirmation } = await signUp({ ...result.data, role: defaultRole, journey });
+      if (!user) throw new Error('Account creation did not return a user');
+      setSignupPassword('');
       if (needsConfirmation) {
-        setLoginEmail(signupEmail);
+        setLoginEmail(result.data.email);
         setMode('login');
-        setNotice(`We sent a confirmation link to ${signupEmail}. Open it, then log in here.`);
+        setNotice(`Sign-up received. Check ${result.data.email} for your confirmation link (including spam). Confirm your email, then log in to save your pregnancy details.`);
       } else if (user) {
+        toast.success('Your account is ready. You’re signed in.');
         onSignedIn(user.id);
       }
     });
@@ -81,9 +103,11 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
   };
 
   const switchMode = (m: Mode) => {
+    if (pending.current) return;
     setMode(m);
     setError('');
     setNotice('');
+    setValidation({});
   };
 
   const isLogin = mode === 'login';
@@ -93,14 +117,19 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
       <label htmlFor={id} className="text-[13px] font-semibold text-neema-ink">{label}</label>
       <div className="relative">
         <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-neema-muted" />
-        <input id={id} required className={cn(inputCls, eye && 'pr-12')} {...props} />
+        <input id={id} required disabled={isLoading} aria-invalid={!!validation[id.replace('signup-', '')]} aria-describedby={validation[id.replace('signup-', '')] ? `${id}-error` : id === 'signup-password' ? 'password-help' : undefined} className={cn(inputCls, eye && 'pr-12')} {...props} onChange={(e) => {
+          props.onChange?.(e);
+          setError('');
+          setValidation((current) => { const next = { ...current }; delete next[id.replace('signup-', '')]; return next; });
+        }} />
         {eye && (
-          <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}
+          <button type="button" disabled={isLoading} onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}
             className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-neema-muted-strong hover:text-neema-ink">
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         )}
       </div>
+      {validation[id.replace('signup-', '')] && <p id={`${id}-error`} role="alert" className="text-sm font-medium text-neema-dark">{validation[id.replace('signup-', '')]}</p>}
     </div>
   );
   const pwType = showPassword ? 'text' : 'password';
@@ -109,7 +138,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
         <header className="flex items-center justify-between">
-          <button type="button" onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
+          <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
             <ArrowLeft className="h-5 w-5" /> Back
           </button>
           <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
@@ -130,12 +159,12 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
         {notice && <p role="status" className="mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
         {error && <p role="alert" className="mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
 
-        <section className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
+        <section aria-busy={isLoading} className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
           {mode === 'forgot' ? (
             <form onSubmit={handleForgot} className="flex flex-col gap-4">
               <p className="text-neema-muted-strong">Enter your email and we’ll send you a link to choose a new password.</p>
               {field('forgot-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: loginEmail, onChange: (e) => setLoginEmail(e.target.value), autoComplete: 'email' })}
-              <SubmitBtn loading={isLoading}>Send reset link</SubmitBtn>
+              <SubmitBtn loading={isLoading} pendingText="Sending reset link…">Send reset link</SubmitBtn>
               <button type="button" onClick={() => switchMode('login')} className="min-h-[48px] font-semibold text-neema-dark">Back to log in</button>
             </form>
           ) : isLogin ? (
@@ -143,14 +172,15 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
               {field('login-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: loginEmail, onChange: (e) => setLoginEmail(e.target.value), autoComplete: 'email' })}
               {field('login-password', 'Password', Lock, { type: pwType, placeholder: 'Your password', value: loginPassword, onChange: (e) => setLoginPassword(e.target.value), autoComplete: 'current-password' }, true)}
               <button type="button" onClick={() => switchMode('forgot')} className="-mt-1 self-end min-h-[48px] px-1 text-[15px] font-semibold text-neema-dark hover:underline">Forgot password?</button>
-              <SubmitBtn loading={isLoading}>Log in</SubmitBtn>
+              <SubmitBtn loading={isLoading} pendingText="Logging in…">Log in</SubmitBtn>
             </form>
           ) : (
-            <form onSubmit={handleSignup} className="flex flex-col gap-4">
-              {field('signup-name', 'Full name', UserIcon, { type: 'text', placeholder: 'e.g. Amina Fouda', value: signupName, onChange: (e) => setSignupName(e.target.value), autoComplete: 'name' })}
-              {field('signup-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: signupEmail, onChange: (e) => setSignupEmail(e.target.value), autoComplete: 'email' })}
+            <form noValidate onSubmit={handleSignup} className="flex flex-col gap-4">
+              {field('signup-name', 'Full name', UserIcon, { type: 'text', placeholder: 'e.g. Amina Fouda', value: signupName, onChange: (e) => setSignupName(e.target.value), autoComplete: 'name', maxLength: 120 })}
+              {field('signup-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: signupEmail, onChange: (e) => setSignupEmail(e.target.value), autoComplete: 'email', maxLength: 254 })}
               {field('signup-password', 'Password', Lock, { type: pwType, placeholder: 'Create a password', value: signupPassword, onChange: (e) => setSignupPassword(e.target.value), autoComplete: 'new-password', minLength: 6 }, true)}
-              <SubmitBtn loading={isLoading}>Create account</SubmitBtn>
+              <p id="password-help" className="text-sm text-neema-muted-strong">Use at least 6 characters and a password you haven’t used elsewhere.</p>
+              <SubmitBtn loading={isLoading} pendingText="Creating your account…">Create account</SubmitBtn>
             </form>
           )}
         </section>
@@ -158,7 +188,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
         <div className="my-6 flex items-center gap-3 text-sm text-neema-muted-strong">
           <span className="h-px flex-1 bg-neema-line" /> or <span className="h-px flex-1 bg-neema-line" />
         </div>
-        <button type="button" onClick={handleGuestLogin}
+        <button type="button" disabled={isLoading} onClick={handleGuestLogin}
           className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
           Continue as guest
         </button>
@@ -173,11 +203,11 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
   );
 }
 
-function SubmitBtn({ loading, children }: { loading: boolean; children: React.ReactNode }) {
+function SubmitBtn({ loading, children, pendingText }: { loading: boolean; children: React.ReactNode; pendingText: string }) {
   return (
-    <button type="submit" disabled={loading}
-      className="mt-1 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-neema-dark px-4 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 active:scale-[0.98] disabled:opacity-60">
-      {loading ? <><span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Please wait…</> : children}
-    </button>
+    <Button type="submit" variant="ghost" disabled={loading}
+      className="mt-1 min-h-[56px] w-full whitespace-normal bg-neema-dark px-4 text-lg text-neema-cream shadow-neema-hero hover:bg-neema-dark hover:text-neema-cream disabled:opacity-60">
+      {loading ? <span role="status" className="flex items-center gap-2"><LoaderCircle aria-hidden="true" className="h-5 w-5 motion-safe:animate-spin" />{pendingText}</span> : children}
+    </Button>
   );
 }
