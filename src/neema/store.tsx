@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, Dispatch, Se
 import { KB } from './data';
 import type { JourneyId, Lang } from './data';
 import type { MyMethod } from './cycle';
+import type { EmergencyContact } from './contacts';
 
 /** Baby feeds counted for one day. */
 export type Feeds = { date: string; count: number; last: 'left' | 'right' | '' };
@@ -15,7 +16,7 @@ export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: str
 /** Settings and progress saved to the user's account (and remembered on this device). */
 export const PERSISTED_KEYS = [
   'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
-  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom',
+  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'contacts',
 ] as const;
 export type PersistedKey = (typeof PERSISTED_KEYS)[number];
 export type PersistedState = Partial<Record<PersistedKey, unknown>>;
@@ -81,6 +82,9 @@ function useNeemaState(seed?: PersistedState) {
   const [feeds, setFeeds] = usePersisted<Feeds>('feeds', { date: '', count: 0, last: '' }, seed);
   const [mood, setMood] = usePersisted<Record<string, Mood>>('mood', {}, seed);
 
+  // Emergency contacts (saved to their own table for signed-in users)
+  const [contacts, setContacts] = usePersisted<EmergencyContact[]>('contacts', [], seed);
+
   // Privacy
   const [pinLock, setPinLock] = usePersisted('pinLock', true, seed);
   const [sharePreg, setSharePreg] = usePersisted('sharePreg', true, seed);
@@ -108,7 +112,7 @@ function useNeemaState(seed?: PersistedState) {
 
   const persisted: PersistedState = {
     discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
-    folic, pills, method, feeds, mood, shopCustom,
+    folic, pills, method, feeds, mood, shopCustom, contacts,
   };
 
   return {
@@ -119,7 +123,7 @@ function useNeemaState(seed?: PersistedState) {
     water, setWater, iron, setIron, activeWeek, setActiveWeek,
     shop, setShop, ttc, setTtc, cycleLen, setCycleLen, periodLen, setPeriodLen, lastPeriod, setLastPeriod,
     pinLock, setPinLock, sharePreg, setSharePreg, shareFp, setShareFp,
-    folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom,
+    folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom, contacts, setContacts,
     messages, setMessages,
   };
 }

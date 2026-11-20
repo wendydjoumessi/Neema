@@ -24,9 +24,10 @@ import { LoadingScreen, NewPasswordScreen } from '@/components/screens/NewPasswo
 import type { PregnancyEntry } from '@/components/screens/PregnancySetupScreen';
 import { supabase } from '@/integrations/supabase/client';
 import { JourneyScreen } from '@/components/screens/JourneyScreen';
+import type { EmergencyContact } from '@/neema/contacts';
 import { BirthScreen } from '@/components/screens/BirthScreen';
 import {
-  CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveBirth, saveConsent,
+  CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveBirth, saveContacts, saveConsent,
   saveMedicalProfile, savePregnancy, saveProfile, signOut, type Account, type Journey, type PregnancyRow, type Profile,
 } from '@/lib/account';
 import { MedicineSafety } from '@/components/screens/MedicineSafety';
@@ -58,6 +59,8 @@ function AppFlow() {
   const [isPartnerMode, setIsPartnerMode] = useState(false);
   const [checklist, setChecklist] = useState(defaultChecklist);
   const [setupError, setSetupError] = useState('');
+  /** Last contacts list saved to the account, so unchanged lists aren't rewritten. */
+  const savedContacts = useRef('[]');
   const recovering = useRef(typeof window !== 'undefined' && window.location.hash.includes('type=recovery'));
 
   const goMain = (acc: Account | null, role: 'mother' | 'partner', id: string) => {
@@ -91,6 +94,7 @@ function AppFlow() {
     try {
       const acc = await loadAccount(id);
       const role = acc.profile?.role ?? selectedRole;
+      savedContacts.current = JSON.stringify(acc.contacts);
       setAccount(acc);
       setUserId(id);
       setUser({ id, name: acc.profile?.full_name || email?.split('@')[0] || '', email: email ?? '', role });
@@ -212,7 +216,7 @@ function AppFlow() {
 
   /** Save settings and progress: preferences go to the profile, the rest to app_state. */
   const handlePersist = useCallback((state: PersistedState) => {
-    const { lang, journey, discreet, city, ...rest } = state;
+    const { lang, journey, discreet, city, contacts, ...rest } = state;
     // A journey that needs dates she hasn't given yet: ask for them.
     if (journey === 'preg' && (pregnancy?.id === 'none' || pregnancy?.birthDate)) setCurrentScreen('setup');
     if (journey === 'pp' && !pregnancy?.birthDate) setCurrentScreen('birth');
@@ -225,6 +229,12 @@ function AppFlow() {
       city: typeof city === 'string' && city ? city : null,
     }).catch(() => undefined);
     saveAppState(userId, rest).catch(() => undefined);
+    const contactsJson = JSON.stringify(contacts ?? []);
+    if (contactsJson !== savedContacts.current) {
+      saveContacts(userId, (contacts as EmergencyContact[]) ?? [])
+        .then(() => { savedContacts.current = contactsJson; })
+        .catch(() => undefined);
+    }
   }, [userId, pregnancy?.id, pregnancy?.birthDate, selectedJourney]);
 
   const toggleChecklistItem = (id: string) => {
@@ -363,6 +373,7 @@ function AppFlow() {
         journey: account.profile?.journey,
         discreet: account.profile?.discreet_mode,
         city: account.profile?.city ?? undefined,
+        contacts: account.contacts,
       };
   const medicalFacts = [
     account?.medical?.blood_group && { k: 'Blood group', v: account.medical.blood_group === 'unknown' ? 'Not known' : account.medical.blood_group },

@@ -239,12 +239,6 @@ export const FACILITIES = [
   { name: 'Hôpital Général de Douala', area: 'Douala', km: '7.5 km', note: 'referral hospital' }
 ];
 
-export const CONTACTS = [
-  { id: 'paul', name: 'Paul Nkeng', role: 'Partner · Neema app · +237 6•• •• •• 18' },
-  { id: 'rose', name: 'Maman Rose', role: 'Mother · SMS only · +237 6•• •• •• 07' },
-  { id: 'clarisse', name: 'Clarisse', role: 'Sister · SMS only · +237 6•• •• •• 52' }
-];
-
 export const T = {
   en: { myProfile: 'My profile', greeting: 'Good afternoon', openProfile: 'Open profile and settings', home: 'Home', ask: 'Ask Neema', diet: 'Diet', fp: 'Planning', fpTtc: 'My cycle', fpAvoid: 'Methods', fpDiscreet: 'Calendar', shop: 'Shopping', sosBig: 'SOS · GET HELP NOW', profile: 'Profile & settings', back: 'Back to Home', journey: 'My journey', privacy: 'Privacy', language: 'Language', contacts: 'Emergency contacts', data: 'My data', security: 'Account security', export: 'Download my data', deleteAll: 'Delete my account and data' },
   fr: { myProfile: 'Mon profil', greeting: 'Bon après-midi', openProfile: 'Ouvrir le profil et les paramètres', home: 'Accueil', ask: 'Demander', diet: 'Nutrition', fp: 'Planning', fpTtc: 'Mon cycle', fpAvoid: 'Méthodes', fpDiscreet: 'Calendrier', shop: 'Achats', sosBig: 'SOS · AIDE IMMÉDIATE', profile: 'Profil et paramètres', back: 'Retour à l’accueil', journey: 'Mon parcours', privacy: 'Confidentialité', language: 'Langue', contacts: 'Contacts d’urgence', data: 'Mes données', security: 'Sécurité du compte', export: 'Télécharger mes données', deleteAll: 'Supprimer mon compte et mes données' }

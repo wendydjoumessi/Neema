@@ -75,7 +75,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     }
     setValidation({});
     run(async () => {
-      const { user, needsConfirmation } = await signUp({ ...result.data, role: defaultRole, journey });
+      const { user, needsConfirmation } = await signUp({ name: result.data.name ?? '', email: result.data.email ?? '', password: result.data.password ?? '', role: defaultRole, journey });
       if (!user) throw new Error('Account creation did not return a user');
       setSignupPassword('');
       if (needsConfirmation) {

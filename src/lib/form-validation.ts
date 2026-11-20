@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { format, isValid, parseISO } from 'date-fns';
+import { normalizePhone } from '@/neema/contacts';
 
 export const signupSchema = z.object({
   name: z.string().trim().min(1, 'Enter your full name.').max(120, 'Use 120 characters or fewer.'),
@@ -18,6 +19,18 @@ export const pregnancyDatingSchema = z.object({
 export const doctorDateSchema = z.object({ doctorDueDate: z.union([z.literal(''), dateSchema]) });
 export const babyNameSchema = z.object({ babyName: z.string().trim().max(60, 'Use 60 characters or fewer for the nickname.') });
 export const pregnancySetupSchema = pregnancyDatingSchema.and(doctorDateSchema).and(babyNameSchema);
+
+/** Emergency contact: shared by the contact form and the account save helper. Phone comes out as +237XXXXXXXXX. */
+export const emergencyContactSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a name.').max(80, 'Use 80 characters or fewer.'),
+  relationship: z.string().trim().max(40, 'Use 40 characters or fewer.'),
+  phone: z.string().transform((value, ctx) => {
+    const phone = normalizePhone(value);
+    if (!phone) { ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Enter a valid phone number, e.g. 6 77 12 34 56.' }); return z.NEVER; }
+    return phone;
+  }),
+  sms: z.boolean(),
+});
 
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   return Object.fromEntries(error.issues.map((issue) => [String(issue.path[0]), issue.message]));

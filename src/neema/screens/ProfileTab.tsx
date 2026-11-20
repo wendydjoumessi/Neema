@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PregnancyData, User } from '@/types/pregnancy';
-import { CONTACTS, JOURNEYS, T } from '../data';
+import { JOURNEYS, T } from '../data';
+import { EmergencyContactsCard } from './EmergencyContacts';
 import { useNeema } from '../store';
 import type { AccountActions, ExtraScreen } from '../NeemaApp';
 import { Card, H1, H2, OutlineButton, PrimaryButton, Segmented, SwitchRow } from '../ui';
@@ -150,16 +151,7 @@ export function ProfileTab({
         </Card>
       )}
 
-      <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
-        <H2>{t.contacts}</H2>
-        {/* TODO: load the user's saved emergency contacts. */}
-        {CONTACTS.map((c) => (
-          <div key={c.id} className="flex min-h-[48px] items-center gap-3">
-            <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-neema-cream font-bold">{c.name.charAt(0)}</span>
-            <span className="flex flex-col"><span className="font-semibold">{c.name}</span><span className="text-[13px] font-medium leading-[18px] text-neema-muted">{c.role}</span></span>
-          </div>
-        ))}
-      </Card>
+      <div id="emergency-contacts"><EmergencyContactsCard title={t.contacts} /></div>
 
       <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
         <H2>{t.data}</H2>
