@@ -7,6 +7,9 @@ import type { EmergencyContact } from './contacts';
 /** Baby feeds counted for one day. */
 export type Feeds = { date: string; count: number; last: 'left' | 'right' | '' };
 export type Mood = 'good' | 'ok' | 'low' | 'hard';
+/** Body & skin: what she has told Neema about her recovery. */
+export type BodyPlan = { checked: boolean; csection: boolean; gap: '' | 'small' | 'wide' };
+export type BodySection = 'activity' | 'skin' | 'ingredients';
 /** Items she adds herself, e.g. from her clinic's maternity list. */
 export type CustomItem = { id: string; name: string; qty?: string; group: 'mother' | 'baby' | 'kit' | 'feed' };
 /** Her changes to Neema's own list items: a new name or quantity, or removed from her list. */
@@ -18,7 +21,7 @@ export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: str
 /** Settings and progress saved to the user's account (and remembered on this device). */
 export const PERSISTED_KEYS = [
   'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
-  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'shopEdits', 'contacts',
+  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'shopEdits', 'contacts', 'bodyPlan', 'moves',
 ] as const;
 export type PersistedKey = (typeof PERSISTED_KEYS)[number];
 export type PersistedState = Partial<Record<PersistedKey, unknown>>;
@@ -68,6 +71,9 @@ function useNeemaState(seed?: PersistedState) {
   const [shop, setShop] = usePersisted<Record<string, boolean>>('shop', {}, seed);
 
   const [shopCustom, setShopCustom] = usePersisted<CustomItem[]>('shopCustom', [], seed);
+  const [bodyPlan, setBodyPlan] = usePersisted<BodyPlan>('bodyPlan', { checked: false, csection: false, gap: '' }, seed);
+  /** Exercises ticked as done, by date. */
+  const [moves, setMoves] = usePersisted<Record<string, string[]>>('moves', {}, seed);
   const [shopEdits, setShopEdits] = usePersisted<Record<string, ShopEdit>>('shopEdits', {}, seed);
 
   // Trying to conceive
@@ -100,6 +106,11 @@ function useNeemaState(seed?: PersistedState) {
     { id: 2, role: 'ai', text: KB[0].text, sources: KB[0].sources },
   ] : []);
 
+  // Screens opened on top of the tabs (Body & skin, and the Profile extras)
+  const [extraId, setExtraId] = useState<string | null>(null);
+  const [bodySection, setBodySection] = useState<BodySection>('activity');
+  const openBody = (section: BodySection) => { setBodySection(section); setNotifOpen(false); setExtraId('body'); };
+
   const openSymptom = (result: string | null = null, word = '') => {
     setSymptomResult(result);
     setDangerWord(word);
@@ -115,7 +126,7 @@ function useNeemaState(seed?: PersistedState) {
 
   const persisted: PersistedState = {
     discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
-    folic, pills, method, feeds, mood, shopCustom, shopEdits, contacts,
+    folic, pills, method, feeds, mood, shopCustom, shopEdits, contacts, bodyPlan, moves,
   };
 
   return {
@@ -127,6 +138,7 @@ function useNeemaState(seed?: PersistedState) {
     shop, setShop, ttc, setTtc, cycleLen, setCycleLen, periodLen, setPeriodLen, lastPeriod, setLastPeriod,
     pinLock, setPinLock, sharePreg, setSharePreg, shareFp, setShareFp,
     folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom, shopEdits, setShopEdits, contacts, setContacts,
+    bodyPlan, setBodyPlan, moves, setMoves, extraId, setExtraId, bodySection, setBodySection, openBody,
     messages, setMessages,
   };
 }

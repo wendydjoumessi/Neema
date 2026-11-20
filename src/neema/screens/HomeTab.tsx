@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import {
   MessageCircle, Leaf, ShoppingBag, Activity, Sun, Droplet, ChevronRight, Ruler, NotebookText, CalendarHeart, ListChecks,
-  Scale, MapPin, Stethoscope, Syringe, Pill as PillIcon, ShieldCheck, HeartHandshake, Baby,
+  Scale, MapPin, Stethoscope, Syringe, Pill as PillIcon, ShieldCheck, HeartHandshake, Baby, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import pregTipPhoto from '@/assets/about-health-nutrition.jpg';
@@ -154,6 +154,10 @@ function PregnantHome({ pregnancy }: { pregnancy: PregnancyData }) {
           <span className="text-[13px] font-semibold leading-[18px] text-neema-success-ink">THIS WEEK’S DIET TIP</span>
           <span className="font-semibold">Folong with groundnuts: iron, folate and protein in one pot</span>
         </Row>
+        <Row Icon={Sparkles} ink="text-[#4A3F6B]" onClick={() => s.openBody('skin')}>
+          <span className="font-semibold">Skin changes & safe products</span>
+          <span className="text-sm leading-5 text-neema-muted-strong">Stretch marks, dark patches, ingredient checker</span>
+        </Row>
       </Card>
     </>
   );
@@ -205,6 +209,25 @@ function AfterBirthHome({ pregnancy }: { pregnancy: PregnancyData }) {
         <p className="relative">{stage}</p>
       </Hero>
       <Tip photo={ppTipPhoto} alt="A newborn’s feet wrapped in a soft white towel" title="Breastfeed on demand, day and night" text="Give only breast milk for the first 6 months: no water or other drinks, even in the heat. Feeding often helps your milk supply." source="WHO infant feeding recommendations" />
+      <section aria-labelledby="body-card" className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+        <div className="flex items-start gap-3">
+          <span aria-hidden="true" className="flex h-12 w-12 flex-none items-center justify-center rounded-2xl bg-neema-lilac text-[#4A3F6B]"><Sparkles className="h-6 w-6" /></span>
+          <div className="flex flex-col">
+            <h2 id="body-card" className="text-xl font-semibold leading-7">Your body after birth</h2>
+            <p className="text-[15px] leading-[22px] text-neema-muted-strong">Getting your tummy back safely, stretch marks and skin care, without harmful products.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => s.openBody('activity')} className="flex min-h-[64px] flex-col items-start justify-center rounded-xl bg-neema-success-soft px-3.5 py-2 text-left active:scale-[0.98]">
+            <span className="font-semibold">Tummy & exercise</span>
+            <span className="text-[13px] font-medium leading-[18px] text-neema-success-ink">{s.bodyPlan.checked ? 'Building strength' : 'Gentle start'}</span>
+          </button>
+          <button type="button" onClick={() => s.openBody('skin')} className="flex min-h-[64px] flex-col items-start justify-center rounded-xl bg-neema-ochre-soft px-3.5 py-2 text-left active:scale-[0.98]">
+            <span className="font-semibold">Stretch marks & skin</span>
+            <span className="text-[13px] font-medium leading-[18px] text-neema-ochre-ink">What really helps</span>
+          </button>
+        </div>
+      </section>
       <QuickGrid items={[
         quickAsk('Feeding, sleep, recovery', () => s.setTab('ask')),
         { label: 'What to eat', sub: 'Foods for recovery and feeding', Icon: Leaf, bg: 'bg-neema-success-soft', ink: 'text-neema-success-ink', onClick: () => s.setTab('diet') },
