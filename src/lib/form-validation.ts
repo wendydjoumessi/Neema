@@ -32,6 +32,12 @@ export const emergencyContactSchema = z.object({
   sms: z.boolean(),
 });
 
+/** A shopping list item she adds or edits. */
+export const shopItemSchema = z.object({
+  name: z.string().trim().min(1, 'Enter the item name.').max(80, 'Use 80 characters or fewer.'),
+  qty: z.string().trim().max(80, 'Use 80 characters or fewer.'),
+});
+
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   return Object.fromEntries(error.issues.map((issue) => [String(issue.path[0]), issue.message]));
 }
