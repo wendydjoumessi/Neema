@@ -218,15 +218,16 @@ export const QUICK_INGREDIENTS = ['Hydroquinone', 'Clobetasol', 'Mercury', 'Reti
  * Ingredients that help stretch marks fade (FR-SKIN-03). Ingredient names only, never brands or products.
  * Honest framing: they soften and fade marks; none removes them completely.
  */
-export const STRETCH_HELPERS: { name: string; what: string; when: 'now' | 'later' }[] = [
-  { name: 'Hyaluronic acid', what: 'The best-studied for new, red or dark marks. Helps them look softer and flatter.', when: 'now' },
-  { name: 'Centella asiatica (gotu kola)', what: 'A plant extract that supports skin repair and may help marks fade.', when: 'now' },
-  { name: 'Shea butter (karité)', what: 'Pure, unrefined. Eases dryness and itching and softens the skin.', when: 'now' },
-  { name: 'Cocoa butter', what: 'Rich moisturiser that keeps stretching skin supple.', when: 'now' },
-  { name: 'Sweet almond oil', what: 'Gentle massage oil; daily massage may help new marks. Avoid if allergic to nuts.', when: 'now' },
-  { name: 'Coconut oil', what: 'Moisturises and soothes itchy skin.', when: 'now' },
-  { name: 'Tretinoin (prescription)', what: 'Can improve newer marks, but only from a doctor, and never while pregnant or breastfeeding.', when: 'later' },
-  { name: 'Glycolic acid', what: 'May smooth older marks. Start low-strength after breastfeeding, or ask your health worker.', when: 'later' },
+export type HelperIcon = 'drop' | 'leaf' | 'shea' | 'cocoa' | 'almond' | 'coconut' | 'tube';
+export const STRETCH_HELPERS: { name: string; short: string; what: string; icon: HelperIcon; when: 'now' | 'later' }[] = [
+  { name: 'Hyaluronic acid', short: 'Best for new marks', icon: 'drop', what: 'The best-studied for new, red or dark marks. Helps them look softer and flatter.', when: 'now' },
+  { name: 'Centella asiatica', short: 'Helps skin repair', icon: 'leaf', what: 'Also called gotu kola. A plant extract that supports skin repair and may help marks fade.', when: 'now' },
+  { name: 'Shea butter', short: 'Softens, eases itching', icon: 'shea', what: 'Karité. Choose pure, unrefined shea. Eases dryness and itching and softens the skin.', when: 'now' },
+  { name: 'Cocoa butter', short: 'Keeps skin supple', icon: 'cocoa', what: 'A rich moisturiser that keeps stretching skin supple.', when: 'now' },
+  { name: 'Sweet almond oil', short: 'For daily massage', icon: 'almond', what: 'A gentle massage oil; daily massage may help new marks. Avoid if you are allergic to nuts.', when: 'now' },
+  { name: 'Coconut oil', short: 'Soothes dry skin', icon: 'coconut', what: 'Moisturises and soothes itchy, dry skin.', when: 'now' },
+  { name: 'Tretinoin', short: 'Prescription only', icon: 'tube', what: 'Can improve newer marks, but only from a doctor, and never while pregnant or breastfeeding.', when: 'later' },
+  { name: 'Glycolic acid', short: 'Low strength first', icon: 'tube', what: 'May smooth older marks. Start with a low strength after breastfeeding, or ask your health worker.', when: 'later' },
 ];
 
 /** Finds every known ingredient in what she typed or pasted from a label. */

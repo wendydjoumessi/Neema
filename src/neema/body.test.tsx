@@ -56,13 +56,15 @@ describe('body and skin after birth', () => {
     render(<NeemaApp user={user} pregnancy={afterBirth} onLogout={vi.fn()} extras={[]} />);
     fireEvent.click(screen.getByRole('button', { name: /Stretch marks & skin/ }));
     expect(screen.getByRole('heading', { name: 'Can stretch marks be wiped away?' })).toBeInTheDocument();
-    expect(screen.getByText(/no cream or oil can make them disappear completely/)).toBeInTheDocument();
+    expect(screen.getByText('Not completely, but they fade a lot.')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Stretch marks fade over time/ })).toBeInTheDocument();
     // Ingredient names only: no brands or products
     expect(screen.getByRole('heading', { name: 'Ingredients that help marks fade' })).toBeInTheDocument();
-    for (const name of ['Hyaluronic acid', 'Centella asiatica (gotu kola)', 'Shea butter (karité)', 'Cocoa butter', 'Sweet almond oil', 'Coconut oil']) {
-      expect(screen.getByText(name)).toBeInTheDocument();
+    for (const name of ['Hyaluronic acid', 'Centella asiatica', 'Shea butter', 'Cocoa butter', 'Sweet almond oil', 'Coconut oil', 'Tretinoin']) {
+      expect(screen.getByRole('button', { name: new RegExp(`^${name}`) })).toBeInTheDocument();
     }
-    expect(screen.getByText('Tretinoin (prescription)')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Hyaluronic acid/ }));
+    expect(screen.getByRole('status')).toHaveTextContent(/best-studied for new/);
     expect(document.body.textContent).not.toMatch(/vaseline|nivea|bio-oil|palmer|retin-a|accutane|®|™/i);
     fireEvent.click(screen.getByRole('button', { name: /Check a product’s ingredients/ }));
     fireEvent.change(screen.getByLabelText(/Type an ingredient/), { target: { value: 'Mercurous chloride, shea butter' } });
