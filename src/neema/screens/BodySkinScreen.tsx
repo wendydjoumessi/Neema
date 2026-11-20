@@ -1,9 +1,9 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, Volume2, Square, AlertTriangle, Search, Sun, Droplets, Ban, Sparkles, Leaf, Lock, Unlock } from 'lucide-react';
+import { ChevronDown, Volume2, Square, AlertTriangle, Search, Sun, Droplets, Ban, Leaf, Lock, Unlock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PregnancyData } from '@/types/pregnancy';
 import {
-  CANT_CHANGE, CAN_CHANGE, MOVES_BUILD, MOVES_FULL, MOVES_GENERAL, MOVES_GENTLE, MOVES_PREG, QUICK_INGREDIENTS, SAFETY_LABEL,
+  CANT_CHANGE, CAN_CHANGE, STRETCH_HELPERS, MOVES_BUILD, MOVES_FULL, MOVES_GENERAL, MOVES_GENTLE, MOVES_PREG, QUICK_INGREDIENTS, SAFETY_LABEL,
   TUMMY_MYTHS, TUMMY_STOP, checkIngredients, type Move, type SafetyClass,
 } from '../body';
 import { daysBetween, todayIso } from '../cycle';
@@ -288,18 +288,41 @@ function SkinSection({ go }: { go: (to: BodySection | 'diet') => void }) {
         </p>
       </section>
 
+      <Card className="flex flex-col gap-3">
+        <H2>Ingredients that help marks fade</H2>
+        <p className="text-[15px] leading-[22px] text-neema-muted-strong">
+          Look for these names on the ingredient list of any cream or oil. Neema doesn’t recommend brands: a simple, cheap product with the right ingredient works as well as an expensive one. Safe {nursing}.
+        </p>
+        <ul className="flex flex-col">
+          {STRETCH_HELPERS.filter((h) => h.when === 'now').map((h) => (
+            <li key={h.name} className="flex gap-3 border-b border-neema-line py-2.5 last:border-b-0">
+              <span aria-hidden="true" className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-neema-success-soft text-neema-success-ink"><Droplets className="h-4 w-4" /></span>
+              <span className="flex flex-col"><span className="font-semibold">{h.name}</span><span className="text-[15px] leading-[22px] text-neema-muted-strong">{h.what}</span></span>
+            </li>
+          ))}
+        </ul>
+        <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-2.5 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+          Massage in twice a day for at least 3 months. Results are gradual, and work best on newer marks.
+        </p>
+      </Card>
+
       <Card className="flex flex-col gap-3.5">
-        <H2>What helps{pp ? ' (safe while breastfeeding)' : ''}</H2>
-        <Bullet Icon={Droplets} tint="bg-neema-ochre-soft text-neema-ochre-ink" title="Moisturise twice a day">Pure unrefined shea butter (karité), cocoa butter or coconut oil. Massage gently into the skin. They soothe and soften; they don’t erase marks.</Bullet>
-        <Bullet Icon={Sparkles} tint="bg-neema-lilac text-[#4A3F6B]" title="Hyaluronic acid cream">May help newer, darker marks look softer. Safe {nursing}.</Bullet>
-        <Bullet Icon={Sun} tint="bg-neema-primary-soft text-neema-dark" title="Keep marks out of the sun">Sun darkens marks and dark patches. Cover up, or use a mineral sunscreen.</Bullet>
+        <H2>Habits that help too</H2>
+        <Bullet Icon={Sun} tint="bg-neema-primary-soft text-neema-dark" title="Keep marks out of the sun">Sun darkens marks and dark patches. Cover up, or use a mineral sunscreen (zinc oxide or titanium dioxide).</Bullet>
         <Bullet Icon={Leaf} tint="bg-neema-success-soft text-neema-success-ink" title="Water, good food and movement">Healthy skin heals better. Gradual weight change is easier on the skin than fast loss.</Bullet>
       </Card>
 
-      {pp && (
-        <Card className="flex flex-col gap-2">
-          <H2>After you stop breastfeeding</H2>
-          <p className="text-[15px] leading-[22px]">If marks still bother you, a doctor or dermatologist can suggest prescription creams such as tretinoin, or treatments like microneedling. On dark skin, laser should only be done by an experienced dermatologist, as it can leave dark patches.</p>
+      {(pp || s.journey === 'ttc' || s.journey === 'avoid') && (
+        <Card className="flex flex-col gap-3">
+          <H2>{pp ? 'After you stop breastfeeding' : 'When you’re not pregnant or breastfeeding'}</H2>
+          <ul className="flex flex-col">
+            {STRETCH_HELPERS.filter((h) => h.when === 'later').map((h) => (
+              <li key={h.name} className="flex flex-col border-b border-neema-line py-2.5 last:border-b-0">
+                <span className="font-semibold">{h.name}</span><span className="text-[15px] leading-[22px] text-neema-muted-strong">{h.what}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[15px] leading-[22px]">A dermatologist can also offer treatments such as microneedling. On dark skin, laser should only be done by an experienced dermatologist, as it can leave dark patches.</p>
         </Card>
       )}
 
