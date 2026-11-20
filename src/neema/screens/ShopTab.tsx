@@ -1,106 +1,289 @@
-import { useState } from 'react';
-import { BookOpen, ChevronDown } from 'lucide-react';
+import { FormEvent, ReactNode, useState } from 'react';
+import { ChevronDown, Share2, Plus, Trash2, PartyPopper, CalendarClock, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SHOP, SHOP_CATS, SHOP_STAGES, STAGE_TAG, ShopItem } from '../data';
-import { useNeema } from '../store';
-import { CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
+import { BAGS, READY, SHOP, SHOP_CATS, SHOP_STAGES, ShopItem } from '../data';
+import { useNeema, type CustomItem } from '../store';
+import { Card, CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
 
-export function ShopTab() {
+/** When each stage opens (by pregnancy week) and when it should be done. */
+const STAGE_TIMING: Record<string, { from: number; by: string }> = {
+  t2: { from: 14, by: 'Get by week 28' },
+  t3: { from: 24, by: 'Get by week 32' },
+  bag: { from: 30, by: 'Pack by week 36' },
+};
+const STAGE_ORDER = ['t2', 't3', 'bag'] as const;
+
+type View = 'now' | 'bag' | 'all' | 'pp';
+type Row = { id: string; name: string; qty?: string; tip?: string; guide?: string[]; ess: boolean; custom?: boolean };
+
+const toRow = (it: ShopItem): Row => ({ id: it.id, name: it.name, qty: it.qty, tip: it.tip, guide: 'guide' in it ? it.guide : undefined, ess: it.ess });
+const customRow = (c: CustomItem): Row => ({ id: c.id, name: c.name, qty: 'Added by you', ess: true, custom: true });
+
+function ItemRow({ row }: { row: Row }) {
   const s = useNeema();
+  const [open, setOpen] = useState(false);
+  const on = !!s.shop[row.id];
+  const hasMore = !!(row.tip || row.guide);
+  return (
+    <li className="border-b border-neema-line last:border-b-0">
+      <div className="flex items-center gap-2 py-1.5">
+        <button type="button" aria-label={`Got it: ${row.name}`} aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [row.id]: !on })} className="-ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
+          <CheckBox on={on} />
+        </button>
+        <button type="button" onClick={() => (hasMore ? setOpen(!open) : s.setShop({ ...s.shop, [row.id]: !on }))} aria-expanded={hasMore ? open : undefined}
+          className="flex min-h-[52px] min-w-0 flex-1 items-center gap-2 text-left">
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="flex flex-wrap items-center gap-x-2">
+              <span className={cn('font-semibold', on && 'text-neema-muted line-through')}>{row.name}</span>
+              {!row.ess && <span className="rounded-full bg-neema-sand px-2 text-[13px] font-semibold leading-[20px] text-neema-muted-strong">Optional</span>}
+            </span>
+            {row.qty && <span className="text-[15px] leading-[21px] text-neema-muted">{row.qty}</span>}
+          </span>
+          {hasMore && <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />}
+        </button>
+        {row.custom && (
+          <button type="button" aria-label={`Remove ${row.name}`} onClick={() => s.setShopCustom(s.shopCustom.filter((c) => c.id !== row.id))} className="flex h-12 w-12 flex-none items-center justify-center rounded-xl text-neema-muted hover:bg-neema-cream">
+            <Trash2 className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+      {open && (
+        <div className="mb-3 ml-10 flex flex-col gap-2 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
+          {row.tip && <p>{row.tip}</p>}
+          {row.guide && (
+            <>
+              <div className="text-[13px] font-semibold uppercase leading-[18px] text-neema-dark">How to use</div>
+              <ol className="flex list-decimal flex-col gap-1.5 pl-5">{row.guide.map((g) => <li key={g}>{g}</li>)}</ol>
+            </>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+function Section({ title, note, rows, badge, children }: { title: string; note?: string; rows: Row[]; badge?: string; children?: ReactNode }) {
+  const s = useNeema();
+  const done = rows.filter((r) => s.shop[r.id]).length;
+  return (
+    <Card className="flex flex-col px-4 pb-2 pt-4">
+      <div className="flex items-baseline justify-between gap-2 px-1">
+        <H2>{title}</H2>
+        <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-neema-muted-strong">{badge ?? `${done} of ${rows.length}`}</span>
+      </div>
+      {note && <p className="mt-1 px-1 text-[15px] leading-[21px] text-neema-muted-strong">{note}</p>}
+      <ul className="mt-1 flex flex-col">{rows.map((r) => <ItemRow key={r.id} row={r} />)}</ul>
+      {children}
+    </Card>
+  );
+}
+
+function AddItem({ group, label }: { group: CustomItem['group']; label: string }) {
+  const s = useNeema();
+  const [name, setName] = useState('');
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const n = name.trim();
+    if (!n) return;
+    s.setShopCustom([...s.shopCustom, { id: `c_${Date.now()}`, name: n.slice(0, 80), group }]);
+    setName('');
+  };
+  return (
+    <form onSubmit={submit} className="mb-2 mt-2 flex gap-2 border-t border-neema-line pt-3">
+      <label htmlFor={`add-${group}`} className="sr-only">{label}</label>
+      <input id={`add-${group}`} value={name} onChange={(e) => setName(e.target.value)} placeholder={label}
+        className="h-12 min-w-0 flex-1 rounded-xl border border-neema-border bg-white px-3 text-base" />
+      <button type="submit" aria-label="Add item" disabled={!name.trim()} className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-neema-dark text-white disabled:opacity-40">
+        <Plus className="h-5 w-5" />
+      </button>
+    </form>
+  );
+}
+
+function ReadinessCard() {
+  const s = useNeema();
+  const done = READY.filter((r) => s.shop[r.id]).length;
+  return (
+    <section className="flex flex-col rounded-2xl bg-neema-lilac px-5 pb-3 pt-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <H2>Ready for labour?</H2>
+        <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-[#4A3F6B]">{done} of {READY.length}</span>
+      </div>
+      <p className="mt-1 text-[15px] leading-[21px]">Not things to buy, but the plans that matter most when labour starts.</p>
+      <ul className="mt-1 flex flex-col">
+        {READY.map((r) => {
+          const on = !!s.shop[r.id];
+          return (
+            <li key={r.id}>
+              <button type="button" aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [r.id]: !on })} className="flex min-h-[60px] w-full items-start gap-3 border-b border-[#D9D2EA] py-2.5 text-left last:border-b-0">
+                <span className="mt-0.5"><CheckBox on={on} tone="ink" /></span>
+                <span className="flex flex-col"><span className="font-semibold">{r.label}</span><span className="text-[15px] leading-[21px] text-neema-muted-strong">{r.sub}</span></span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+export function ShopTab({ week = 20 }: { week?: number }) {
+  const s = useNeema();
+  const afterBirth = s.journey === 'pp';
+  const [view, setView] = useState<View>(afterBirth ? 'pp' : 'now');
   const [groupBy, setGroupBy] = useState<'cat' | 'stage'>('cat');
   const [essOnly, setEssOnly] = useState(false);
-  const [openGuide, setOpenGuide] = useState('');
+  const [showNext, setShowNext] = useState(false);
+  const [shared, setShared] = useState('');
 
-  const list = SHOP.filter((it) => !essOnly || it.ess);
-  const done = list.filter((it) => s.shop[it.id]).length;
-  const pct = list.length ? Math.round((100 * done) / list.length) : 0;
-  const groups = (groupBy === 'cat' ? SHOP_CATS : SHOP_STAGES)
-    .map((g) => ({ ...g, items: list.filter((it) => (groupBy === 'cat' ? it.cat : it.when) === g.id) }))
-    .filter((g) => g.items.length);
-  const catTitle = (id: string) => SHOP_CATS.find((c) => c.id === id)?.title ?? '';
+  const custom = (g: CustomItem['group']) => s.shopCustom.filter((c) => c.group === g).map(customRow);
+  const ppMother = SHOP.filter((i) => i.cat === 'mother' && (i.when === 'pp' || ['pads', 'bras', 'nipple'].includes(i.id))).map(toRow);
+  const ppFeed = [...SHOP.filter((i) => i.cat === 'feed').map(toRow), ...custom('feed')];
+  const ppBaby = SHOP.filter((i) => i.cat === 'baby' && (i.when === 'pp' || ['nappies', 'cotton', 'soap', 'thermo', 'net'].includes(i.id))).map(toRow);
+  // After birth, progress counts only what she still needs now (not the hospital bag).
+  const essentials = afterBirth
+    ? [...ppMother, ...ppFeed, ...ppBaby].filter((r) => r.ess)
+    : [...SHOP.filter((i) => i.ess).map(toRow), ...s.shopCustom.map(customRow)];
+  const essDone = essentials.filter((r) => s.shop[r.id]).length;
+  const pct = essentials.length ? Math.round((100 * essDone) / essentials.length) : 0;
+  const bagRows = SHOP.filter((i) => i.when === 'bag');
+  const bagDone = bagRows.filter((i) => s.shop[i.id]).length + s.shopCustom.filter((c) => c.group !== 'feed' && s.shop[c.id]).length;
+  const bagTotal = bagRows.length + s.shopCustom.filter((c) => c.group !== 'feed').length;
 
-  const Item = ({ it }: { it: ShopItem }) => {
-    const on = !!s.shop[it.id];
-    const open = openGuide === it.id;
-    return (
-      <article className="flex flex-col gap-2.5 rounded-2xl bg-white px-4 py-3.5 shadow-neema-card">
-        <div className="flex items-start gap-3">
-          <button type="button" aria-label={`Got it: ${it.name}`} aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [it.id]: !on })} className="-my-2 -ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
-            <CheckBox on={on} />
-          </button>
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className={cn('font-semibold', on && 'line-through')}>{it.name}</span>
-            <span className="text-[15px] leading-[21px] text-neema-muted">{it.qty}</span>
-            <div className="flex flex-wrap gap-1.5">
-              <span className={cn('rounded-full px-2 text-[13px] font-semibold leading-[20px]', it.ess ? 'bg-neema-success-soft text-neema-success-ink' : 'bg-neema-sand')}>
-                {it.ess ? 'Essential' : 'Nice to have'}
-              </span>
-              <span className="rounded-full bg-neema-cream px-2 text-[13px] font-semibold leading-[20px]">
-                {groupBy === 'cat' ? STAGE_TAG[it.when as keyof typeof STAGE_TAG] : catTitle(it.cat)}
-              </span>
-            </div>
-            <div className="text-[15px] leading-[22px]">{it.tip}</div>
-          </div>
-        </div>
-        {it.guide && (
-          <>
-            <button type="button" aria-expanded={open} onClick={() => setOpenGuide(open ? '' : it.id)} className="flex min-h-[48px] items-center justify-between rounded-xl border border-[#E3C9BE] bg-neema-primary-soft px-3.5 text-[15px] font-semibold text-neema-dark">
-              <span className="flex items-center gap-2"><BookOpen className="h-[18px] w-[18px]" />How to use</span>
-              <ChevronDown className={cn('h-[18px] w-[18px] transition-transform', open && 'rotate-180')} />
-            </button>
-            {open && (
-              <ol className="flex list-decimal flex-col gap-1.5 rounded-xl bg-neema-cream py-3 pl-8 pr-3.5 text-[15px] leading-[22px]">
-                {it.guide.map((step) => <li key={step}>{step}</li>)}
-              </ol>
-            )}
-          </>
-        )}
-      </article>
-    );
+  const open = STAGE_ORDER.filter((st) => week >= STAGE_TIMING[st].from);
+  const next = STAGE_ORDER.find((st) => week < STAGE_TIMING[st].from);
+  const stageRows = (st: string) => SHOP.filter((i) => i.when === st && !(essOnly && !i.ess)).map(toRow);
+  const nowRows = open.flatMap((st) => stageRows(st)).filter((r) => !s.shop[r.id]);
+
+  const share = async () => {
+    const todo = (view === 'bag' ? [...bagRows.map(toRow), ...custom('mother'), ...custom('baby'), ...custom('kit')]
+      : view === 'pp' ? [...ppMother, ...ppFeed, ...ppBaby]
+        : essentials).filter((r) => !s.shop[r.id]);
+    const text = `Neema checklist: still needed\n${todo.map((r) => `• ${r.name}${r.qty && !r.custom ? ` (${r.qty})` : ''}`).join('\n')}`;
+    try {
+      if (navigator.share) { await navigator.share({ title: 'Neema checklist', text }); setShared('Shared.'); return; }
+    } catch { /* cancelled: fall back to WhatsApp */ }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    setShared('Opening WhatsApp…');
   };
+
+  const views = afterBirth
+    ? [{ id: 'pp' as View, label: 'After birth' }, { id: 'all' as View, label: 'Everything' }]
+    : [{ id: 'now' as View, label: 'Get now' }, { id: 'bag' as View, label: 'Hospital bag' }, { id: 'all' as View, label: 'Everything' }];
 
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 p-4">
       <div>
-        <H1>Baby &amp; mother checklist</H1>
-        <p className="mt-1 text-neema-muted-strong">Everything for you, your baby and your delivery, in one list.</p>
+        <H1>{afterBirth ? 'After-birth checklist' : 'Getting ready for baby'}</H1>
+        <p className="mt-1 text-neema-muted-strong">{afterBirth ? 'Only what helps now. Breastfeeding itself needs no equipment.' : 'What to get, and when. You don’t need everything at once.'}</p>
       </div>
 
+      {/* Summary */}
       <section className="flex flex-col gap-2.5 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
         <div className="flex items-baseline justify-between">
-          <span className="text-lg font-semibold leading-6">{done} of {list.length} ready</span>
+          <span className="text-lg font-semibold leading-6">Essentials: {essDone} of {essentials.length} ready</span>
           <span className="font-bold text-neema-success-ink">{pct}%</span>
         </div>
-        <div className="h-3 overflow-hidden rounded-full bg-neema-sand" role="img" aria-label={`${done} of ${list.length} items ready`}>
+        <div className="h-3 overflow-hidden rounded-full bg-neema-sand" role="img" aria-label={`${essDone} of ${essentials.length} essentials ready`}>
           <div className="h-full rounded-full bg-neema-success" style={{ width: `${pct}%` }} />
         </div>
-        <div className="text-[15px] leading-[21px] text-neema-muted">Unticked hospital-bag items appear in your reminders at weeks 32 and 36.</div>
+        {!afterBirth && (
+          <div className="flex items-center gap-2 text-[15px] leading-[21px] text-neema-muted-strong">
+            <CalendarClock className="h-[18px] w-[18px] flex-none" />
+            <span>Week {week} · Hospital bag {bagDone} of {bagTotal} packed{week >= 32 && bagDone < bagTotal ? ' — pack it by week 36' : ''}</span>
+          </div>
+        )}
+        <button type="button" onClick={share} className="mt-1 flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">
+          <Share2 className="h-5 w-5" /> Share the list with family
+        </button>
+        {shared && <p role="status" className="text-center text-[15px] text-neema-muted-strong">{shared}</p>}
       </section>
 
-      <div className="flex flex-col gap-2">
-        <Segmented label="Group the list" value={groupBy} onChange={setGroupBy} options={[{ id: 'cat', label: 'By category' }, { id: 'stage', label: 'By trimester' }]} />
-        <div className="rounded-[14px] bg-white px-4 shadow-sm">
-          <SwitchRow label="Essentials only" on={essOnly} onToggle={() => setEssOnly(!essOnly)} className="min-h-[56px]" />
-        </div>
-      </div>
+      <Segmented label="Show" value={view} onChange={setView} options={views} />
 
-      {groups.map((g) => (
-        <section key={g.id} className="flex flex-col gap-2.5">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-baseline justify-between gap-2">
-              <H2>{g.title}</H2>
-              <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-neema-muted-strong">
-                {g.items.filter((it) => s.shop[it.id]).length} of {g.items.length}
-              </span>
+      {view === 'now' && (
+        <>
+          {open.length === 0 ? (
+            <Card className="flex flex-col gap-2">
+              <ShieldCheck className="h-7 w-7 text-neema-success-ink" />
+              <H2>Nothing to buy yet</H2>
+              <p className="text-neema-muted-strong">In the first trimester, your energy and money are best spent on antenatal visits, iron and folic acid, and good food. Many families start getting things ready from week 14.</p>
+            </Card>
+          ) : nowRows.length === 0 ? (
+            <Card className="flex flex-col gap-2">
+              <PartyPopper className="h-7 w-7 text-neema-success-ink" />
+              <H2>You’re up to date</H2>
+              <p className="text-neema-muted-strong">Everything for this stage is ticked.{next ? ` More from week ${STAGE_TIMING[next].from}.` : ''}</p>
+            </Card>
+          ) : (
+            open.map((st) => {
+              const rows = stageRows(st).filter((r) => !s.shop[r.id]);
+              if (!rows.length) return null;
+              const title = SHOP_STAGES.find((x) => x.id === st)!.title.split(' · ')[0];
+              return <Section key={st} title={st === 'bag' ? 'Hospital bag' : title} badge={STAGE_TIMING[st].by} rows={rows} />;
+            })
+          )}
+          {week >= 28 && <ReadinessCard />}
+          {next && (
+            <Card className="flex flex-col gap-2 py-4">
+              <button type="button" aria-expanded={showNext} onClick={() => setShowNext(!showNext)} className="flex min-h-[48px] items-center justify-between gap-2 text-left">
+                <span className="flex flex-col">
+                  <span className="font-semibold">Coming up from week {STAGE_TIMING[next].from}</span>
+                  <span className="text-[15px] leading-[21px] text-neema-muted-strong">{stageRows(next).length} items · {STAGE_TIMING[next].by.toLowerCase()}</span>
+                </span>
+                <ChevronDown className={cn('h-5 w-5 text-neema-muted transition-transform', showNext && 'rotate-180')} />
+              </button>
+              {showNext && <ul className="flex flex-col">{stageRows(next).map((r) => <ItemRow key={r.id} row={r} />)}</ul>}
+            </Card>
+          )}
+        </>
+      )}
+
+      {view === 'bag' && (
+        <>
+          <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+            Pack by week 36 and keep the bags by the door. Labour can start early.
+          </p>
+          {BAGS.map((b) => (
+            <Section key={b.id} title={b.title} note={b.note}
+              rows={[...SHOP.filter((i) => i.when === 'bag' && i.cat === b.id).map(toRow), ...custom(b.id as CustomItem['group'])]}>
+              <AddItem group={b.id as CustomItem['group']} label={b.id === 'kit' ? 'Add an item from your clinic’s list' : 'Add your own item'} />
+            </Section>
+          ))}
+          <ReadinessCard />
+        </>
+      )}
+
+      {view === 'pp' && (
+        <>
+          <Section title="For you" rows={ppMother} />
+          <Section title="Feeding" note={SHOP_CATS.find((c) => c.id === 'feed')!.note} rows={ppFeed}>
+            <AddItem group="feed" label="Add your own item" />
+          </Section>
+          <Section title="For baby" rows={ppBaby} />
+        </>
+      )}
+
+      {view === 'all' && (
+        <>
+          <div className="flex flex-col gap-2">
+            <Segmented label="Group the list" value={groupBy} onChange={setGroupBy} options={[{ id: 'cat', label: 'By category' }, { id: 'stage', label: 'By stage' }]} />
+            <div className="rounded-[14px] bg-white px-4 shadow-sm">
+              <SwitchRow label="Essentials only" on={essOnly} onToggle={() => setEssOnly(!essOnly)} className="min-h-[56px]" />
             </div>
-            {g.note && <p className="text-[15px] leading-[21px] text-neema-muted-strong">{g.note}</p>}
           </div>
-          {g.items.map((it) => <Item key={it.id} it={it} />)}
-        </section>
-      ))}
+          {(groupBy === 'cat' ? SHOP_CATS : SHOP_STAGES).map((g) => {
+            const rows = [
+              ...SHOP.filter((it) => (groupBy === 'cat' ? it.cat : it.when) === g.id && !(essOnly && !it.ess)).map(toRow),
+              ...(groupBy === 'cat' ? custom(g.id as CustomItem['group']) : []),
+            ];
+            return rows.length ? <Section key={g.id} title={g.title} note={g.note} rows={rows} /> : null;
+          })}
+        </>
+      )}
 
       <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
-        WHO recommends breastfeeding only for baby’s first 6 months. Choose unperfumed products for baby and never use skin lighteners. Lay baby on their back on a firm, flat surface, under the net.
+        Choose unperfumed products for baby, and never use skin lighteners or talc. Lay baby on their back on a firm, flat surface, under a treated net.
       </p>
     </div>
   );

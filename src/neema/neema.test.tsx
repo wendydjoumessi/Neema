@@ -72,8 +72,23 @@ describe('Neema app', () => {
   it('opens a pump guide on the checklist', () => {
     setup();
     fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Shopping' }));
-    fireEvent.click(screen.getAllByRole('button', { name: /How to use/ })[1]);
+    // Week 24: trimester 2 and 3 items are due now; the hospital bag is coming up later.
+    expect(screen.getByRole('heading', { name: 'Trimester 2' })).toBeInTheDocument();
+    expect(screen.getByText('Coming up from week 30')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Everything' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Manual breast pump/ }));
     expect(screen.getByText(/Centre the nipple in the funnel/)).toBeInTheDocument();
+  });
+
+  it('packs the hospital bag with the clinic’s own items', () => {
+    setup();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Shopping' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Hospital bag' }));
+    expect(screen.getByRole('heading', { name: 'Ready for labour?' })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Add an item from your clinic’s list'), { target: { value: 'Bleach, 1 bottle' } });
+    fireEvent.submit(screen.getByLabelText('Add an item from your clinic’s list').closest('form')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Got it: Bleach, 1 bottle' }));
+    expect(screen.getByRole('button', { name: 'Got it: Bleach, 1 bottle' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('opens an earlier screen from Profile and logs out', () => {

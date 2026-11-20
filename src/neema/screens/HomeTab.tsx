@@ -121,7 +121,8 @@ function PregnantHome({ pregnancy }: { pregnancy: PregnancyData }) {
   const daysToGo = Math.max(0, Math.ceil((new Date(pregnancy.dueDate).getTime() - Date.now()) / 86400000));
   const progress = Math.min(100, Math.round((week / 40) * 100));
   const size = babySizeFor(week);
-  const shopDone = SHOP.filter((i) => s.shop[i.id]).length;
+  const essentials = SHOP.filter((i) => i.ess);
+  const shopDone = essentials.filter((i) => s.shop[i.id]).length;
   return (
     <>
       <Hero ochre>
@@ -143,7 +144,7 @@ function PregnantHome({ pregnancy }: { pregnancy: PregnancyData }) {
       <QuickGrid items={[
         quickAsk('Questions, any time', () => s.setTab('ask')),
         { label: 'What to eat', sub: `Local foods for week ${week}`, Icon: Leaf, bg: 'bg-neema-success-soft', ink: 'text-neema-success-ink', onClick: () => s.setTab('diet') },
-        { label: 'Shopping', sub: `${shopDone} of ${SHOP.length} ready`, Icon: ShoppingBag, bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', onClick: () => s.setTab('shop') },
+        { label: 'Shopping', sub: `${shopDone} of ${essentials.length} essentials`, Icon: ShoppingBag, bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', onClick: () => s.setTab('shop') },
         { label: 'Symptom checker', sub: 'How are you feeling?', Icon: Activity, bg: 'bg-neema-lilac', ink: 'text-[#4A3F6B]', onClick: () => s.openSymptom() },
       ]} />
       <Card className="flex flex-col gap-3 px-5 py-4">

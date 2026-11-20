@@ -78,9 +78,10 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
     fp: { id: 'fp' as TabId, label: fpLabel, Icon: CalendarDays },
     shop: { id: 'shop' as TabId, label: t.shop, Icon: ShoppingBag },
   };
-  const tabs = s.journey === 'ttc' ? [tab.home, tab.fp, tab.ask, tab.diet]
-    : s.journey === 'avoid' ? [tab.home, tab.fp, tab.ask, tab.diet]
-      : [tab.home, tab.ask, tab.diet, tab.fp, tab.shop];
+  // Same order in every journey, so tabs never move when she changes journey.
+  const tabs = s.journey === 'ttc' || s.journey === 'avoid'
+    ? [tab.home, tab.ask, tab.diet, tab.fp]
+    : [tab.home, tab.ask, tab.diet, tab.fp, tab.shop];
   useEffect(() => {
     if (!tabs.some((x) => x.id === s.tab) && s.tab !== 'profile') s.setTab('home');
   }, [s.journey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -148,7 +149,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
               {s.tab === 'ask' && <AskTab week={pregnancy.currentWeek} />}
               {s.tab === 'diet' && <DietTab trimester={pregnancy.trimester} />}
               {s.tab === 'fp' && <FamilyPlanningTab />}
-              {s.tab === 'shop' && <ShopTab />}
+              {s.tab === 'shop' && <ShopTab week={pregnancy.currentWeek} />}
               {s.tab === 'profile' && (
                 <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={extras} onOpenExtra={setExtraId} extraFacts={profileFacts} account={account} />
               )}

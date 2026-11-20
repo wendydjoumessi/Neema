@@ -133,6 +133,21 @@ export const SHOP_STAGES = [
   { id: 'bag', title: 'Hospital bag · packed by week 36', note: 'Take these to the facility when labour starts.' },
   { id: 'pp', title: 'Postpartum · after birth', note: 'Buy when you need them, or ask someone to get them for you.' }
 ];
+/** WHO birth preparedness: not things to buy, but what a mother should have arranged before labour. */
+export const READY = [
+  { id: 'r_fac', label: 'I know where I will give birth', sub: 'Visit the facility before labour and ask for its maternity list.' },
+  { id: 'r_trans', label: 'Transport arranged, day and night', sub: 'Save a driver’s or moto-taxi number and plan for night-time.' },
+  { id: 'r_money', label: 'Money set aside', sub: 'For transport, fees and any emergency.' },
+  { id: 'r_comp', label: 'A companion for labour', sub: 'WHO encourages having someone you choose with you.' },
+  { id: 'r_blood', label: 'A possible blood donor', sub: 'A relative or friend ready to donate if you need blood.' },
+  { id: 'r_signs', label: 'I know the danger signs', sub: 'Bleeding, severe headache, blurred vision, fits, fever, or water breaking early: go now.' },
+];
+/** The hospital bag packed as three separate bags. */
+export const BAGS = [
+  { id: 'mother', title: 'Bag for you', note: '' },
+  { id: 'baby', title: 'Bag for baby', note: '' },
+  { id: 'kit', title: 'Mama kit for the delivery', note: 'Most facilities in Cameroon ask you to bring these. Lists vary: add anything your clinic asks for.' },
+];
 export const STAGE_TAG = { t2: 'Trimester 2', t3: 'Trimester 3', bag: 'Hospital bag', pp: 'Postpartum' };
 export const SHOP = [
   { id: 'docs', cat: 'mother', when: 'bag', ess: true, name: 'Antenatal card, ID and insurance papers', qty: 'In a plastic sleeve', tip: 'The facility will ask for your antenatal card at admission.' },
@@ -140,6 +155,10 @@ export const SHOP = [
   { id: 'pants', cat: 'mother', when: 'bag', ess: true, name: 'Disposable maternity underwear', qty: '6–10 pairs', tip: 'Or loose cotton briefs one size up that you don’t mind staining.' },
   { id: 'gowns', cat: 'mother', when: 'bag', ess: true, name: 'Front-opening nightgowns', qty: '2, loose and light cotton', tip: 'Front buttons make breastfeeding and check-ups easier.' },
   { id: 'hyg', cat: 'mother', when: 'bag', ess: true, name: 'Postpartum hygiene items', qty: 'Small jug for rinsing, mild unscented soap, 2 clean towels, toothbrush', tip: 'Rinse the vulva with clean warm water after using the toilet. No douching or herbal steam.' },
+  { id: 'meds', cat: 'mother', when: 'bag', ess: true, name: 'Your medicines and iron tablets', qty: 'Enough for 3–4 days, with any prescriptions', tip: 'Tell the midwife about every medicine you take, including herbal ones.' },
+  { id: 'phone', cat: 'mother', when: 'bag', ess: true, name: 'Phone, charger and emergency numbers', qty: 'Numbers written on paper too', tip: 'Power cuts happen. Keep your companion’s and driver’s numbers on paper in the bag.' },
+  { id: 'snacks', cat: 'mother', when: 'bag', ess: true, name: 'Water bottle and light snacks', qty: '1 bottle, biscuits or fruit', tip: 'If your labour is normal, drinking and light eating help you keep your strength.' },
+  { id: 'gohome', cat: 'mother', when: 'bag', ess: false, name: 'Loose clothes to go home in', qty: '1 outfit', tip: 'Your belly takes weeks to go down: pick something loose and comfortable.' },
   { id: 'slippers', cat: 'mother', when: 'bag', ess: true, name: 'Slippers and a light wrap or cardigan', qty: '1 pair, 1 wrap', tip: 'Wards can be cold at night with fans or air conditioning.' },
   { id: 'bras', cat: 'mother', when: 't3', ess: true, name: 'Nursing bras', qty: '2–3, front-opening, no underwire', tip: 'Buy around week 36 when your size has settled; leave room for milk coming in.' },
   { id: 'nipple', cat: 'mother', when: 't3', ess: false, name: 'Nipple cream (pure lanolin)', qty: '1 small tube', tip: 'A few drops of your own breast milk, air-dried, also soothe sore nipples. Pain usually means the latch needs adjusting.' },
@@ -154,11 +173,14 @@ export const SHOP = [
   { id: 'cot', cat: 'baby', when: 't2', ess: false, name: 'Baby cot or Moses basket', qty: '1, with a firm, flat mattress', tip: 'A borrowed cot is fine if it is sturdy. Keep pillows and soft toys out.' },
   { id: 'onesies', cat: 'baby', when: 't3', ess: true, name: 'Soft cotton onesies', qty: '6–8, newborn and 0–3 months', tip: '100% cotton is coolest in the heat. Wash before first use.' },
   { id: 'vests', cat: 'baby', when: 't3', ess: true, name: 'Baby vests', qty: '4–6 short-sleeved', tip: 'A light layer under a onesie on cooler nights.' },
-  { id: 'socks', cat: 'baby', when: 't3', ess: true, name: 'Booties or socks', qty: '4 pairs', tip: 'Newborns lose heat through their feet in the first days.' },
+  { id: 'socks', cat: 'baby', when: 't3', ess: true, name: 'Booties or socks', qty: '4 pairs', tip: 'Newborns get cold easily in the first days. Skin-to-skin contact on your chest is the best way to warm baby.' },
   { id: 'mitts', cat: 'baby', when: 't3', ess: true, name: 'Scratch mittens', qty: '3 pairs', tip: 'Stop scratches until you can safely trim baby’s nails.' },
   { id: 'caps', cat: 'baby', when: 't3', ess: true, name: 'Soft cotton caps', qty: '2–3', tip: 'For the first days and air-conditioned rooms.' },
   { id: 'blankets', cat: 'baby', when: 't3', ess: true, name: 'Light baby blankets', qty: '2–3 cotton receiving blankets', tip: 'Light layers are safer than one thick blanket.' },
   { id: 'towels', cat: 'baby', when: 't3', ess: true, name: 'Baby towels', qty: '2 soft, hooded', tip: 'Keep them only for baby and dry them in the sun.' },
+  { id: 'thermo', cat: 'baby', when: 't3', ess: true, name: 'Digital thermometer', qty: '1, for the armpit', tip: 'A newborn with a temperature of 37.5 °C or more, or below 35.5 °C, needs a health worker the same day.' },
+  { id: 'outfit', cat: 'baby', when: 'bag', ess: true, name: 'Going-home outfit for baby', qty: '1 onesie, cap, socks and a blanket', tip: 'Pack them in a separate small bag so they are easy to find.' },
+  { id: 'carrier', cat: 'baby', when: 'pp', ess: false, name: 'Baby wrap or carrier', qty: '1', tip: 'Keep baby’s face visible and chin off the chest, high enough to kiss.' },
   { id: 'tub', cat: 'baby', when: 't3', ess: true, name: 'Baby bathtub', qty: '1, or a clean basin kept only for baby', tip: 'Test the water with your elbow: warm, never hot.' },
   { id: 'cotton', cat: 'baby', when: 'bag', ess: true, name: 'Cotton wool', qty: '1 large roll', tip: 'With cooled boiled water for cleaning eyes and the nappy area.' },
   { id: 'soap', cat: 'baby', when: 'bag', ess: true, name: 'Mild, unscented baby wash or soap', qty: '1 bar or bottle', tip: 'Avoid perfumed or medicated soaps on newborn skin.' },
