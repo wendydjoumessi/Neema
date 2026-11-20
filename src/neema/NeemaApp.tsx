@@ -69,13 +69,21 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
     s.setTab(tab);
   };
 
-  const tabs: { id: TabId; label: string; Icon: typeof Home }[] = [
-    { id: 'home', label: t.home, Icon: Home },
-    { id: 'ask', label: t.ask, Icon: MessageCircle },
-    { id: 'diet', label: t.diet, Icon: Leaf },
-    { id: 'fp', label: s.discreet ? t.fpDiscreet : t.fp, Icon: CalendarDays },
-    { id: 'shop', label: t.shop, Icon: ShoppingBag },
-  ];
+  // Each journey gets the tabs it needs: no baby shopping list when she isn't expecting.
+  const fpLabel = s.discreet ? t.fpDiscreet : s.journey === 'ttc' ? t.fpTtc : s.journey === 'avoid' ? t.fpAvoid : t.fp;
+  const tab = {
+    home: { id: 'home' as TabId, label: t.home, Icon: Home },
+    ask: { id: 'ask' as TabId, label: t.ask, Icon: MessageCircle },
+    diet: { id: 'diet' as TabId, label: t.diet, Icon: Leaf },
+    fp: { id: 'fp' as TabId, label: fpLabel, Icon: CalendarDays },
+    shop: { id: 'shop' as TabId, label: t.shop, Icon: ShoppingBag },
+  };
+  const tabs = s.journey === 'ttc' ? [tab.home, tab.fp, tab.ask, tab.diet]
+    : s.journey === 'avoid' ? [tab.home, tab.fp, tab.ask, tab.diet]
+      : [tab.home, tab.ask, tab.diet, tab.fp, tab.shop];
+  useEffect(() => {
+    if (!tabs.some((x) => x.id === s.tab) && s.tab !== 'profile') s.setTab('home');
+  }, [s.journey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-[100dvh] bg-neema-sand/60 font-sans text-base leading-6 tracking-normal text-neema-ink [&_h1]:font-sans [&_h1]:tracking-normal [&_h2]:font-sans [&_h2]:tracking-normal [&_h3]:font-sans">
@@ -149,7 +157,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
         </main>
 
         {/* Tab bar */}
-        <nav aria-label="Main" className="grid flex-none grid-cols-5 border-t border-neema-line bg-white px-1 pb-2.5 pt-1.5">
+        <nav aria-label="Main" className={cn('grid flex-none border-t border-neema-line bg-white px-1 pb-2.5 pt-1.5', tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-5')}>
           {tabs.map(({ id, label, Icon }) => {
             const on = s.tab === id && !extra;
             return (

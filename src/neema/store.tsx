@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 import { KB } from './data';
 import type { JourneyId, Lang } from './data';
+import type { MyMethod } from './cycle';
+
+/** Baby feeds counted for one day. */
+export type Feeds = { date: string; count: number; last: 'left' | 'right' | '' };
+export type Mood = 'good' | 'ok' | 'low' | 'hard';
 
 export type TabId = 'home' | 'ask' | 'diet' | 'fp' | 'shop' | 'profile';
 export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: string; sources?: string[] };
@@ -8,7 +13,7 @@ export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: str
 /** Settings and progress saved to the user's account (and remembered on this device). */
 export const PERSISTED_KEYS = [
   'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
-  'pinLock', 'sharePreg', 'shareFp',
+  'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood',
 ] as const;
 export type PersistedKey = (typeof PERSISTED_KEYS)[number];
 export type PersistedState = Partial<Record<PersistedKey, unknown>>;
@@ -63,16 +68,26 @@ function useNeemaState(seed?: PersistedState) {
   const [periodLen, setPeriodLen] = usePersisted('periodLen', 5, seed);
   const [lastPeriod, setLastPeriod] = usePersisted('lastPeriod', '', seed);
 
+  // Daily ticks by date (YYYY-MM-DD)
+  const [folic, setFolic] = usePersisted<Record<string, boolean>>('folic', {}, seed);
+  const [pills, setPills] = usePersisted<Record<string, boolean>>('pills', {}, seed);
+  // Avoiding pregnancy: the method she uses
+  const [method, setMethod] = usePersisted<MyMethod>('method', { id: '', start: '' }, seed);
+  // After birth
+  const [feeds, setFeeds] = usePersisted<Feeds>('feeds', { date: '', count: 0, last: '' }, seed);
+  const [mood, setMood] = usePersisted<Record<string, Mood>>('mood', {}, seed);
+
   // Privacy
   const [pinLock, setPinLock] = usePersisted('pinLock', true, seed);
   const [sharePreg, setSharePreg] = usePersisted('sharePreg', true, seed);
   const [shareFp, setShareFp] = usePersisted('shareFp', false, seed);
 
   // Ask Neema
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  // A sample exchange only for pregnancy; other journeys start with their own suggestions.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => journey === 'preg' ? [
     { id: 1, role: 'user', text: 'Which local foods help with iron?' },
     { id: 2, role: 'ai', text: KB[0].text, sources: KB[0].sources },
-  ]);
+  ] : []);
 
   const openSymptom = (result: string | null = null, word = '') => {
     setSymptomResult(result);
@@ -89,6 +104,7 @@ function useNeemaState(seed?: PersistedState) {
 
   const persisted: PersistedState = {
     discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
+    folic, pills, method, feeds, mood,
   };
 
   return {
@@ -99,6 +115,7 @@ function useNeemaState(seed?: PersistedState) {
     water, setWater, iron, setIron, activeWeek, setActiveWeek,
     shop, setShop, ttc, setTtc, cycleLen, setCycleLen, periodLen, setPeriodLen, lastPeriod, setLastPeriod,
     pinLock, setPinLock, sharePreg, setSharePreg, shareFp, setShareFp,
+    folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood,
     messages, setMessages,
   };
 }

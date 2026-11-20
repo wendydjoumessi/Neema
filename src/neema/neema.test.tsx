@@ -59,7 +59,11 @@ describe('Neema app', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
     fireEvent.click(screen.getByRole('radio', { name: /trying to conceive/ }));
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Planning' }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'My cycle' }));
+    // No period date yet: Neema asks for it instead of inventing one.
+    expect(screen.getByRole('heading', { name: 'When did your last period start?' })).toBeInTheDocument();
+    expect(screen.queryByText('My fertile window')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
     expect(screen.getByText('My fertile window')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'One day longer' }));
     expect(screen.getByText('6 days')).toBeInTheDocument();
@@ -80,5 +84,29 @@ describe('Neema app', () => {
     fireEvent.click(screen.getByRole('button', { name: /Back to Profile/ }));
     fireEvent.click(screen.getByRole('button', { name: /LOG OUT/ }));
     expect(onLogout).toHaveBeenCalled();
+  });
+
+  it('shows each journey its own home, with no invented dates', () => {
+    setup();
+    const nav = () => within(screen.getByRole('navigation', { name: 'Main' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: /avoiding pregnancy/ }));
+    expect(nav().queryByRole('button', { name: 'Shopping' })).not.toBeInTheDocument();
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByRole('heading', { name: 'Find a method that fits your life' })).toBeInTheDocument();
+    expect(screen.queryByText(/Cycle day|Next period/)).not.toBeInTheDocument();
+
+    fireEvent.click(nav().getByRole('button', { name: 'Methods' }));
+    fireEvent.change(screen.getByLabelText('What I use now'), { target: { value: 'inject3' } });
+    fireEvent.change(screen.getByLabelText('Date of my last injection'), { target: { value: '2026-10-01' } });
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByText('Next injection by 31 Dec')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: /trying to conceive/ }));
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByRole('heading', { name: 'Let’s find your fertile days' })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
+    expect(screen.getByText(/cycle day 4/i)).toBeInTheDocument();
   });
 });

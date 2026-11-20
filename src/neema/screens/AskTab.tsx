@@ -1,7 +1,7 @@
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Send, ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FALLBACK, KB, SUGGEST } from '../data';
+import { FALLBACK, KB, SUGGEST_BY_JOURNEY } from '../data';
 import { findDangerSign } from '../safety';
 import { useNeema } from '../store';
 import { Disclaimer, Pill, SosPill } from '../ui';
@@ -120,7 +120,10 @@ export function AskTab({ week }: { week: number }) {
         })}
         {s.messages.length === 0 && (
           <p className="rounded-2xl border-2 border-dashed border-neema-border p-4 text-center text-neema-muted-strong">
-            Ask anything about week {week}, food, rest or your next visit. Try a suggestion below.
+            {s.journey === 'preg' ? `Ask anything about week ${week}, food, rest or your next visit.`
+              : s.journey === 'pp' ? 'Ask about feeding, recovery, sleep or your baby.'
+                : s.journey === 'ttc' ? 'Ask about your cycle, fertility or getting ready for pregnancy.'
+                  : 'Ask privately about methods, side effects or emergency contraception.'} Try a suggestion below.
           </p>
         )}
         {typing && <div className="self-start rounded-2xl bg-white px-3.5 py-2.5 text-neema-muted shadow-sm">Neema is finding an approved answer…</div>}
@@ -128,7 +131,7 @@ export function AskTab({ week }: { week: number }) {
 
       <div className="flex flex-none flex-col gap-2 border-t border-neema-line bg-neema-cream px-4 pb-3 pt-2">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
-          {SUGGEST.map((q) => (
+          {SUGGEST_BY_JOURNEY[s.journey].map((q) => (
             <button key={q} type="button" onClick={() => send(q)} className="min-h-[44px] flex-none whitespace-nowrap rounded-full border border-[#E3C9BE] bg-white px-3.5 text-sm font-medium">
               {q}
             </button>

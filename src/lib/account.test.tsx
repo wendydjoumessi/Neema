@@ -176,7 +176,7 @@ describe('accounts', () => {
     render(<Index />);
     fireEvent.click(await screen.findByRole('button', { name: 'I’m not pregnant right now' }));
     fireEvent.click(screen.getByRole('button', { name: 'I’m trying to get pregnant' }));
-    expect(await screen.findByText('TRYING TO CONCEIVE')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Let’s find your fertile days' })).toBeInTheDocument();
     expect(db.profiles[0].journey).toBe('ttc');
   });
 
@@ -189,7 +189,7 @@ describe('accounts', () => {
     fireEvent.click(screen.getByRole('button', { name: /I want to avoid pregnancy/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Continue as guest' }));
     expect(screen.queryByRole('heading', { name: /When did your last period start/ })).not.toBeInTheDocument();
-    expect(await screen.findByText('AVOIDING PREGNANCY')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Find a method that fits your life' })).toBeInTheDocument();
   });
 
   it('asks a new mother for her baby’s birth date instead of pregnancy dates', async () => {
