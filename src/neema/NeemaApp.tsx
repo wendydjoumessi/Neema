@@ -11,6 +11,7 @@ import { AskTab } from './screens/AskTab';
 import { DietTab } from './screens/DietTab';
 import { FamilyPlanningTab } from './screens/FamilyPlanningTab';
 import { ShopTab } from './screens/ShopTab';
+import { BodySkinScreen } from './screens/BodySkinScreen';
 import { ProfileTab } from './screens/ProfileTab';
 import { SosSheet } from './overlays/SosSheet';
 import { SymptomSheet } from './overlays/SymptomSheet';
@@ -57,11 +58,19 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
     const id = window.setTimeout(() => onPersist(JSON.parse(serialized)), 800);
     return () => window.clearTimeout(id);
   }, [serialized, onPersist]);
-  const [extraId, setExtraId] = useState<string | null>(null);
+  const { extraId, setExtraId } = s;
   const t = T[s.lang];
   const firstName = (user?.name || 'Amina').split(' ')[0];
   const initials = (user?.name || 'Amina').split(' ').map((p) => p.charAt(0)).join('').slice(0, 2).toUpperCase();
-  const extra = extras.find((e) => e.id === extraId);
+  // Body & skin is built in; the other extras come from the app (account screens etc.).
+  const bodyExtra: ExtraScreen = {
+    id: 'body',
+    label: s.journey === 'pp' ? 'Your body after birth' : 'Healthy body & skin',
+    description: s.journey === 'pp' ? 'Tummy, stretch marks, skin and safe products' : 'Safe activity, skin changes and an ingredient checker',
+    render: ({ goTab }) => <BodySkinScreen pregnancy={pregnancy} goTab={goTab} />,
+  };
+  const allExtras = [bodyExtra, ...extras];
+  const extra = allExtras.find((e) => e.id === extraId);
 
   const go = (tab: TabId) => {
     setExtraId(null);
@@ -138,7 +147,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="flex flex-none items-center gap-2 border-b border-neema-line bg-white px-2 py-1">
                 <button type="button" onClick={() => setExtraId(null)} className="flex min-h-[48px] items-center gap-1 px-2 font-semibold text-neema-dark">
-                  <ChevronLeft className="h-5 w-5" /> Back to Profile
+                  <ChevronLeft className="h-5 w-5" /> {s.tab === 'profile' ? 'Back to Profile' : 'Back'}
                 </button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">{extra.render({ goTab: go })}</div>
@@ -151,7 +160,7 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
               {s.tab === 'fp' && <FamilyPlanningTab />}
               {s.tab === 'shop' && <ShopTab week={pregnancy.currentWeek} />}
               {s.tab === 'profile' && (
-                <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={extras} onOpenExtra={setExtraId} extraFacts={profileFacts} account={account} />
+                <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={allExtras} onOpenExtra={setExtraId} extraFacts={profileFacts} account={account} />
               )}
             </>
           )}
