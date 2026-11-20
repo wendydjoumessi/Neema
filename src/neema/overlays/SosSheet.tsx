@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { X, Phone, Mail, Check, MapPin } from 'lucide-react';
-import { CONTACTS, FACILITIES } from '../data';
+import { useEffect, useState } from 'react';
+import { X, Phone, Mail, MapPin, UserPlus, LocateFixed } from 'lucide-react';
+import { FACILITIES } from '../data';
+import { formatPhone, smsLink } from '../contacts';
 import { useNeema } from '../store';
 import { CheckBox, H2 } from '../ui';
 
@@ -9,11 +10,22 @@ const mapsLink = (name: string, area: string) =>
 
 export function SosSheet({ firstName }: { firstName: string }) {
   const s = useNeema();
-  const [picked, setPicked] = useState<Record<string, boolean>>({ paul: true, rose: true });
-  const [sent, setSent] = useState(false);
-  const n = CONTACTS.filter((c) => picked[c.id]).length;
+  const [picked, setPicked] = useState<Record<string, boolean>>(() => Object.fromEntries(s.contacts.map((c) => [c.id, c.sms])));
+  const [gps, setGps] = useState<{ state: 'finding' | 'ok' | 'none'; link?: string }>({ state: 'finding' });
+  // Ask for the location as soon as SOS opens, so it is ready by the time she sends the message.
+  useEffect(() => {
+    if (!('geolocation' in navigator)) { setGps({ state: 'none' }); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => setGps({ state: 'ok', link: `https://maps.google.com/?q=${p.coords.latitude.toFixed(5)},${p.coords.longitude.toFixed(5)}` }),
+      () => setGps({ state: 'none' }),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  }, []);
+  const chosen = s.contacts.filter((c) => picked[c.id]);
+  const n = chosen.length;
   const reason = s.dangerWord ? ` Reason: ${s.dangerWord}.` : '';
-  const sms = `URGENT from ${firstName} via Neema: I need help now.${reason} My location: ${s.city ? `${s.city} ` : ''}(GPS link). Please call me or come.`;
+  const where = gps.link ? ` My location: ${gps.link}` : s.city ? ` I am in ${s.city}.` : '';
+  const sms = `URGENT from ${firstName}: I need help now.${reason}${where} Please call me or come.`;
   const close = () => { s.setSosOpen(false); s.setDangerWord(''); };
 
   return (
@@ -50,25 +62,44 @@ export function SosSheet({ firstName }: { firstName: string }) {
 
           <section className="flex flex-col gap-2.5 rounded-2xl border border-neema-line px-4 py-3.5">
             <H2>Alert my people by SMS</H2>
-            {CONTACTS.map((c) => (
-              <button key={c.id} type="button" aria-pressed={!!picked[c.id]} onClick={() => { setPicked({ ...picked, [c.id]: !picked[c.id] }); setSent(false); }} className="flex min-h-[52px] items-center gap-3 text-left">
-                <CheckBox on={!!picked[c.id]} tone="ink" />
-                <span className="flex flex-col"><span className="font-semibold">{c.name}</span><span className="text-[13px] font-medium leading-[18px] text-neema-muted">{c.role}</span></span>
-              </button>
-            ))}
-            <div className="rounded-xl bg-neema-cream px-3 py-2.5 text-[15px] leading-[22px]">
-              <div className="mb-0.5 text-[13px] font-semibold leading-[18px] text-neema-muted-strong">MESSAGE PREVIEW</div>
-              {sms}
-            </div>
-            {sent ? (
-              <div role="status" className="flex items-center gap-2.5 rounded-xl bg-neema-success-soft px-3.5 py-3 font-semibold text-neema-success-ink">
-                <Check className="h-[22px] w-[22px]" strokeWidth={2.5} />Alert sent to {n} {n === 1 ? 'contact' : 'contacts'} with your location.
+            {s.contacts.length === 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-[15px] leading-[22px] text-neema-muted-strong">You haven’t added emergency contacts yet. Add the people you would call first, so you can alert them in one tap next time.</p>
+                <button type="button" onClick={() => { close(); s.setTab('profile'); window.setTimeout(() => document.getElementById('emergency-contacts')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                  className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-neema-border font-semibold text-neema-dark">
+                  <UserPlus className="h-5 w-5" /> Add emergency contacts
+                </button>
               </div>
             ) : (
-              // TODO: send through the SMS gateway with the device's GPS location (works without data).
-              <button type="button" disabled={!n} onClick={() => setSent(true)} className="flex min-h-[56px] items-center justify-center gap-2 rounded-xl bg-neema-ink font-semibold tracking-wide text-white disabled:opacity-50">
-                <Mail className="h-5 w-5" />{n ? `SEND ALERT TO ${n} ${n === 1 ? 'CONTACT' : 'CONTACTS'}` : 'CHOOSE A CONTACT'}
-              </button>
+              <>
+                <ul className="flex flex-col">
+                  {s.contacts.map((c) => (
+                    <li key={c.id} className="flex items-center gap-2 border-b border-neema-line last:border-b-0">
+                      <button type="button" aria-pressed={!!picked[c.id]} onClick={() => setPicked({ ...picked, [c.id]: !picked[c.id] })} className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 text-left">
+                        <CheckBox on={!!picked[c.id]} tone="ink" />
+                        <span className="flex min-w-0 flex-col"><span className="truncate font-semibold">{c.name}</span><span className="text-[13px] font-medium leading-[18px] text-neema-muted">{[c.relationship, formatPhone(c.phone)].filter(Boolean).join(' · ')}</span></span>
+                      </button>
+                      <a href={`tel:${c.phone}`} aria-label={`Call ${c.name}`} className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-neema-success-soft text-neema-success-ink"><Phone className="h-5 w-5" /></a>
+                    </li>
+                  ))}
+                </ul>
+                <div className="rounded-xl bg-neema-cream px-3 py-2.5 text-[15px] leading-[22px]">
+                  <div className="mb-0.5 text-[13px] font-semibold leading-[18px] text-neema-muted-strong">MESSAGE PREVIEW</div>
+                  {sms}
+                  <div role="status" className="mt-1.5 flex items-center gap-1.5 text-[13px] font-medium leading-[18px] text-neema-muted-strong">
+                    <LocateFixed className="h-4 w-4" />
+                    {gps.state === 'finding' ? 'Finding your location…' : gps.state === 'ok' ? 'Your GPS location is included.' : 'Location not available. Allow location for Neema to include it.'}
+                  </div>
+                </div>
+                {n ? (
+                  <a href={smsLink(chosen.map((c) => c.phone), sms)} className="flex min-h-[56px] items-center justify-center gap-2 rounded-xl bg-neema-ink font-semibold tracking-wide text-white">
+                    <Mail className="h-5 w-5" />SEND SMS TO {n} {n === 1 ? 'CONTACT' : 'CONTACTS'}
+                  </a>
+                ) : (
+                  <button type="button" disabled className="min-h-[56px] rounded-xl bg-neema-ink font-semibold tracking-wide text-white opacity-50">CHOOSE A CONTACT</button>
+                )}
+                <p className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">Opens your messages app with the text ready: press send. Standard SMS rates apply; no internet needed.</p>
+              </>
             )}
           </section>
 
@@ -87,7 +118,7 @@ export function SosSheet({ firstName }: { firstName: string }) {
               </div>
             ))}
           </section>
-          <p className="mb-2 text-[13px] font-medium leading-[18px] text-neema-muted">Without data, the SMS is sent from your phone. Your location is shared only in this alert.</p>
+          <p className="mb-2 text-[13px] font-medium leading-[18px] text-neema-muted">Your location is shared only in the message you send.</p>
         </div>
       </div>
     </div>

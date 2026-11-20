@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // A small in-memory stand-in for the Supabase client
 // ---------------------------------------------------------------------------
 type Row = Record<string, unknown>;
-const db: Record<string, Row[]> = { profiles: [], medical_profiles: [], pregnancies: [], app_state: [], data_requests: [] };
+const db: Record<string, Row[]> = { profiles: [], medical_profiles: [], pregnancies: [], app_state: [], data_requests: [], emergency_contacts: [] };
 const calls: { table: string; op: string; payload?: unknown }[] = [];
 let session: { user: { id: string; email: string } } | null = null;
 let signInError: { message: string } | null = null;
@@ -14,9 +14,17 @@ function query(table: string) {
   const filters: [string, unknown][] = [];
   let op = 'select';
   let payload: Row | null = null;
-  const rows = () => db[table].filter((r) => filters.every(([k, v]) => r[k] === v));
+  const rows = () => db[table].filter((r) => filters.every(([k, v]) => (v && typeof v === 'object' && 'in' in v ? (v as { in: unknown[] }).in.includes(r[k]) : r[k] === v)));
   const run = () => {
     if (op === 'update') { rows().forEach((r) => Object.assign(r, payload)); return rows(); }
+    if (op === 'delete') { const gone = rows(); db[table] = db[table].filter((r) => !gone.includes(r)); return gone; }
+    if (op === 'upsert' && Array.isArray(payload)) {
+      return (payload as Row[]).map((p) => {
+        const existing = db[table].find((r) => r.id === p.id);
+        if (existing) Object.assign(existing, p); else db[table].push({ ...p });
+        return existing ?? p;
+      });
+    }
     if (op === 'insert' || op === 'upsert') {
       const key = table === 'profiles' ? 'id' : table === 'pregnancies' || table === 'data_requests' ? 'id' : 'user_id';
       const existing = payload && db[table].find((r) => r[key] && r[key] === payload![key]);
@@ -30,6 +38,8 @@ function query(table: string) {
     select: () => api,
     eq: (k: string, v: unknown) => { filters.push([k, v]); return api; },
     order: () => api,
+    in: (k: string, vs: unknown[]) => { filters.push([k, { in: vs }]); return api; },
+    delete: () => { op = 'delete'; calls.push({ table, op }); return api; },
     limit: () => api,
     update: (p: Row) => { op = 'update'; payload = p; calls.push({ table, op, payload: p }); return api; },
     insert: (p: Row) => { op = 'insert'; payload = p; calls.push({ table, op, payload: p }); return api; },
@@ -210,5 +220,26 @@ describe('accounts', () => {
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'born', due_date: iso(new Date(Date.now() - 21 * 86400000)), outcome_date: iso(new Date(Date.now() - 21 * 86400000)), doctor_due_date: null });
     render(<Index />);
     expect(await screen.findByText('3 weeks after birth')).toBeInTheDocument();
+  });
+
+  it('loads her saved contacts and saves changes to the contacts table', async () => {
+    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false, ...consented });
+    db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'active', due_date: iso(new Date(Date.now() + 112 * 86400000)), doctor_due_date: null });
+    db.emergency_contacts.push({ id: 'c1', user_id: 'u1', name: 'Paul', relationship: 'Partner', phone: '+237677123456', alert_by_sms: true, position: 0 });
+    render(<Index />);
+    await screen.findByText('Week 24');
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
+    expect(screen.getByText('Partner · +237 6 77 12 34 56')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add a contact' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Rose' } });
+    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '699 00 01 11' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(db.emergency_contacts).toHaveLength(2), { timeout: 2000 });
+    expect(db.emergency_contacts[1]).toMatchObject({ user_id: 'u1', name: 'Rose', phone: '+237699000111', position: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Paul' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this contact' }));
+    fireEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }));
+    await waitFor(() => expect(db.emergency_contacts.map((c) => c.name)).toEqual(['Rose']), { timeout: 2000 });
   });
 });

@@ -207,8 +207,8 @@ function AfterBirthHome({ pregnancy }: { pregnancy: PregnancyData }) {
       <Tip photo={ppTipPhoto} alt="A newborn’s feet wrapped in a soft white towel" title="Breastfeed on demand, day and night" text="Give only breast milk for the first 6 months: no water or other drinks, even in the heat. Feeding often helps your milk supply." source="WHO infant feeding recommendations" />
       <QuickGrid items={[
         quickAsk('Feeding, sleep, recovery', () => s.setTab('ask')),
-        { label: 'What to eat', sub: 'Foods while breastfeeding', Icon: Leaf, bg: 'bg-neema-success-soft', ink: 'text-neema-success-ink', onClick: () => s.setTab('diet') },
-        { label: 'Birth spacing', sub: 'Methods safe while breastfeeding', Icon: CalendarHeart, bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', onClick: () => s.setTab('fp') },
+        { label: 'What to eat', sub: 'Foods for recovery and feeding', Icon: Leaf, bg: 'bg-neema-success-soft', ink: 'text-neema-success-ink', onClick: () => s.setTab('diet') },
+        { label: 'Birth spacing', sub: 'Methods to start after birth', Icon: CalendarHeart, bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', onClick: () => s.setTab('fp') },
         { label: 'Symptom checker', sub: 'For you or baby', Icon: Activity, bg: 'bg-neema-lilac', ink: 'text-[#4A3F6B]', onClick: () => s.openSymptom() },
       ]} />
       <Card className="flex flex-col gap-3 px-5 py-4">
@@ -358,7 +358,7 @@ function AvoidingHome() {
             <div className="relative flex flex-col gap-0.5">
               <Eyebrow>Avoiding pregnancy</Eyebrow>
               <h1 className="text-[32px] font-bold leading-10">Find a method that fits your life</h1>
-              <span>Compare methods privately: how well they work, side effects, and which are safe while breastfeeding.</span>
+              <span>Compare methods privately: how well each one works, possible side effects, and how soon you can get pregnant after stopping.</span>
             </div>
             <div className="relative flex flex-col gap-2">
               <button type="button" onClick={() => s.setTab('fp')} className="min-h-[52px] rounded-xl bg-white font-semibold text-neema-dark active:scale-[0.98]">Compare methods</button>

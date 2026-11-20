@@ -1,7 +1,8 @@
+import type { EmergencyContact } from '@/neema/contacts';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import type { PregnancyData } from '@/types/pregnancy';
-import { pregnancySetupSchema, signupSchema } from './form-validation';
+import { emergencyContactSchema, pregnancySetupSchema, signupSchema } from './form-validation';
 
 export type Profile = Tables<'profiles'>;
 export type MedicalProfile = Tables<'medical_profiles'>;
@@ -19,6 +20,7 @@ export type Account = {
   /** The most recent birth, for mothers in the after-birth journey. */
   birth: PregnancyRow | null;
   appState: Record<string, unknown> | null;
+  contacts: EmergencyContact[];
 };
 
 const DAY = 86_400_000;
@@ -85,6 +87,7 @@ export async function loadAccount(userId: string): Promise<Account> {
       .order('outcome_date', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('app_state').select('state').eq('user_id', userId).maybeSingle(),
   ]);
+  const contacts = await supabase.from('emergency_contacts').select('*').eq('user_id', userId).order('position', { ascending: true });
   const err = profile.error || medical.error || pregnancy.error || birth.error || state.error;
   if (err) throw err;
   return {
@@ -93,6 +96,8 @@ export async function loadAccount(userId: string): Promise<Account> {
     pregnancy: pregnancy.data,
     birth: birth.data,
     appState: (state.data?.state as Record<string, unknown> | undefined) ?? null,
+    // Contacts are not essential to open the app: if they fail to load, start with none.
+    contacts: (contacts.data ?? []).map((c) => ({ id: c.id, name: c.name, relationship: c.relationship, phone: c.phone, sms: c.alert_by_sms })),
   };
 }
 
@@ -151,6 +156,29 @@ export async function saveBirth(userId: string, birthDate: string, nickname: str
     : await supabase.from('pregnancies').insert({ user_id: userId, due_date: birthDate, ...fields }).select('*').single();
   if (res.error) throw res.error;
   return res.data;
+}
+
+/** Replace her saved emergency contacts with this list (adds, edits, reorders and removes). */
+export async function saveContacts(userId: string, input: EmergencyContact[]) {
+  // Same rules as the form; anything invalid (e.g. an old device copy) is left out rather than failing the whole save.
+  const list = input.flatMap((c) => {
+    const r = emergencyContactSchema.safeParse(c);
+    return r.success ? [{ ...(r.data as Omit<EmergencyContact, 'id'>), id: c.id }] : [];
+  }).slice(0, 5);
+  const existing = await supabase.from('emergency_contacts').select('id').eq('user_id', userId);
+  if (existing.error) throw existing.error;
+  const keep = new Set(list.map((c) => c.id));
+  const gone = (existing.data ?? []).map((r) => r.id).filter((id) => !keep.has(id));
+  if (gone.length) {
+    const del = await supabase.from('emergency_contacts').delete().in('id', gone);
+    if (del.error) throw del.error;
+  }
+  if (list.length) {
+    const up = await supabase.from('emergency_contacts').upsert(
+      list.map((c, i) => ({ id: c.id, user_id: userId, name: c.name, relationship: c.relationship, phone: c.phone, alert_by_sms: c.sms, position: i })),
+    );
+    if (up.error) throw up.error;
+  }
 }
 
 export async function saveAppState(userId: string, state: Record<string, unknown>) {
