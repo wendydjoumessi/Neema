@@ -1,11 +1,16 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, Volume2, Square, AlertTriangle, Search, Sun, Droplets, Ban, Sparkles, Leaf, Lock, Unlock } from 'lucide-react';
+import { ChevronDown, Volume2, Square, AlertTriangle, Search, Ban, Lock, Unlock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PregnancyData } from '@/types/pregnancy';
 import {
-  CANT_CHANGE, CAN_CHANGE, MOVES_BUILD, MOVES_FULL, MOVES_GENERAL, MOVES_GENTLE, MOVES_PREG, QUICK_INGREDIENTS, SAFETY_LABEL,
+  CANT_CHANGE, CAN_CHANGE, STRETCH_HELPERS, MOVES_BUILD, MOVES_FULL, MOVES_GENERAL, MOVES_GENTLE, MOVES_PREG, QUICK_INGREDIENTS, SAFETY_LABEL,
   TUMMY_MYTHS, TUMMY_STOP, checkIngredients, type Move, type SafetyClass,
+  type HelperIcon,
 } from '../body';
+import {
+  AlmondIcon, CocoaIcon, CoconutIcon, DarkPatchMap, DnaIcon, DropIcon, FadeTimeline, HandHeartIcon, HatIcon, LeafIcon, ShadeIcon, SheaIcon,
+  SunscreenIcon, TubeIcon,
+} from '../illustrations';
 import { daysBetween, todayIso } from '../cycle';
 import { useNeema, type BodySection } from '../store';
 import { Card, CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
@@ -89,11 +94,11 @@ function GeneticsCard({ go }: { go: (to: BodySection | 'diet') => void }) {
     <Card className="flex flex-col gap-3">
       <H2>What you can and can’t change</H2>
       <div className="rounded-xl bg-neema-sand px-3.5 py-3">
-        <div className="mb-1 text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-neema-muted-strong">Mostly in your genes</div>
+        <div className="mb-1 flex items-center gap-2 text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-neema-muted-strong"><DnaIcon className="h-8 w-8" /> Mostly in your genes</div>
         <ul className="flex flex-col gap-1 text-[15px] leading-[22px]">{CANT_CHANGE.map((c) => <li key={c}>• {c}</li>)}</ul>
       </div>
       <div className="rounded-xl bg-neema-success-soft px-3.5 py-2">
-        <div className="mb-1 mt-1 text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-neema-success-ink">In your hands</div>
+        <div className="mb-1 mt-1 flex items-center gap-2 text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-neema-success-ink"><HandHeartIcon className="h-8 w-8" /> In your hands</div>
         <ul className="flex flex-col">
           {CAN_CHANGE.map((c) => (
             <li key={c.text}>
@@ -263,69 +268,151 @@ function OtherActivity() {
 // ---------------------------------------------------------------------------
 // Skin & stretch marks
 // ---------------------------------------------------------------------------
-function Bullet({ Icon, tint, title, children }: { Icon: typeof Sun; tint: string; title: string; children: ReactNode }) {
+const HELPER_ICON: Record<HelperIcon, (p: { className?: string }) => JSX.Element> = {
+  drop: DropIcon, leaf: LeafIcon, shea: SheaIcon, cocoa: CocoaIcon, almond: AlmondIcon, coconut: CoconutIcon, tube: (p) => <TubeIcon {...p} />,
+};
+
+/** A grid of tappable ingredient tiles; the chosen one shows its details underneath. */
+function HelperGrid({ items }: { items: typeof STRETCH_HELPERS }) {
+  const [picked, setPicked] = useState<string | null>(null);
+  const chosen = items.find((h) => h.name === picked);
   return (
-    <div className="flex gap-3">
-      <span aria-hidden="true" className={cn('flex h-10 w-10 flex-none items-center justify-center rounded-xl', tint)}><Icon className="h-5 w-5" /></span>
-      <div className="flex flex-col"><span className="font-semibold">{title}</span><span className="text-[15px] leading-[22px] text-neema-muted-strong">{children}</span></div>
+    <div className="flex flex-col gap-2">
+      <ul className="grid grid-cols-2 gap-2">
+        {items.map((h) => {
+          const Icon = HELPER_ICON[h.icon];
+          const on = picked === h.name;
+          return (
+            <li key={h.name}>
+              <button type="button" aria-expanded={on} onClick={() => setPicked(on ? null : h.name)}
+                className={cn('flex min-h-[112px] w-full flex-col items-start gap-1.5 rounded-2xl border-2 p-3 text-left transition-colors', on ? 'border-neema-primary bg-neema-primary-soft' : 'border-transparent bg-neema-cream')}>
+                <Icon className="h-10 w-10" />
+                <span className="font-semibold leading-5">{h.name}</span>
+                <span className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{h.short}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {chosen && <p role="status" className="rounded-xl bg-white px-3.5 py-3 text-[15px] leading-[22px] shadow-sm"><span className="font-semibold">{chosen.name}: </span>{chosen.what}</p>}
     </div>
   );
 }
+
+function IconTile({ Icon, title, sub }: { Icon: (p: { className?: string }) => JSX.Element; title: string; sub: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-2xl bg-neema-cream px-2 py-3 text-center">
+      <Icon className="h-11 w-11" />
+      <span className="text-[15px] font-semibold leading-5">{title}</span>
+      <span className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{sub}</span>
+    </div>
+  );
+}
+
+const AVOID_TILES = [
+  { name: 'Mercury', why: 'Harms kidneys and baby’s brain' },
+  { name: 'Hydroquinone', why: 'Absorbed into your body' },
+  { name: 'Strong steroids', why: 'Thin skin, more marks' },
+  { name: 'Retinoids', why: 'Can harm a baby' },
+];
 
 function SkinSection({ go }: { go: (to: BodySection | 'diet') => void }) {
   const s = useNeema();
   const pp = s.journey === 'pp';
   const preg = s.journey === 'preg';
   const nursing = pp ? 'while breastfeeding' : 'in pregnancy';
+  const now = STRETCH_HELPERS.filter((h) => h.when === 'now');
+  const later = STRETCH_HELPERS.filter((h) => h.when === 'later');
   return (
     <>
-      <section className="flex flex-col gap-2.5 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
-        <H2>{pp ? 'Can stretch marks be wiped away?' : 'Stretch marks'}</H2>
-        <p className="text-[15px] leading-[22px]">
-          {pp
-            ? 'Honestly, no cream or oil can make them disappear completely. But they do fade a lot. Over 6 to 12 months they become flatter, softer and closer to your skin colour. On dark skin they may start darker or lighter than your skin.'
-            : 'Many women get them, and whether you do depends mostly on your genes. Moisturisers can’t fully prevent them, but they ease the dryness and itching of stretching skin.'}
-        </p>
+      {/* 1. The honest answer, shown as a picture */}
+      <section className="flex flex-col gap-2 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+        <H2>{pp ? 'Can stretch marks be wiped away?' : 'Stretch marks fade with time'}</H2>
+        <p className="text-lg font-semibold leading-6 text-neema-dark">{pp ? 'Not completely, but they fade a lot.' : 'Most of it depends on your genes.'}</p>
+        <FadeTimeline />
+        <p className="text-[15px] leading-[22px] text-neema-muted-strong">Over 6 to 12 months they become flatter, softer and closer to your skin colour.</p>
       </section>
 
-      <Card className="flex flex-col gap-3.5">
-        <H2>What helps{pp ? ' (safe while breastfeeding)' : ''}</H2>
-        <Bullet Icon={Droplets} tint="bg-neema-ochre-soft text-neema-ochre-ink" title="Moisturise twice a day">Pure unrefined shea butter (karité), cocoa butter or coconut oil. Massage gently into the skin. They soothe and soften; they don’t erase marks.</Bullet>
-        <Bullet Icon={Sparkles} tint="bg-neema-lilac text-[#4A3F6B]" title="Hyaluronic acid cream">May help newer, darker marks look softer. Safe {nursing}.</Bullet>
-        <Bullet Icon={Sun} tint="bg-neema-primary-soft text-neema-dark" title="Keep marks out of the sun">Sun darkens marks and dark patches. Cover up, or use a mineral sunscreen.</Bullet>
-        <Bullet Icon={Leaf} tint="bg-neema-success-soft text-neema-success-ink" title="Water, good food and movement">Healthy skin heals better. Gradual weight change is easier on the skin than fast loss.</Bullet>
-      </Card>
+      {/* 2. Ingredients, as tiles */}
+      <section className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+        <div>
+          <H2>Ingredients that help marks fade</H2>
+          <p className="mt-1 text-[15px] leading-[22px] text-neema-muted-strong">Look for these names on any label. No brand needed. Safe {nursing}. Tap one to learn more.</p>
+        </div>
+        <HelperGrid items={now} />
+        <div className="grid grid-cols-3 gap-2" aria-label="How to use them">
+          {[['2×', 'a day'], ['3+', 'months'], ['Massage', 'gently in']].map(([big, small]) => (
+            <div key={big} className="flex flex-col items-center rounded-xl bg-neema-ochre-soft px-1 py-2 text-neema-ochre-ink">
+              <span className="text-lg font-bold leading-6">{big}</span>
+              <span className="text-[13px] font-semibold leading-[18px]">{small}</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {pp && (
-        <Card className="flex flex-col gap-2">
-          <H2>After you stop breastfeeding</H2>
-          <p className="text-[15px] leading-[22px]">If marks still bother you, a doctor or dermatologist can suggest prescription creams such as tretinoin, or treatments like microneedling. On dark skin, laser should only be done by an experienced dermatologist, as it can leave dark patches.</p>
-        </Card>
+      {/* 3. Habits */}
+      <section className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+        <H2>Habits that help too</H2>
+        <div className="grid grid-cols-3 gap-2">
+          <IconTile Icon={HatIcon} title="Cover up" sub="Sun darkens marks" />
+          <IconTile Icon={DropIcon} title="Drink water" sub={pp ? 'At every feed' : 'Through the day'} />
+          <IconTile Icon={LeafIcon} title="Eat well" sub="Leaves, beans, fish" />
+        </div>
+      </section>
+
+      {/* 4. Later options */}
+      {!preg && (
+        <section className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+          <div className="flex items-center justify-between gap-2">
+            <H2>{pp ? 'After breastfeeding' : 'Stronger options'}</H2>
+            <span className="rounded-full bg-neema-lilac px-2.5 py-0.5 text-[13px] font-semibold text-neema-lilac-ink">Ask a doctor</span>
+          </div>
+          <HelperGrid items={later} />
+          <p className="text-[15px] leading-[22px] text-neema-muted-strong">On dark skin, laser only with an experienced dermatologist: it can leave dark patches.</p>
+        </section>
       )}
 
-      <section className="flex flex-col gap-2 rounded-2xl bg-neema-primary-soft px-5 py-4">
-        <div className="flex items-center gap-2"><Ban className="h-5 w-5 text-neema-dark" /><H2>Please don’t use lightening creams to fade marks or patches</H2></div>
-        <p className="text-[15px] leading-[22px]">Many “clarifying” creams and soaps contain ingredients that are unsafe {pp ? 'while breastfeeding' : 'in pregnancy and while breastfeeding'}:</p>
-        <ul className="flex flex-col gap-1 text-[15px] leading-[22px]">
-          <li>• <span className="font-semibold">Mercury</span>: harms kidneys and a baby’s developing brain.</li>
-          <li>• <span className="font-semibold">Hydroquinone</span>: much of it is absorbed into your body.</li>
-          <li>• <span className="font-semibold">Strong steroids</span> such as clobetasol: thin the skin and can cause more stretch marks.</li>
-          <li>• <span className="font-semibold">Retinoids</span> (tretinoin, retinol, isotretinoin): can harm a developing baby.</li>
+      {/* 5. Warning, as crossed-out products */}
+      <section className="flex flex-col gap-3 rounded-2xl bg-neema-primary-soft px-5 py-4">
+        <div className="flex items-center gap-2"><Ban className="h-5 w-5 flex-none text-neema-dark" /><H2>Don’t use lightening creams</H2></div>
+        <ul className="grid grid-cols-2 gap-2">
+          {AVOID_TILES.map((t) => (
+            <li key={t.name} className="flex items-center gap-2 rounded-xl bg-white p-2.5">
+              <TubeIcon crossed className="h-10 w-10 flex-none" />
+              <span className="flex flex-col"><span className="text-[15px] font-semibold leading-5">{t.name}</span><span className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{t.why}</span></span>
+            </li>
+          ))}
         </ul>
-        <p className="text-[15px] leading-[22px]">If you’ve used them, that’s okay: stop now and tell your health worker. Avoid harsh scrubs, lemon, bleach and very hot water too.</p>
-        <button type="button" onClick={() => go('ingredients')} className="mt-1 flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-neema-dark font-semibold text-white"><Search className="h-5 w-5" /> Check a product’s ingredients</button>
+        <p className="text-[15px] leading-[22px]">Used them already? Stop now and tell your health worker. No harsh scrubs, lemon or bleach.</p>
+        <button type="button" onClick={() => go('ingredients')} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-neema-dark font-semibold text-white"><Search className="h-5 w-5" /> Check a product’s ingredients</button>
       </section>
 
-      <Card className="flex flex-col gap-2">
-        <H2>Dark patches on face, neck and belly</H2>
-        <p className="text-[15px] leading-[22px]">Pregnancy hormones make skin produce more colour: patches on the face (melasma), a dark line down the belly (linea nigra), and darker neck, underarms and inner thighs. They are common and {pp ? 'usually fade gradually over the months after birth' : 'usually fade gradually after birth'}.</p>
-        <p className="text-[15px] leading-[22px]"><span className="font-semibold">Even dark skin needs sun protection</span> to stop patches darkening for good: a hat and shade cost nothing, and a mineral sunscreen (zinc oxide or titanium dioxide) helps. Vitamin C, niacinamide and azelaic acid are gentle options; ask your pharmacist.</p>
-      </Card>
+      {/* 6. Dark patches, with a body map */}
+      <section className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
+        <H2>Dark patches are common</H2>
+        <div className="flex items-center gap-4">
+          <div className="w-[104px] flex-none"><DarkPatchMap /></div>
+          <ol className="flex flex-col gap-2.5 text-[15px] leading-[21px]">
+            {[['Face', 'cheeks and forehead'], ['Neck', 'and underarms'], ['Belly line', 'from navel down']].map(([t, sub], i) => (
+              <li key={t} className="flex items-start gap-2">
+                <span aria-hidden="true" className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-neema-primary text-[13px] font-bold text-white">{i + 1}</span>
+                <span><span className="font-semibold">{t}</span> <span className="text-neema-muted-strong">{sub}</span></span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <p className="rounded-xl bg-neema-success-soft px-3.5 py-2.5 text-[15px] font-medium leading-[22px] text-neema-success-ink">They usually fade in the months after birth. Even dark skin needs sun protection:</p>
+        <div className="grid grid-cols-3 gap-2">
+          <IconTile Icon={HatIcon} title="Hat" sub="Free" />
+          <IconTile Icon={ShadeIcon} title="Shade" sub="Midday sun" />
+          <IconTile Icon={SunscreenIcon} title="Mineral sunscreen" sub="Zinc or titanium" />
+        </div>
+      </section>
 
       {preg && (
         <section className="flex flex-col gap-2 rounded-2xl border border-neema-line bg-white px-5 py-4">
           <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-neema-dark" /><H2>When itching is a warning sign</H2></div>
-          <p className="text-[15px] leading-[22px]">Severe itching, especially on the palms of your hands and soles of your feet in late pregnancy, can be a sign of a liver condition. Get checked today.</p>
+          <p className="text-[15px] leading-[22px]">Severe itching on the palms and soles in late pregnancy can signal a liver problem. Get checked today.</p>
           <button type="button" onClick={() => s.openSymptom()} className="min-h-[48px] rounded-xl border border-neema-border font-semibold">Check my symptoms</button>
         </section>
       )}

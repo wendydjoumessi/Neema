@@ -179,8 +179,8 @@ export const INGREDIENTS: Ingredient[] = [
   { name: 'Mercury', aliases: ['mercury', 'mercurous chloride', 'mercuric', 'calomel', 'hydrargyri', 'mercurio'], cls: 'avoid', why: 'Found in some illegal lightening creams and soaps. It harms the kidneys and nerves and can damage a baby’s developing brain. Stop using any product that contains it.' },
   { name: 'Clobetasol (strong steroid)', aliases: ['clobetasol'], cls: 'avoid', why: 'A very strong steroid often sold in lightening creams. Long use thins the skin, causes stretch marks and acne, and can affect your hormones. Use only if a doctor prescribes it.' },
   { name: 'Betamethasone (steroid)', aliases: ['betamethasone', 'betamethason'], cls: 'avoid', why: 'A strong steroid sometimes added to lightening creams. Use only if a doctor prescribes it for a skin condition.' },
-  { name: 'Tretinoin', aliases: ['tretinoin', 'retinoic acid', 'retin-a'], cls: 'avoid', why: 'A retinoid. It can harm a developing baby. Wait until after pregnancy and breastfeeding, and use only with a doctor’s advice.' },
-  { name: 'Isotretinoin', aliases: ['isotretinoin', 'roaccutane', 'accutane'], cls: 'avoid', why: 'Causes serious birth defects. Never use it when you could be pregnant.' },
+  { name: 'Tretinoin', aliases: ['tretinoin', 'retinoic acid'], cls: 'avoid', why: 'A retinoid. It can harm a developing baby. Wait until after pregnancy and breastfeeding, and use only with a doctor’s advice.' },
+  { name: 'Isotretinoin', aliases: ['isotretinoin'], cls: 'avoid', why: 'Causes serious birth defects. Never use it when you could be pregnant.' },
   { name: 'Retinol', aliases: ['retinol', 'retinal', 'retinyl', 'retinaldehyde'], cls: 'avoid', why: 'A vitamin A form used in anti-ageing creams. Best avoided in pregnancy and while breastfeeding.' },
   { name: 'Adapalene / tazarotene', aliases: ['adapalene', 'tazarotene'], cls: 'avoid', why: 'Retinoid acne treatments. Avoid in pregnancy and while breastfeeding.' },
   { name: 'Glutathione injections', aliases: ['glutathione injection', 'glutathione iv'], cls: 'avoid', why: 'Injected for skin lightening. Not proven safe and risky when injected outside a hospital.' },
@@ -199,17 +199,36 @@ export const INGREDIENTS: Ingredient[] = [
   { name: 'Coconut oil', aliases: ['coconut', 'cocos nucifera', 'huile de coco'], cls: 'safe', why: 'A safe moisturiser for skin and hair.' },
   { name: 'Glycerin', aliases: ['glycerin', 'glycerine', 'glycerol'], cls: 'safe', why: 'Draws water into the skin. Safe in pregnancy and breastfeeding.' },
   { name: 'Hyaluronic acid', aliases: ['hyaluronic', 'sodium hyaluronate'], cls: 'safe', why: 'Keeps skin moist. Some studies suggest it may help newer stretch marks look softer.' },
+  { name: 'Centella asiatica (gotu kola)', aliases: ['centella', 'gotu kola', 'madecassoside', 'asiaticoside'], cls: 'safe', why: 'A plant extract that supports skin repair. May help stretch marks fade. Safe on the skin.' },
+  { name: 'Sweet almond oil', aliases: ['almond oil', 'prunus amygdalus', 'prunus dulcis'], cls: 'safe', why: 'A gentle oil for massage on stretching skin. Avoid if you are allergic to nuts.' },
+  { name: 'Glycolic acid', aliases: ['glycolic', 'alpha hydroxy'], cls: 'care', why: 'May help older stretch marks look smoother. Low-strength creams are usually fine; avoid strong peels in pregnancy.' },
   { name: 'Zinc oxide', aliases: ['zinc oxide'], cls: 'safe', why: 'A mineral sunscreen. The best choice to stop dark patches getting darker.' },
   { name: 'Titanium dioxide', aliases: ['titanium dioxide'], cls: 'safe', why: 'A mineral sunscreen, safe in pregnancy and breastfeeding.' },
   { name: 'Niacinamide', aliases: ['niacinamide', 'nicotinamide', 'vitamin b3'], cls: 'safe', why: 'Helps even out skin tone and calm the skin.' },
   { name: 'Azelaic acid', aliases: ['azelaic'], cls: 'safe', why: 'Considered safe in pregnancy. Can help with acne and dark patches.' },
   { name: 'Vitamin C', aliases: ['ascorbic', 'vitamin c', 'ascorbyl'], cls: 'safe', why: 'Helps brighten dark patches gently. Safe in pregnancy and breastfeeding.' },
   { name: 'Aloe vera', aliases: ['aloe'], cls: 'safe', why: 'Soothing on the skin. Don’t take it by mouth: aloe drinks can act as a laxative.' },
-  { name: 'Petroleum jelly', aliases: ['petrolatum', 'petroleum jelly', 'vaseline'], cls: 'safe', why: 'Protects very dry skin and cracked heels.' },
+  { name: 'Petroleum jelly', aliases: ['petrolatum', 'petroleum jelly'], cls: 'safe', why: 'Protects very dry skin and cracked heels.' },
   { name: 'Ceramides', aliases: ['ceramide'], cls: 'safe', why: 'Strengthen the skin barrier. Safe to use.' },
 ];
 
-export const QUICK_INGREDIENTS = ['Hydroquinone', 'Clobetasol', 'Mercury', 'Retinol', 'Shea butter', 'Niacinamide'];
+export const QUICK_INGREDIENTS = ['Hydroquinone', 'Clobetasol', 'Mercury', 'Retinol', 'Shea butter', 'Centella'];
+
+/**
+ * Ingredients that help stretch marks fade (FR-SKIN-03). Ingredient names only, never brands or products.
+ * Honest framing: they soften and fade marks; none removes them completely.
+ */
+export type HelperIcon = 'drop' | 'leaf' | 'shea' | 'cocoa' | 'almond' | 'coconut' | 'tube';
+export const STRETCH_HELPERS: { name: string; short: string; what: string; icon: HelperIcon; when: 'now' | 'later' }[] = [
+  { name: 'Hyaluronic acid', short: 'Best for new marks', icon: 'drop', what: 'The best-studied for new, red or dark marks. Helps them look softer and flatter.', when: 'now' },
+  { name: 'Centella asiatica', short: 'Helps skin repair', icon: 'leaf', what: 'Also called gotu kola. A plant extract that supports skin repair and may help marks fade.', when: 'now' },
+  { name: 'Shea butter', short: 'Softens, eases itching', icon: 'shea', what: 'Karité. Choose pure, unrefined shea. Eases dryness and itching and softens the skin.', when: 'now' },
+  { name: 'Cocoa butter', short: 'Keeps skin supple', icon: 'cocoa', what: 'A rich moisturiser that keeps stretching skin supple.', when: 'now' },
+  { name: 'Sweet almond oil', short: 'For daily massage', icon: 'almond', what: 'A gentle massage oil; daily massage may help new marks. Avoid if you are allergic to nuts.', when: 'now' },
+  { name: 'Coconut oil', short: 'Soothes dry skin', icon: 'coconut', what: 'Moisturises and soothes itchy, dry skin.', when: 'now' },
+  { name: 'Tretinoin', short: 'Prescription only', icon: 'tube', what: 'Can improve newer marks, but only from a doctor, and never while pregnant or breastfeeding.', when: 'later' },
+  { name: 'Glycolic acid', short: 'Low strength first', icon: 'tube', what: 'May smooth older marks. Start with a low strength after breastfeeding, or ask your health worker.', when: 'later' },
+];
 
 /** Finds every known ingredient in what she typed or pasted from a label. */
 export function checkIngredients(text: string): Ingredient[] {
