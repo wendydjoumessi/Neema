@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Check, X, Search, ArrowRight, Droplet, Sun, Leaf } from 'lucide-react';
-import { AVOID, FOODS, IRON, STAGES, SWAPS } from '../data';
+import { AVOID, AVOID_EVERYDAY, FOODS, IRON, STAGES, SWAPS, waterTarget } from '../data';
 import { useNeema } from '../store';
 import { Card, CheckBox, H1, H2, Pill, Segmented } from '../ui';
 
 type StageId = keyof typeof STAGES;
-const WATER_TARGET = 11; // cups of 250 ml (about 2.8 L on hot days)
+const PREG_STAGES: StageId[] = ['t1', 't2', 't3', 'pp'];
 const RING = 2 * Math.PI * 26;
 
 function Ring({ value, color, label }: { value: number; color: string; label: string }) {
@@ -20,7 +20,12 @@ function Ring({ value, color, label }: { value: number; color: string; label: st
 
 export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
   const s = useNeema();
-  const current: StageId = s.journey === 'pp' ? 'pp' : (`t${trimester}` as StageId);
+  const pregnancyStages = s.journey === 'preg' || s.journey === 'pp';
+  const current: StageId = s.journey === 'pp' ? 'pp' : s.journey === 'ttc' ? 'ttc' : s.journey === 'avoid' ? 'every' : (`t${trimester}` as StageId);
+  const WATER_TARGET = waterTarget(s.journey);
+  const ironLabels = IRON.map((l, i) => (i > 0 ? l : s.journey === 'ttc' ? 'Folic acid tablet' : s.journey === 'avoid' ? 'Iron-rich breakfast (beans, eggs)' : l));
+  const avoidList = s.journey === 'avoid' ? AVOID_EVERYDAY : AVOID;
+  const title = s.journey === 'ttc' ? 'Eating to conceive' : s.journey === 'avoid' ? 'Healthy eating' : 'Diet for each stage';
   const [stageId, setStageId] = useState<StageId>(current);
   const [query, setQuery] = useState('');
   const st = STAGES[stageId];
@@ -31,16 +36,18 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 p-4">
       <div>
-        <H1>Diet for each stage</H1>
-        <p className="mt-1 text-neema-muted-strong">Local foods for each stage, with a focus on iron and folate.</p>
+        <H1>{title}</H1>
+        <p className="mt-1 text-neema-muted-strong">{pregnancyStages ? 'Local foods for each stage, with a focus on iron and folate.' : 'Local foods that keep your iron and folate up.'}</p>
       </div>
 
-      <Segmented
-        label="Stage"
-        value={stageId}
-        onChange={setStageId}
-        options={(Object.keys(STAGES) as StageId[]).map((k) => ({ id: k, label: STAGES[k].short }))}
-      />
+      {pregnancyStages && (
+        <Segmented
+          label="Stage"
+          value={stageId}
+          onChange={setStageId}
+          options={PREG_STAGES.map((k) => ({ id: k, label: STAGES[k].short }))}
+        />
+      )}
 
       <Card className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
@@ -51,7 +58,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
           {st.nutrients.map((n) => <Pill key={n} className="bg-neema-ochre-soft px-3 py-1 text-neema-ochre-ink">{n}</Pill>)}
         </div>
         <div className="rounded-xl bg-neema-cream px-3.5 py-3">
-          <div className="text-[13px] font-semibold leading-[18px] text-neema-muted-strong">MORE NUTRIENTS, NOT DOUBLE FOOD</div>
+          <div className="text-[13px] font-semibold leading-[18px] text-neema-muted-strong">{pregnancyStages ? 'MORE NUTRIENTS, NOT DOUBLE FOOD' : 'WHAT MATTERS MOST'}</div>
           <div>{st.extra}</div>
         </div>
         <div>
@@ -77,7 +84,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
           </article>
         ))}
       </div>
-      <p className="text-neema-muted-strong">Eat leaves with orange, pineapple or tomato. Food supports, but never replaces, the iron and folic acid tablets from your antenatal visit.</p>
+      <p className="text-neema-muted-strong">Eat leaves with orange, pineapple or tomato. {s.journey === 'preg' ? 'Food supports, but never replaces, the iron and folic acid tablets from your antenatal visit.' : s.journey === 'ttc' ? 'Food supports, but doesn’t replace, a daily folic acid tablet.' : 'Vitamin C helps your body take in the iron.'}</p>
 
       <Card className="flex flex-col gap-3">
         <H2>Local market swaps</H2>
@@ -107,7 +114,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
         {/* TODO: fetch today's temperature for the user's city and raise the water target on hot days. */}
         <div className="flex items-center gap-2.5 rounded-xl bg-neema-ochre-soft px-3 py-2.5 text-sm font-medium leading-5 text-neema-ochre-ink">
           <Sun className="h-[22px] w-[22px] flex-none" />
-          <span>Hot, humid day: water target raised from 2.3 L to 2.8 L.</span>
+          <span>Hot, humid day: water target raised to about {(WATER_TARGET * 0.25).toFixed(1).replace('.0', '')} L.</span>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="flex flex-col items-center gap-1">
@@ -134,7 +141,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
         </div>
         <div>
           <div className="mb-1 text-[13px] font-semibold leading-[18px] text-neema-muted">TODAY’S IRON HABITS</div>
-          {IRON.map((label, i) => (
+          {ironLabels.map((label, i) => (
             <button key={label} type="button" aria-pressed={!!s.iron[i]} onClick={() => s.setIron({ ...s.iron, [i]: !s.iron[i] })} className="flex min-h-[52px] w-full items-center gap-3 border-b border-neema-line text-left">
               <CheckBox on={!!s.iron[i]} /> {label}
             </button>
@@ -154,10 +161,10 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
 
       <Card className="flex flex-col gap-2">
         <H2 className="mb-1">Avoid or limit</H2>
-        {AVOID.map((a) => (
+        {avoidList.map((a) => (
           <div key={a.what} className="flex items-start gap-2.5"><X className="mt-0.5 h-5 w-5 flex-none text-neema-dark" strokeWidth={2.5} /><span><span className="font-semibold">{a.what}</span> — {a.why}</span></div>
         ))}
-        <div className="mt-1 text-[13px] font-medium leading-[18px] text-neema-muted">Based on WHO African-region antenatal guidance. Reviewed by Neema’s clinical reviewer.</div>
+        <div className="mt-1 text-[13px] font-medium leading-[18px] text-neema-muted">{s.journey === 'avoid' ? 'Based on WHO healthy diet guidance.' : 'Based on WHO African-region antenatal guidance.'} Reviewed by Neema’s clinical reviewer.</div>
       </Card>
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Lock, MapPin, Leaf, Minus, Plus } from 'lucide-react';
+import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart } from 'lucide-react';
+import { MY_METHODS, cycleInfo, fmtShort, methodStatus, type MyMethodId } from '../cycle';
+import { fmtDate } from '../format';
 import { cn } from '@/lib/utils';
 import { CMP_TABS, FP_FILTERS, JOURNEYS, METHODS, TTC_CHECK, TTC_FOODS } from '../data';
 import { useNeema } from '../store';
@@ -29,12 +31,128 @@ function Clinics() {
   );
 }
 
+/** Last period date, period length and cycle length: shared by "trying to conceive" and "avoiding pregnancy". */
+function PeriodSettings() {
+  const s = useNeema();
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="neema-lmp" className="font-semibold">First day of my last period</label>
+        <input id="neema-lmp" type="date" max={isoDate(new Date())} value={s.lastPeriod} onChange={(e) => s.setLastPeriod(e.target.value)}
+          className="h-[52px] rounded-xl border border-neema-border bg-white px-3.5 text-base" />
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex flex-col">
+          <span className="font-semibold">My period lasts</span>
+          <span className="text-sm leading-5 text-neema-muted">Usually 2–8 days</span>
+        </span>
+        <div role="group" aria-label="Period length in days" className="flex items-center gap-1 rounded-[14px] bg-neema-cream p-1">
+          <button type="button" aria-label="One day shorter" disabled={s.periodLen <= 2} onClick={() => s.setPeriodLen(s.periodLen - 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-white disabled:opacity-40">
+            <Minus className="h-5 w-5" />
+          </button>
+          <span aria-live="polite" className="min-w-[64px] text-center font-bold">{s.periodLen} days</span>
+          <button type="button" aria-label="One day longer" disabled={s.periodLen >= 10} onClick={() => s.setPeriodLen(s.periodLen + 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-white disabled:opacity-40">
+            <Plus className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div>
+        <div className="mb-1.5 font-semibold">My usual cycle length</div>
+        <Segmented role="radiogroup" label="Cycle length" value={s.cycleLen} onChange={s.setCycleLen}
+          options={[26, 28, 30, 32].map((n) => ({ id: n, label: `${n} days` }))} />
+      </div>
+    </div>
+  );
+}
+
+/** The method she uses now, with the date that drives her reminder. */
+function MyMethodCard() {
+  const s = useNeema();
+  const st = methodStatus(s.method);
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <H2>My method</H2>
+        <span className="flex items-center gap-1 text-[13px] font-semibold leading-[18px] text-neema-muted-strong"><Lock className="h-3.5 w-3.5" /> Private</span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="my-method" className="font-semibold">What I use now</label>
+        <select id="my-method" value={s.method.id} onChange={(e) => s.setMethod({ id: e.target.value as MyMethodId | '', start: '' })}
+          className="h-[52px] rounded-xl border border-neema-border bg-white px-3 text-base">
+          <option value="">Not using a method yet</option>
+          {MY_METHODS.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </select>
+      </div>
+      {st?.def.dateLabel && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="method-date" className="font-semibold">{st.def.dateLabel}</label>
+          <input id="method-date" type="date" max={isoDate(new Date())} value={s.method.start} onChange={(e) => s.setMethod({ ...s.method, start: e.target.value })}
+            className="h-[52px] rounded-xl border border-neema-border bg-white px-3.5 text-base" />
+        </div>
+      )}
+      {st && (
+        <div className="flex items-start gap-3 rounded-xl bg-neema-success-soft px-3.5 py-3 text-neema-ink">
+          <Clock className="mt-0.5 h-5 w-5 flex-none text-neema-success-ink" />
+          <div className="flex flex-col gap-0.5">
+            {st.due && (
+              <span className="font-semibold">
+                {st.def.id.startsWith('inject') ? `Next injection by ${fmtDate(st.due)}` : `Replace or remove by ${fmtDate(st.due)}`}
+              </span>
+            )}
+            <span className="text-[15px] leading-[22px]">{st.def.graceText ?? st.def.note}</span>
+          </div>
+        </div>
+      )}
+      {!st && <p className="text-[15px] leading-[22px] text-neema-muted-strong">Not sure yet? Compare methods below, then talk to a health worker.</p>}
+    </Card>
+  );
+}
+
+function EmergencyCard() {
+  const [showClinics, setShowClinics] = useState(false);
+  return (
+    <section className="flex flex-col gap-2 rounded-2xl bg-neema-primary-soft px-5 py-4">
+      <H2>Had sex without protection, or a condom broke?</H2>
+      <p>Emergency contraceptive pills from a pharmacy work best as soon as possible, and up to 5 days (120 hours) after. A copper IUD fitted at a clinic within 5 days is the most effective option and keeps protecting you after.</p>
+      <p className="text-[15px] leading-[22px] text-neema-muted-strong">Emergency pills don’t end a pregnancy and are not for regular use. Consider an HIV and STI test too.</p>
+      <button type="button" onClick={() => setShowClinics(!showClinics)} className="mt-1 min-h-[52px] rounded-xl bg-neema-dark font-semibold text-white">Find a family planning clinic</button>
+      {showClinics && <Clinics />}
+    </section>
+  );
+}
+
+/** Optional period tracking while avoiding pregnancy. */
+function PeriodTracking() {
+  const s = useNeema();
+  const [open, setOpen] = useState(!!s.lastPeriod);
+  const c = cycleInfo(s.lastPeriod, s.cycleLen, s.periodLen);
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <H2>My period</H2>
+        <span className="text-[13px] font-semibold leading-[18px] text-neema-muted-strong">Optional</span>
+      </div>
+      {c && (
+        <div className="rounded-xl bg-neema-cream px-3.5 py-3">
+          <div className="text-[13px] font-bold leading-[18px] tracking-[0.04em] text-neema-dark">CYCLE DAY {c.cycleDay} · ESTIMATE</div>
+          <div className="text-lg font-bold leading-[26px]">{c.phase === 'late' ? 'Your period may be late' : `Next period around ${fmtShort(c.nextPeriod)}`}</div>
+          {c.phase === 'late' && <div className="text-[15px] leading-[22px]">If it is more than a week late, take a pregnancy test.</div>}
+        </div>
+      )}
+      {open ? <PeriodSettings /> : (
+        <button type="button" onClick={() => setOpen(true)} className="min-h-[48px] rounded-xl border border-neema-border bg-white font-semibold">Track my period</button>
+      )}
+      <p className="text-[15px] leading-[22px] text-neema-muted-strong">Period dates help you notice changes. Counting days alone is not a reliable way to avoid pregnancy.</p>
+    </Card>
+  );
+}
+
 function TryingToConceive() {
   const s = useNeema();
   const [showClinics, setShowClinics] = useState(false);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const lmp = s.lastPeriod ? new Date(s.lastPeriod + 'T00:00:00') : new Date(today.getTime() - 12 * DAY);
+  const lmp = new Date((s.lastPeriod || isoDate(today)) + 'T00:00:00');
   const dayDate = (n: number) => new Date(lmp.getTime() + (n - 1) * DAY);
   const cycleDay = Math.floor((today.getTime() - lmp.getTime()) / DAY) + 1;
   const ovu = s.cycleLen - 14;
@@ -49,6 +167,14 @@ function TryingToConceive() {
 
   return (
     <div className="flex flex-col gap-4">
+      {!s.lastPeriod ? (
+        <Card className="flex flex-col gap-3">
+          <span aria-hidden="true" className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neema-primary-soft text-neema-dark"><CalendarHeart className="h-6 w-6" /></span>
+          <H2>When did your last period start?</H2>
+          <p className="text-neema-muted-strong">Neema uses it to estimate your fertile window and your next period. Nothing is shown until you add it.</p>
+          <PeriodSettings />
+        </Card>
+      ) : (
       <Card className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-2">
           <H2>My fertile window</H2>
@@ -83,46 +209,10 @@ function TryingToConceive() {
           <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded border-2 border-neema-ink" />Today</span>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="neema-lmp" className="font-semibold">First day of my last period</label>
-          <input
-            id="neema-lmp"
-            type="date"
-            max={isoDate(today)}
-            value={s.lastPeriod || isoDate(lmp)}
-            onChange={(e) => s.setLastPeriod(e.target.value)}
-            className="h-[52px] rounded-xl border border-neema-border bg-white px-3.5 text-base"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex flex-col">
-            <span className="font-semibold">My period lasts</span>
-            <span className="text-sm leading-5 text-neema-muted">Usually 2–8 days</span>
-          </span>
-          <div role="group" aria-label="Period length in days" className="flex items-center gap-1 rounded-[14px] bg-neema-cream p-1">
-            <button type="button" aria-label="One day shorter" disabled={s.periodLen <= 2} onClick={() => s.setPeriodLen(s.periodLen - 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-white disabled:opacity-40">
-              <Minus className="h-5 w-5" />
-            </button>
-            <span aria-live="polite" className="min-w-[64px] text-center font-bold">{s.periodLen} days</span>
-            <button type="button" aria-label="One day longer" disabled={s.periodLen >= 10} onClick={() => s.setPeriodLen(s.periodLen + 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-white disabled:opacity-40">
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div className="mb-1.5 font-semibold">My usual cycle length</div>
-          <Segmented
-            role="radiogroup"
-            label="Cycle length"
-            value={s.cycleLen}
-            onChange={s.setCycleLen}
-            options={[26, 28, 30, 32].map((n) => ({ id: n, label: `${n} days` }))}
-          />
-        </div>
+        <PeriodSettings />
         <p className="text-[15px] leading-[22px] text-neema-muted-strong">Calendar estimates are a guide for conceiving, not a contraceptive method.</p>
       </Card>
+      )}
 
       <Card className="flex flex-col px-5 pb-5 pt-4">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
@@ -256,7 +346,7 @@ function CompareMethods() {
 export function FamilyPlanningTab() {
   const s = useNeema();
   const journey = JOURNEYS.find((j) => j.id === s.journey)!;
-  const title = s.journey === 'ttc' ? 'Trying to conceive' : s.journey === 'avoid' ? 'Avoiding pregnancy' : 'Family planning';
+  const title = s.journey === 'ttc' ? 'My cycle' : s.journey === 'avoid' ? 'My family planning' : s.journey === 'pp' ? 'Birth spacing' : 'Family planning';
   const banner =
     s.journey === 'preg'
       ? 'Plan ahead: many methods can start right after birth, even while breastfeeding. WHO advises waiting at least 24 months after a birth before the next pregnancy.'
@@ -273,7 +363,15 @@ export function FamilyPlanningTab() {
         </button>
       </div>
       {banner && <div className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">{banner}</div>}
-      {s.journey === 'ttc' ? <TryingToConceive /> : <CompareMethods />}
+      {s.journey === 'ttc' ? <TryingToConceive /> : s.journey === 'avoid' ? (
+        <>
+          <MyMethodCard />
+          <EmergencyCard />
+          <H2 className="mt-1">Compare methods</H2>
+          <CompareMethods />
+          <PeriodTracking />
+        </>
+      ) : <CompareMethods />}
     </div>
   );
 }

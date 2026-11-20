@@ -33,7 +33,7 @@ export function ProfileTab({
   const name = user?.name || 'Amina';
   const initials = name.split(' ').map((p) => p.charAt(0)).join('').slice(0, 2).toUpperCase();
 
-  const pregnant = pregnancy.id !== 'none';
+  const pregnant = pregnancy.id !== 'none' && !pregnancy.birthDate && s.journey === 'preg';
   const facts = [
     { k: 'Email', v: user?.email || '—' },
     ...(pregnant
@@ -41,7 +41,9 @@ export function ProfileTab({
           { k: 'Due date', v: fmtDate(new Date(pregnancy.dueDate)) },
           { k: 'Week', v: String(pregnancy.currentWeek) },
         ]
-      : []),
+      : pregnancy.birthDate && s.journey === 'pp'
+        ? [{ k: 'Baby born', v: fmtDate(pregnancy.birthDate) }]
+        : []),
     ...extraFacts,
   ];
 

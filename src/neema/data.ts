@@ -19,16 +19,36 @@ export const KB = [
   { keys: ['water', 'drink', 'hydrat', 'heat', 'hot', 'thirst'], text: 'In pregnancy, about 2.3 L of total water a day is a common reference. On hot, humid days in Douala or Yaoundé you need more, so Neema raises your target. Sip through the day and keep water near you. Pale yellow urine is a good sign. If you feel dizzy or your urine stays very dark, use the symptom checker.', sources: ['Neema · My daily habits', 'EFSA dietary reference values for water'] },
   { keys: ['malaria', 'iptp', 'mosquito', 'paludisme', 'net'], text: 'Malaria is more dangerous in pregnancy. In Cameroon, pregnant women are offered preventive malaria treatment (IPTp) at antenatal visits from the second trimester, and should sleep under an insecticide-treated net every night. Your health worker decides when you take it. Neema can’t tell you to start or stop a medicine.', sources: ['Cameroon MINSANTE · Malaria in pregnancy (IPTp)', 'WHO antenatal care recommendations (2016)'] },
   { keys: ['clay', 'kaolin', 'chalk', 'craving', 'calabar'], text: 'Many women crave clay (kaolin, or calabar chalk) in pregnancy. It is best avoided: it can contain lead and other contaminants, and it can block iron absorption. Strong cravings for clay can be a sign of low iron, so ask for a haemoglobin check at your next visit.', sources: ['Neema · Food safety notes', 'WHO antenatal care recommendations (2016)'] },
+  { keys: ['emergency', 'unprotected', 'condom broke', 'morning after', 'pilule du lendemain'], text: 'Emergency contraceptive pills work best taken as soon as possible, and can be used up to 5 days (120 hours) after sex without protection. They are sold in pharmacies. A copper IUD fitted by a health worker within 5 days is the most effective option and keeps protecting you afterwards. Emergency pills do not end an existing pregnancy and are not meant for regular use.', sources: ['WHO Family Planning: A Global Handbook (2022)', 'WHO fact sheet: Emergency contraception'] },
+  { keys: ['fertile', 'ovulat', 'conceive', 'get pregnant', 'how long can it take'], text: 'Your fertile window is the 5 days before ovulation and the day of ovulation. In a 28-day cycle, ovulation is often around day 14, but it varies, so Neema’s dates are estimates. Having sex every 2 to 3 days through the cycle gives a good chance. Most couples conceive within 12 months; see a health worker together after 12 months of trying, or after 6 months if you are 35 or older.', sources: ['WHO preconception care', 'Neema · My cycle'] },
+  { keys: ['folic'], text: 'Folic acid helps protect your baby’s brain and spine, which form in the first weeks of pregnancy, often before you know you are pregnant. That is why WHO advises taking a daily folic acid tablet from the time you start trying, ideally 2 to 3 months before. Ask your pharmacist or health worker for the right tablet.', sources: ['WHO preconception care', 'WHO antenatal care recommendations (2016)'] },
+  { keys: ['safe while breastfeeding', 'methods while breastfeeding', 'spacing'], text: 'Many methods are safe while breastfeeding: the implant, the copper or hormonal IUD, the progestin-only pill, the injection and condoms. An IUD can be fitted within 48 hours of birth or from 4 weeks after. The combined pill is usually not advised in the first 6 months of breastfeeding. Breastfeeding alone (LAM) protects only if baby is under 6 months, feeds only on breast milk, and your period has not returned. WHO advises waiting at least 24 months before the next pregnancy.', sources: ['WHO Family Planning: A Global Handbook (2022)', 'WHO postnatal care recommendations (2022)'] },
+  { keys: ['forget', 'pills', 'remember'], text: 'If remembering a daily pill is hard, long-acting methods need nothing day to day: the implant (3 or 5 years), the IUD (5 to 12 years) or the injection (every 2 or 3 months). They are also more effective in everyday use than pills. If you stay on the pill, set a daily reminder in Neema and keep the pack where you see it every day.', sources: ['WHO Family Planning: A Global Handbook (2022)'] },
+  { keys: ['future fertility', 'injection affect', 'fertility return', 'return to fertility'], text: 'After stopping the 3-monthly injection, fertility returns, but it can take a few months longer than with other methods: on average about 4 months after the effect wears off. With the implant, IUD, pill and condoms, fertility returns quickly after stopping. None of these methods cause infertility.', sources: ['WHO Family Planning: A Global Handbook (2022)'] },
+  { keys: ['genotype', 'sickle'], text: 'Yes, it is a good idea. Sickle cell disease is common in Cameroon. If both partners carry the trait (AS), each pregnancy has a 1 in 4 chance of a baby with sickle cell disease (SS). A simple blood test at a health centre or laboratory tells you your genotype, so you can plan with a health worker.', sources: ['WHO sickle cell disease fact sheet', 'Neema · Pre-conception checklist'] },
+  { keys: ['feed', 'breastfeed', 'milk', 'latch'], text: 'Breastfeed on demand, day and night: newborns usually feed 8 to 12 times in 24 hours. Give only breast milk for the first 6 months, with no water or other drinks, even in hot weather. Signs baby is getting enough: 6 or more wet nappies a day after the first week, and steady weight gain at check-ups. If feeding hurts or baby is too sleepy to feed, ask a health worker soon.', sources: ['WHO infant feeding recommendations', 'Neema · After birth'] },
+  { keys: ['bleeding after', 'lochia', 'bleed'], text: 'Bleeding after birth (lochia) is heaviest in the first days and slowly becomes lighter, changing from red to brown and then pale. It can last up to about 6 weeks. Soaking a pad in an hour or less, large clots, fever or a foul smell are danger signs: use SOS or go to a health facility now.', sources: ['WHO postnatal care recommendations (2022)'] },
+  { keys: ['sad', 'cry', 'depress', 'blues', 'anxious', 'hopeless'], text: 'Many mothers feel tearful, worried or low in the first two weeks after birth. These “baby blues” usually pass. If the feelings last longer than two weeks, make it hard to care for yourself or your baby, or you have thoughts of harming yourself or your baby, talk to a health worker straight away. You are not alone, and help works.', sources: ['WHO postnatal care recommendations (2022)'] },
+  { keys: ['hiv', 'sti', 'protect against'], text: 'Only condoms, male or female, protect against HIV and other sexually transmitted infections as well as pregnancy. You can use a condom together with another method, such as the implant or injection, for double protection. Free HIV testing is available at many health centres in Cameroon.', sources: ['WHO Family Planning: A Global Handbook (2022)'] },
   { keys: ['walk', 'exercise', 'active', 'sport', 'market', 'dance'], text: 'Yes. For most women, safe, regular movement is healthy in pregnancy. WHO suggests at least 150 minutes of moderate activity a week, and walking to the market or farm counts. Avoid heavy lifting and overheating, and ask your health worker first if you have complications.', sources: ['WHO guidelines on physical activity (2020)', 'Neema · Healthy routine'] }
 ];
 export const FALLBACK = { text: 'I don’t have an approved Neema source for that yet, so I won’t guess. You can browse this week’s care articles, or ask your health worker at your next antenatal visit.', sources: [] as string[] };
 
+/** Starter questions for each journey. */
+export const SUGGEST_BY_JOURNEY: Record<JourneyId, string[]> = {
+  preg: ['Which local foods help with iron?', 'How much water should I drink in Douala heat?', 'Is it OK to eat clay (kaolin)?', 'When do I get malaria prevention tablets?', 'Is walking to the market good exercise?'],
+  pp: ['How often should my baby feed?', 'How long does bleeding last after birth?', 'Which family planning methods are safe while breastfeeding?', 'Is it normal to feel sad after birth?'],
+  ttc: ['When am I most fertile?', 'Why should I take folic acid before pregnancy?', 'How long can it take to get pregnant?', 'Should my partner and I check our genotypes?'],
+  avoid: ['What can I do after unprotected sex?', 'Which method is best if I forget pills?', 'Does the injection affect future fertility?', 'Which methods also protect against HIV?'],
+};
 export const SUGGEST = ['Which local foods help with iron?', 'How much water should I drink in Douala heat?', 'Is it OK to eat clay (kaolin)?', 'When do I get malaria prevention tablets?', 'Is walking to the market good exercise?'];
 
 export const STAGES = {
   t1: { short: 'Trim. 1', label: 'Trimester 1', weeks: 'Weeks 1–13', nutrients: ['Folate', 'Iron', 'Iodine'], extra: 'No extra food is usually needed yet. Focus on quality, not quantity.', meals: ['Folong sauce with boiled plantain', 'Millet pap with a handful of groundnuts', 'Beans with ripe plantain and tomato'], problem: 'Nausea: eat small dry snacks such as roasted corn, little and often.' },
   t2: { short: 'Trim. 2', label: 'Trimester 2', weeks: 'Weeks 14–27', nutrients: ['Iron', 'Folate', 'Calcium', 'Protein'], extra: 'Add one modest snack a day, such as a handful of groundnuts and a banana. Not “eating for two”.', meals: ['Ndolé with groundnuts and boiled plantain', 'Folong with mackerel and yam', 'Egusi soup with cassava leaves'], problem: 'Heartburn: smaller meals, less fried food and pepper, stay upright after eating.' },
   t3: { short: 'Trim. 3', label: 'Trimester 3', weeks: 'Weeks 28–40', nutrients: ['Iron', 'Protein', 'Fibre'], extra: 'Keep the one modest snack, such as groundnuts and a banana. Eat smaller meals more often.', meals: ['Sweet potato with beans and tomato', 'Sardines with folong and plantain', 'Sorghum pap with kossam'], problem: 'Constipation: more leaves, fruit and water, and a short walk every day.' },
+  ttc: { short: 'Conceiving', label: 'Before pregnancy', weeks: 'Trying to conceive', nutrients: ['Folate', 'Iron', 'Iodine', 'Zinc'], extra: 'No extra food is needed. Build good iron and folate stores before pregnancy, and use iodised salt.', meals: ['Folong with beans and boiled plantain', 'Egusi with fish and cassava leaves', 'Pap with groundnuts and a banana'], problem: 'Very irregular periods? Regular meals and a healthy weight help. See a health worker if your cycle is often shorter than 21 or longer than 35 days.' },
+  every: { short: 'Every day', label: 'Healthy every day', weeks: 'Women’s health', nutrients: ['Iron', 'Folate', 'Calcium'], extra: 'Periods lose iron every month. Eat green leaves, beans or fish most days, with a fruit.', meals: ['Ndolé with fish and boiled plantain', 'Beans and corn (koki) with avocado', 'Millet pap with kossam'], problem: 'Very tired during your period? Iron-rich foods with vitamin C help. Ask for a haemoglobin test if it doesn’t pass.' },
   pp: { short: 'After birth', label: 'After birth', weeks: 'Breastfeeding', nutrients: ['Protein', 'Iron', 'Water'], extra: 'Breastfeeding: a little more food each day and more water, about 2.7 L.', meals: ['Mild fish pepper soup', 'Beans and plantain with avocado', 'Millet pap with kossam'], problem: 'Tired and thirsty? Keep a cup of water by you at every feed.' }
 };
 
@@ -59,7 +79,17 @@ export const AVOID = [
   { what: 'Moringa root or bark', why: 'unsafe in pregnancy; the leaves as food are fine' }
 ];
 
+export const AVOID_EVERYDAY = [
+  { what: 'Alcohol, including palm wine', why: 'harms the liver and raises blood pressure' },
+  { what: 'Sugary drinks and sweets', why: 'add weight without nutrients' },
+  { what: 'Too much salt and stock cubes', why: 'raise blood pressure' },
+  { what: 'Clay (kaolin)', why: 'may contain lead and blocks iron' },
+  { what: 'Unknown herbal mixtures', why: 'some can affect how your family planning method works' }
+];
 export const IRON = ['Iron and folic acid tablet', 'Green leaves (ndolé, folong)', 'Beans or groundnuts', 'Fish, egg or meat', 'Vitamin C with a meal'];
+
+/** Daily water target in 250 ml cups: more in pregnancy and while breastfeeding, and in the heat. */
+export const waterTarget = (j: JourneyId) => (j === 'preg' || j === 'pp' ? 11 : 8);
 
 export const METHODS = [
   { id: 'implant', name: 'Implant (3–5 years)', eff: 'Over 99%', daily: false, hormone: true, bf: true, natural: false, sti: false, pros: 'Nothing to remember; long-lasting; private.', cons: 'Irregular or unpredictable bleeding; a trained provider inserts and removes it; no STI protection.', fert: 'Returns quickly after removal.', bfText: 'Yes, suitable while breastfeeding.' },
@@ -103,6 +133,21 @@ export const SHOP_STAGES = [
   { id: 'bag', title: 'Hospital bag · packed by week 36', note: 'Take these to the facility when labour starts.' },
   { id: 'pp', title: 'Postpartum · after birth', note: 'Buy when you need them, or ask someone to get them for you.' }
 ];
+/** WHO birth preparedness: not things to buy, but what a mother should have arranged before labour. */
+export const READY = [
+  { id: 'r_fac', label: 'I know where I will give birth', sub: 'Visit the facility before labour and ask for its maternity list.' },
+  { id: 'r_trans', label: 'Transport arranged, day and night', sub: 'Save a driver’s or moto-taxi number and plan for night-time.' },
+  { id: 'r_money', label: 'Money set aside', sub: 'For transport, fees and any emergency.' },
+  { id: 'r_comp', label: 'A companion for labour', sub: 'WHO encourages having someone you choose with you.' },
+  { id: 'r_blood', label: 'A possible blood donor', sub: 'A relative or friend ready to donate if you need blood.' },
+  { id: 'r_signs', label: 'I know the danger signs', sub: 'Bleeding, severe headache, blurred vision, fits, fever, or water breaking early: go now.' },
+];
+/** The hospital bag packed as three separate bags. */
+export const BAGS = [
+  { id: 'mother', title: 'Bag for you', note: '' },
+  { id: 'baby', title: 'Bag for baby', note: '' },
+  { id: 'kit', title: 'Mama kit for the delivery', note: 'Most facilities in Cameroon ask you to bring these. Lists vary: add anything your clinic asks for.' },
+];
 export const STAGE_TAG = { t2: 'Trimester 2', t3: 'Trimester 3', bag: 'Hospital bag', pp: 'Postpartum' };
 export const SHOP = [
   { id: 'docs', cat: 'mother', when: 'bag', ess: true, name: 'Antenatal card, ID and insurance papers', qty: 'In a plastic sleeve', tip: 'The facility will ask for your antenatal card at admission.' },
@@ -110,6 +155,10 @@ export const SHOP = [
   { id: 'pants', cat: 'mother', when: 'bag', ess: true, name: 'Disposable maternity underwear', qty: '6–10 pairs', tip: 'Or loose cotton briefs one size up that you don’t mind staining.' },
   { id: 'gowns', cat: 'mother', when: 'bag', ess: true, name: 'Front-opening nightgowns', qty: '2, loose and light cotton', tip: 'Front buttons make breastfeeding and check-ups easier.' },
   { id: 'hyg', cat: 'mother', when: 'bag', ess: true, name: 'Postpartum hygiene items', qty: 'Small jug for rinsing, mild unscented soap, 2 clean towels, toothbrush', tip: 'Rinse the vulva with clean warm water after using the toilet. No douching or herbal steam.' },
+  { id: 'meds', cat: 'mother', when: 'bag', ess: true, name: 'Your medicines and iron tablets', qty: 'Enough for 3–4 days, with any prescriptions', tip: 'Tell the midwife about every medicine you take, including herbal ones.' },
+  { id: 'phone', cat: 'mother', when: 'bag', ess: true, name: 'Phone, charger and emergency numbers', qty: 'Numbers written on paper too', tip: 'Power cuts happen. Keep your companion’s and driver’s numbers on paper in the bag.' },
+  { id: 'snacks', cat: 'mother', when: 'bag', ess: true, name: 'Water bottle and light snacks', qty: '1 bottle, biscuits or fruit', tip: 'If your labour is normal, drinking and light eating help you keep your strength.' },
+  { id: 'gohome', cat: 'mother', when: 'bag', ess: false, name: 'Loose clothes to go home in', qty: '1 outfit', tip: 'Your belly takes weeks to go down: pick something loose and comfortable.' },
   { id: 'slippers', cat: 'mother', when: 'bag', ess: true, name: 'Slippers and a light wrap or cardigan', qty: '1 pair, 1 wrap', tip: 'Wards can be cold at night with fans or air conditioning.' },
   { id: 'bras', cat: 'mother', when: 't3', ess: true, name: 'Nursing bras', qty: '2–3, front-opening, no underwire', tip: 'Buy around week 36 when your size has settled; leave room for milk coming in.' },
   { id: 'nipple', cat: 'mother', when: 't3', ess: false, name: 'Nipple cream (pure lanolin)', qty: '1 small tube', tip: 'A few drops of your own breast milk, air-dried, also soothe sore nipples. Pain usually means the latch needs adjusting.' },
@@ -124,11 +173,14 @@ export const SHOP = [
   { id: 'cot', cat: 'baby', when: 't2', ess: false, name: 'Baby cot or Moses basket', qty: '1, with a firm, flat mattress', tip: 'A borrowed cot is fine if it is sturdy. Keep pillows and soft toys out.' },
   { id: 'onesies', cat: 'baby', when: 't3', ess: true, name: 'Soft cotton onesies', qty: '6–8, newborn and 0–3 months', tip: '100% cotton is coolest in the heat. Wash before first use.' },
   { id: 'vests', cat: 'baby', when: 't3', ess: true, name: 'Baby vests', qty: '4–6 short-sleeved', tip: 'A light layer under a onesie on cooler nights.' },
-  { id: 'socks', cat: 'baby', when: 't3', ess: true, name: 'Booties or socks', qty: '4 pairs', tip: 'Newborns lose heat through their feet in the first days.' },
+  { id: 'socks', cat: 'baby', when: 't3', ess: true, name: 'Booties or socks', qty: '4 pairs', tip: 'Newborns get cold easily in the first days. Skin-to-skin contact on your chest is the best way to warm baby.' },
   { id: 'mitts', cat: 'baby', when: 't3', ess: true, name: 'Scratch mittens', qty: '3 pairs', tip: 'Stop scratches until you can safely trim baby’s nails.' },
   { id: 'caps', cat: 'baby', when: 't3', ess: true, name: 'Soft cotton caps', qty: '2–3', tip: 'For the first days and air-conditioned rooms.' },
   { id: 'blankets', cat: 'baby', when: 't3', ess: true, name: 'Light baby blankets', qty: '2–3 cotton receiving blankets', tip: 'Light layers are safer than one thick blanket.' },
   { id: 'towels', cat: 'baby', when: 't3', ess: true, name: 'Baby towels', qty: '2 soft, hooded', tip: 'Keep them only for baby and dry them in the sun.' },
+  { id: 'thermo', cat: 'baby', when: 't3', ess: true, name: 'Digital thermometer', qty: '1, for the armpit', tip: 'A newborn with a temperature of 37.5 °C or more, or below 35.5 °C, needs a health worker the same day.' },
+  { id: 'outfit', cat: 'baby', when: 'bag', ess: true, name: 'Going-home outfit for baby', qty: '1 onesie, cap, socks and a blanket', tip: 'Pack them in a separate small bag so they are easy to find.' },
+  { id: 'carrier', cat: 'baby', when: 'pp', ess: false, name: 'Baby wrap or carrier', qty: '1', tip: 'Keep baby’s face visible and chin off the chest, high enough to kiss.' },
   { id: 'tub', cat: 'baby', when: 't3', ess: true, name: 'Baby bathtub', qty: '1, or a clean basin kept only for baby', tip: 'Test the water with your elbow: warm, never hot.' },
   { id: 'cotton', cat: 'baby', when: 'bag', ess: true, name: 'Cotton wool', qty: '1 large roll', tip: 'With cooled boiled water for cleaning eyes and the nappy area.' },
   { id: 'soap', cat: 'baby', when: 'bag', ess: true, name: 'Mild, unscented baby wash or soap', qty: '1 bar or bottle', tip: 'Avoid perfumed or medicated soaps on newborn skin.' },
@@ -194,8 +246,8 @@ export const CONTACTS = [
 ];
 
 export const T = {
-  en: { myProfile: 'My profile', greeting: 'Good afternoon', openProfile: 'Open profile and settings', home: 'Home', ask: 'Ask Neema', diet: 'Diet', fp: 'Planning', fpDiscreet: 'Calendar', shop: 'Shopping', sosBig: 'SOS · GET HELP NOW', profile: 'Profile & settings', back: 'Back to Home', journey: 'My journey', privacy: 'Privacy', language: 'Language', contacts: 'Emergency contacts', data: 'My data', security: 'Account security', export: 'Download my data', deleteAll: 'Delete my account and data' },
-  fr: { myProfile: 'Mon profil', greeting: 'Bon après-midi', openProfile: 'Ouvrir le profil et les paramètres', home: 'Accueil', ask: 'Demander', diet: 'Nutrition', fp: 'Planning', fpDiscreet: 'Calendrier', shop: 'Achats', sosBig: 'SOS · AIDE IMMÉDIATE', profile: 'Profil et paramètres', back: 'Retour à l’accueil', journey: 'Mon parcours', privacy: 'Confidentialité', language: 'Langue', contacts: 'Contacts d’urgence', data: 'Mes données', security: 'Sécurité du compte', export: 'Télécharger mes données', deleteAll: 'Supprimer mon compte et mes données' }
+  en: { myProfile: 'My profile', greeting: 'Good afternoon', openProfile: 'Open profile and settings', home: 'Home', ask: 'Ask Neema', diet: 'Diet', fp: 'Planning', fpTtc: 'My cycle', fpAvoid: 'Methods', fpDiscreet: 'Calendar', shop: 'Shopping', sosBig: 'SOS · GET HELP NOW', profile: 'Profile & settings', back: 'Back to Home', journey: 'My journey', privacy: 'Privacy', language: 'Language', contacts: 'Emergency contacts', data: 'My data', security: 'Account security', export: 'Download my data', deleteAll: 'Delete my account and data' },
+  fr: { myProfile: 'Mon profil', greeting: 'Bon après-midi', openProfile: 'Ouvrir le profil et les paramètres', home: 'Accueil', ask: 'Demander', diet: 'Nutrition', fp: 'Planning', fpTtc: 'Mon cycle', fpAvoid: 'Méthodes', fpDiscreet: 'Calendrier', shop: 'Achats', sosBig: 'SOS · AIDE IMMÉDIATE', profile: 'Profil et paramètres', back: 'Retour à l’accueil', journey: 'Mon parcours', privacy: 'Confidentialité', language: 'Langue', contacts: 'Contacts d’urgence', data: 'Mes données', security: 'Sécurité du compte', export: 'Télécharger mes données', deleteAll: 'Supprimer mon compte et mes données' }
 };
 export const JOURNEYS = [
   { id: 'ttc', short: 'Trying to conceive', label: 'Family planning · trying to conceive', sub: 'Cycle, fertile window, pre-conception checklist', tag: 'TRYING TO CONCEIVE', title: 'Cycle day 12', text: 'Your fertile window is estimated to start in about 2 days (an estimate only). Start a daily folic acid tablet now if you haven’t yet.' },

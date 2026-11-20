@@ -59,7 +59,11 @@ describe('Neema app', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
     fireEvent.click(screen.getByRole('radio', { name: /trying to conceive/ }));
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Planning' }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'My cycle' }));
+    // No period date yet: Neema asks for it instead of inventing one.
+    expect(screen.getByRole('heading', { name: 'When did your last period start?' })).toBeInTheDocument();
+    expect(screen.queryByText('My fertile window')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
     expect(screen.getByText('My fertile window')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'One day longer' }));
     expect(screen.getByText('6 days')).toBeInTheDocument();
@@ -68,8 +72,23 @@ describe('Neema app', () => {
   it('opens a pump guide on the checklist', () => {
     setup();
     fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Shopping' }));
-    fireEvent.click(screen.getAllByRole('button', { name: /How to use/ })[1]);
+    // Week 24: trimester 2 and 3 items are due now; the hospital bag is coming up later.
+    expect(screen.getByRole('heading', { name: 'Trimester 2' })).toBeInTheDocument();
+    expect(screen.getByText('Coming up from week 30')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Everything' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Manual breast pump/ }));
     expect(screen.getByText(/Centre the nipple in the funnel/)).toBeInTheDocument();
+  });
+
+  it('packs the hospital bag with the clinic’s own items', () => {
+    setup();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('button', { name: 'Shopping' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Hospital bag' }));
+    expect(screen.getByRole('heading', { name: 'Ready for labour?' })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Add an item from your clinic’s list'), { target: { value: 'Bleach, 1 bottle' } });
+    fireEvent.submit(screen.getByLabelText('Add an item from your clinic’s list').closest('form')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Got it: Bleach, 1 bottle' }));
+    expect(screen.getByRole('button', { name: 'Got it: Bleach, 1 bottle' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('opens an earlier screen from Profile and logs out', () => {
@@ -80,5 +99,29 @@ describe('Neema app', () => {
     fireEvent.click(screen.getByRole('button', { name: /Back to Profile/ }));
     fireEvent.click(screen.getByRole('button', { name: /LOG OUT/ }));
     expect(onLogout).toHaveBeenCalled();
+  });
+
+  it('shows each journey its own home, with no invented dates', () => {
+    setup();
+    const nav = () => within(screen.getByRole('navigation', { name: 'Main' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: /avoiding pregnancy/ }));
+    expect(nav().queryByRole('button', { name: 'Shopping' })).not.toBeInTheDocument();
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByRole('heading', { name: 'Find a method that fits your life' })).toBeInTheDocument();
+    expect(screen.queryByText(/Cycle day|Next period/)).not.toBeInTheDocument();
+
+    fireEvent.click(nav().getByRole('button', { name: 'Methods' }));
+    fireEvent.change(screen.getByLabelText('What I use now'), { target: { value: 'inject3' } });
+    fireEvent.change(screen.getByLabelText('Date of my last injection'), { target: { value: '2026-10-01' } });
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByText('Next injection by 31 Dec')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: /trying to conceive/ }));
+    fireEvent.click(nav().getByRole('button', { name: 'Home' }));
+    expect(screen.getByRole('heading', { name: 'Let’s find your fertile days' })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
+    expect(screen.getByText(/cycle day 4/i)).toBeInTheDocument();
   });
 });
