@@ -56,6 +56,39 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_contacts: {
+        Row: {
+          alert_by_sms: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          position: number
+          relationship: string
+          user_id: string
+        }
+        Insert: {
+          alert_by_sms?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          position?: number
+          relationship?: string
+          user_id: string
+        }
+        Update: {
+          alert_by_sms?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          position?: number
+          relationship?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       medical_profiles: {
         Row: {
           allergies: string | null
