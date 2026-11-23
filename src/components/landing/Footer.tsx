@@ -18,7 +18,7 @@ export function Footer({ onNavigate, scrollToSection }: FooterProps) {
             <button type="button" onClick={() => scrollToSection('services-section')} className={link}>Services</button>
             <button type="button" onClick={() => scrollToSection('about-section')} className={link}>Why Neema</button>
             <button type="button" onClick={() => onNavigate?.('contact')} className={link}>Contact</button>
-            <a href="mailto:fortunelekane61@gmail.com" className={`${link} inline-flex items-center`}>Support</a>
+            <a href="mailto:appneema@gmail.com" className={`${link} inline-flex items-center`}>Support</a>
           </nav>
         </div>
         <a href="tel:119" className="inline-flex min-h-[48px] items-center gap-2 rounded-full border-[1.5px] border-neema-sos bg-neema-sos-soft px-5 font-semibold text-neema-sos">

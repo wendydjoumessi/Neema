@@ -113,7 +113,7 @@ export function ContactScreen({ onBack }: ContactScreenProps) {
   );
 
   const info = [
-    { Icon: Mail, title: 'Email us', text: <a href="mailto:fortunelekane61@gmail.com" className="inline-flex min-h-[48px] items-center break-all font-semibold text-neema-dark underline-offset-2 hover:underline">fortunelekane61@gmail.com</a>, tint: 'bg-neema-primary-soft text-neema-dark' },
+    { Icon: Mail, title: 'Email us', text: <a href="mailto:appneema@gmail.com" className="inline-flex min-h-[48px] items-center break-all font-semibold text-neema-dark underline-offset-2 hover:underline">appneema@gmail.com</a>, tint: 'bg-neema-primary-soft text-neema-dark' },
     { Icon: Clock, title: 'Response time', text: 'We usually reply within 24–48 hours.', tint: 'bg-neema-ochre-soft text-neema-ochre-ink' },
     { Icon: Phone, title: 'Support hours', text: 'Monday – Friday, 9:00 – 18:00 (WAT)', tint: 'bg-neema-success-soft text-neema-success-ink' },
   ];

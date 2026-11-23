@@ -33,11 +33,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields");
     }
 
-    // Note: Using Resend test mode - emails go to the Resend account owner
-    // To send to other recipients, verify a domain at resend.com/domains
+    // Submissions are delivered to the Neema support inbox; the sender stays as reply_to.
     const emailResponse = await resend.emails.send({
       from: "Neema Contact <onboarding@resend.dev>",
-      to: ["wendydjoumessi112@gmail.com"],
+      to: ["appneema@gmail.com"],
       reply_to: email,
       subject: `[Contact Form] ${subject}`,
       html: `
