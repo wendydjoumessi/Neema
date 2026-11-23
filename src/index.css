@@ -404,6 +404,11 @@
     animation: scale-in 0.3s ease-out;
   }
 
+  @keyframes neema-pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }

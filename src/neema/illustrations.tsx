@@ -149,32 +149,3 @@ export function HandHeartIcon({ className }: IconProps) {
     </svg>
   );
 }
-
-/**
- * Where pregnancy darkening usually shows: face (melasma), neck and underarms, and the line on the belly.
- * Each zone has a numbered dot matching the legend next to it.
- */
-export function DarkPatchMap() {
-  return (
-    <svg viewBox="0 0 120 170" role="img" aria-label="Body outline showing dark patches on the cheeks and forehead, the neck and underarms, and a dark line down the belly" className="h-auto w-full max-w-[120px]">
-      <circle cx="60" cy="30" r="22" fill={SKIN_LIGHT} />
-      <rect x="51" y="50" width="18" height="12" fill={SKIN_LIGHT} />
-      <path d="M26 72c0-8 10-12 34-12s34 4 34 12l4 50c-10 6-14 4-16 0l-4 44H42l-4-44c-2 4-6 6-16 0z" fill={SKIN_LIGHT} />
-      <ellipse cx="34" cy="96" rx="16" ry="20" fill={SKIN_LIGHT} />
-      <ellipse cx="86" cy="96" rx="16" ry="20" fill={SKIN_LIGHT} />
-      <ellipse cx="60" cy="118" rx="27" ry="24" fill="#B47C55" />
-      {/* zones */}
-      <ellipse cx="50" cy="32" rx="6" ry="4" fill="#5A3322" opacity="0.8" />
-      <ellipse cx="70" cy="32" rx="6" ry="4" fill="#5A3322" opacity="0.8" />
-      <ellipse cx="60" cy="18" rx="9" ry="3.5" fill="#5A3322" opacity="0.6" />
-      <rect x="51" y="52" width="18" height="7" rx="3" fill="#5A3322" opacity="0.7" />
-      <path d="M60 98v40" stroke="#4A2A1C" strokeWidth="3" strokeLinecap="round" />
-      {[['1', 92, 26], ['2', 92, 58], ['3', 98, 124]].map(([n, x, y]) => (
-        <g key={n}>
-          <circle cx={x as number} cy={y as number} r="10.5" fill="#D95D39" />
-          <text x={x as number} y={(y as number) + 5} textAnchor="middle" fontSize="14" fontWeight="700" fill="#fff" fontFamily="Inter, sans-serif">{n}</text>
-        </g>
-      ))}
-    </svg>
-  );
-}
