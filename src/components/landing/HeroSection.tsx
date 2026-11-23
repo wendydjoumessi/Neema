@@ -10,13 +10,10 @@ interface HeroSectionProps {
 export function HeroSection({ onGetStarted, scrollToSection }: HeroSectionProps) {
   return (
     <section className="overflow-hidden bg-neema-cream">
-      <div className="mx-auto w-full max-w-6xl px-5 pb-14 pt-6 md:px-10 md:pb-20 md:pt-10">
+      <div className="mx-auto w-full max-w-6xl px-5 pb-14 pt-10 md:px-10 md:pb-20 md:pt-10">
 
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <span className="mb-5 inline-flex items-center rounded-full bg-neema-primary-soft px-4 py-1.5 text-sm font-semibold text-neema-dark">
-              Free · English &amp; Français · Made for Cameroon
-            </span>
             <h1 className="font-sans text-4xl font-bold leading-[1.15] tracking-normal text-neema-ink md:text-5xl lg:text-[56px]">
               Care for every stage, <span className="text-neema-dark">from planning to after birth.</span>
             </h1>
