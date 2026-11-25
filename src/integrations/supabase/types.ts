@@ -187,6 +187,7 @@ export type Database = {
           consent_sms: boolean
           consent_terms_at: string | null
           consent_version: string | null
+          country: string
           created_at: string
           discreet_mode: boolean
           faith: string | null
@@ -195,6 +196,7 @@ export type Database = {
           journey: Database["public"]["Enums"]["neema_journey"]
           language: string
           phone: string | null
+          region: string | null
           role: Database["public"]["Enums"]["neema_role"]
           updated_at: string
         }
@@ -205,6 +207,7 @@ export type Database = {
           consent_sms?: boolean
           consent_terms_at?: string | null
           consent_version?: string | null
+          country?: string
           created_at?: string
           discreet_mode?: boolean
           faith?: string | null
@@ -213,6 +216,7 @@ export type Database = {
           journey?: Database["public"]["Enums"]["neema_journey"]
           language?: string
           phone?: string | null
+          region?: string | null
           role?: Database["public"]["Enums"]["neema_role"]
           updated_at?: string
         }
@@ -223,6 +227,7 @@ export type Database = {
           consent_sms?: boolean
           consent_terms_at?: string | null
           consent_version?: string | null
+          country?: string
           created_at?: string
           discreet_mode?: boolean
           faith?: string | null
@@ -231,6 +236,7 @@ export type Database = {
           journey?: Database["public"]["Enums"]["neema_journey"]
           language?: string
           phone?: string | null
+          region?: string | null
           role?: Database["public"]["Enums"]["neema_role"]
           updated_at?: string
         }

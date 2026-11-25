@@ -15,6 +15,13 @@
       "when": 1795427326665,
       "tag": "0001_create_emergency_contacts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795620473839,
+      "tag": "0002_profile_location",
+      "breakpoints": true
     }
   ]
 }
