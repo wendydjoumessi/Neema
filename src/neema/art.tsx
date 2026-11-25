@@ -189,13 +189,68 @@ export function CycleWheel({ cycleLen, periodLen, day, ovulationDay, size = 148,
   );
 }
 
+const KINDS = ['leaf', 'plantain', 'nut', 'fish', 'bean', 'egg', 'milk', 'grain', 'fruit', 'tuber', 'drink', 'salt'];
+
 /** Small food pictures for the Diet screen. */
 export function FoodArt({ name, className }: { name: string; className?: string }) {
   const n = name.toLowerCase();
-  const kind = /plantain/.test(n) ? 'plantain' : /groundnut|egusi|nut/.test(n) ? 'nut' : /mackerel|fish|sardine/.test(n) ? 'fish' : /bean|koki/.test(n) ? 'bean' : 'leaf';
+  const kind = KINDS.includes(n) ? n
+    : /plantain|macabo/.test(n) ? 'plantain' : /groundnut|egusi|nut/.test(n) ? 'nut' : /mackerel|fish|sardine|crayfish|njanga/.test(n) ? 'fish'
+      : /bean|koki|ekoki/.test(n) ? 'bean' : /egg|beef/.test(n) ? 'egg' : /milk|kossam|yog|pap|bouillie/.test(n) ? 'milk'
+        : /millet|sorghum|corn|maize|oat|grain/.test(n) ? 'grain' : /orange|pineapple|pawpaw|avocado|guava|fruit|mango/.test(n) ? 'fruit'
+          : /yam|cocoyam|achu|potato|tuber|cassava tuber/.test(n) ? 'tuber' : /ginger|tea|soup|water/.test(n) ? 'drink' : /salt/.test(n) ? 'salt' : 'leaf';
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" className={className}>
-      <circle cx="32" cy="32" r="30" fill={kind === 'leaf' ? C.greenSoft : kind === 'fish' ? '#E3F0F8' : C.ochreSoft} />
+      <circle cx="32" cy="32" r="30" fill={kind === 'leaf' ? C.greenSoft : kind === 'fish' || kind === 'drink' || kind === 'milk' ? '#E3F0F8' : kind === 'fruit' ? '#FDE7D9' : C.ochreSoft} />
+      {kind === 'egg' && (
+        <g>
+          <ellipse cx="26" cy="34" rx="10" ry="13" fill="#FFF8EE" stroke="#E9D8B4" strokeWidth="1.5" />
+          <ellipse cx="40" cy="36" rx="9" ry="11" fill="#FFF8EE" stroke="#E9D8B4" strokeWidth="1.5" />
+          <circle cx="40" cy="37" r="4.5" fill={C.ochre} />
+        </g>
+      )}
+      {kind === 'milk' && (
+        <g>
+          <path d="M24 20h16l2 8v20a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4V28z" fill="#FFFFFF" stroke="#C8D7E1" strokeWidth="1.6" />
+          <path d="M22 36h20v12a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z" fill="#F4F8FB" />
+          <rect x="25" y="16" width="14" height="5" rx="2" fill="#5D8FB0" />
+        </g>
+      )}
+      {kind === 'grain' && (
+        <g>
+          <path d="M32 50V18" stroke="#B88A4A" strokeWidth="2.5" strokeLinecap="round" />
+          {[22, 28, 34, 40].map((y) => (
+            <g key={y}><ellipse cx="27" cy={y} rx="4.5" ry="3" fill="#E6B655" transform={`rotate(-30 27 ${y})`} /><ellipse cx="37" cy={y} rx="4.5" ry="3" fill="#E6B655" transform={`rotate(30 37 ${y})`} /></g>
+          ))}
+        </g>
+      )}
+      {kind === 'fruit' && (
+        <g>
+          <circle cx="30" cy="36" r="13" fill="#F39A3B" />
+          <path d="M30 23c2-5 7-6 10-4-3 3-6 4-10 4z" fill={C.green} />
+          <circle cx="25" cy="32" r="2.5" fill="#FFD29A" />
+        </g>
+      )}
+      {kind === 'tuber' && (
+        <g>
+          <path d="M16 38c0-10 12-16 22-14s12 12 6 18-28 8-28-4z" fill="#A86F42" />
+          <circle cx="26" cy="34" r="1.6" fill="#7A4E2D" /><circle cx="36" cy="30" r="1.6" fill="#7A4E2D" /><circle cx="38" cy="40" r="1.6" fill="#7A4E2D" />
+        </g>
+      )}
+      {kind === 'drink' && (
+        <g>
+          <path d="M20 26h24l-3 22a4 4 0 0 1-4 3H27a4 4 0 0 1-4-3z" fill="#FFFFFF" stroke="#C8D7E1" strokeWidth="1.6" />
+          <path d="M22 32h20l-2 15a3 3 0 0 1-3 2H27a3 3 0 0 1-3-2z" fill="#F3C64B" opacity=".8" />
+          <path d="M28 20c0-3 4-3 4-6M34 20c0-3 4-3 4-6" stroke="#C8D7E1" strokeWidth="2" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+      {kind === 'salt' && (
+        <g>
+          <path d="M24 26h16v22a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4z" fill="#FFFFFF" stroke="#C8D7E1" strokeWidth="1.6" />
+          <path d="M24 26c0-6 4-10 8-10s8 4 8 10z" fill="#5D8FB0" />
+          {[28, 32, 36].map((x) => <circle key={x} cx={x} cy="21" r="1" fill="#fff" />)}
+        </g>
+      )}
       {kind === 'leaf' && (
         <g>
           <path d="M18 40c2-14 14-22 28-22-2 14-12 24-28 22z" fill="#4CAF6A" />

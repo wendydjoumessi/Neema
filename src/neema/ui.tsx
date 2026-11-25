@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { Check } from 'lucide-react';
+import { Check, MapPin, Sun } from 'lucide-react';
+import { REGIONAL_ACTIVITY, zoneFor } from './location';
 import { cn } from '@/lib/utils';
 
 export const DISCLAIMER =
@@ -159,3 +160,31 @@ export function SosPill({ onClick, label = 'SOS', className }: { onClick: () => 
   );
 }
 
+
+/** Exercise tips for her climate, from the region she gave at sign-up or in her profile. */
+export function RegionalActivityTips({ country, region, onSetRegion }: { country: string; region: string; onSetRegion: () => void }) {
+  const zone = zoneFor(country, region);
+  if (!zone) {
+    return (
+      <button type="button" onClick={onSetRegion} className="neema-press flex min-h-[52px] items-center gap-2.5 rounded-2xl bg-neema-cream px-3.5 py-2.5 text-left text-[15px] leading-[21px]">
+        <MapPin className="h-5 w-5 flex-none text-neema-dark" aria-hidden="true" />
+        <span>Add your region in your profile for exercise tips that suit your weather.</span>
+      </button>
+    );
+  }
+  const a = REGIONAL_ACTIVITY[zone];
+  return (
+    <section className="flex flex-col gap-2 rounded-2xl bg-neema-ochre-soft p-3.5" aria-label={`Exercise tips for ${region}`}>
+      <div className="flex items-center gap-2 font-semibold text-neema-ochre-ink">
+        <Sun className="h-5 w-5" aria-hidden="true" /> {a.title} in {region}
+      </div>
+      <ul className="flex flex-col gap-1.5">
+        {a.tips.map((t) => (
+          <li key={t} className="flex items-start gap-2 text-[15px] leading-[21px]">
+            <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-neema-ochre" />{t}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}

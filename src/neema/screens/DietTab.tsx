@@ -1,14 +1,24 @@
 import { useState } from 'react';
-import { Check, X, Search, ArrowRight, Droplet, Sun, Leaf, ChevronRight, Footprints } from 'lucide-react';
+import { Check, X, Search, ArrowRight, Droplet, Sun, Leaf, ChevronRight, Footprints, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HScroll, ProgressRing, Reveal, Sheet } from '../motion';
 import { FoodArt, PlateArt, WaterDrops } from '../art';
-import { AVOID, AVOID_EVERYDAY, FOODS, IRON, STAGES, SWAPS, waterTarget } from '../data';
+import { AVOID, AVOID_EVERYDAY, FOODS_BY_STAGE, IRON, STAGES, SWAPS, waterTarget } from '../data';
+import { REGIONAL_FOODS, ZONE_LABEL, zoneFor, type LocalFood } from '../location';
 import { useNeema } from '../store';
-import { CheckBox, H1, H2, Pill, Segmented } from '../ui';
+import { CheckBox, H1, H2, Pill, Segmented, RegionalActivityTips } from '../ui';
 
 type StageId = keyof typeof STAGES;
 const PREG_STAGES: StageId[] = ['t1', 't2', 't3', 'pp'];
+/** Each stage has its own colour band and heading, so the shelves never look the same. */
+const STAGE_THEME = {
+  t1: { title: 'First weeks: folate and gentle foods', band: 'bg-neema-success-soft', chip: 'bg-neema-success-soft text-neema-success-ink', ink: 'text-neema-success-ink' },
+  t2: { title: 'Iron and folate first: local foods', band: 'bg-neema-ochre-soft', chip: 'bg-neema-ochre-soft text-neema-ochre-ink', ink: 'text-neema-ochre-ink' },
+  t3: { title: 'Last weeks: calcium, iron and fibre', band: 'bg-neema-primary-soft', chip: 'bg-neema-primary-soft text-neema-dark', ink: 'text-neema-dark' },
+  pp: { title: 'After birth: rebuild and keep feeding', band: 'bg-neema-lilac', chip: 'bg-neema-lilac text-[#4A3F6B]', ink: 'text-[#4A3F6B]' },
+  ttc: { title: 'Before pregnancy: build your stores', band: 'bg-[#E3F0F8]', chip: 'bg-[#E3F0F8] text-[#2F5E7D]', ink: 'text-[#2F5E7D]' },
+} as const;
+
 export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
   const s = useNeema();
   const pregnancyStages = s.journey === 'preg' || s.journey === 'pp';
@@ -24,7 +34,11 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
   const swaps = SWAPS.filter((w) => !q || `${w.from} ${w.to}`.toLowerCase().includes(q));
   const ironCount = IRON.filter((_, i) => s.iron[i]).length;
 
-  const [food, setFood] = useState<(typeof FOODS)[number] | null>(null);
+  const [food, setFood] = useState<LocalFood | null>(null);
+  const stageKey = (['t1', 't2', 't3', 'pp', 'ttc'] as const).find((k) => k === stageId) ?? 't2';
+  const stageFoods = FOODS_BY_STAGE[stageKey];
+  const theme = STAGE_THEME[stageKey];
+  const zone = zoneFor(s.country, s.region);
   const [problemOpen, setProblemOpen] = useState(false);
   const [allSwaps, setAllSwaps] = useState(false);
   const shownSwaps = q || allSwaps ? swaps : swaps.slice(0, 3);
@@ -157,6 +171,7 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
               ))}
             </div>
           </div>
+          <RegionalActivityTips country={s.country} region={s.region} onSetRegion={() => s.setTab('profile')} />
           <div className="flex flex-col gap-2 rounded-2xl bg-neema-cream p-3">
             <p className="text-[15px] leading-[21px] text-neema-muted-strong">Very tired, breathless, or pale inside your eyelids? Check a symptom and ask for a haemoglobin test. Neema does not diagnose anaemia.</p>
             <button type="button" onClick={() => s.openSymptom()} className="neema-press min-h-[48px] rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">Check a symptom</button>
@@ -166,28 +181,67 @@ export function DietTab({ trimester }: { trimester: 1 | 2 | 3 }) {
       )}
 
       {s.dietView === 'food' && (<>
-      {/* Foods as a swipeable shelf */}
+      {/* Foods for this stage: each stage has its own foods and its own look */}
       <Reveal i={4} className="flex flex-col gap-2.5">
-        <H2 className="px-1">Iron and folate first: local foods</H2>
-        <HScroll label="Local foods">
-          {FOODS.map((f) => (
-            <button key={f.name} type="button" onClick={() => setFood(f)} className="neema-press flex w-[172px] flex-none flex-col gap-1.5 rounded-3xl bg-white p-3.5 text-left shadow-neema-card">
-              <FoodArt name={f.name} className="h-14 w-14" />
-              <div className="font-semibold leading-[22px]">{f.name}</div>
-              <div className="text-[13px] font-medium leading-[18px] text-neema-muted">{f.local}</div>
-              <div className="flex flex-wrap gap-1">
-                {f.tags.map((tag) => <span key={tag} className="rounded-full bg-neema-success-soft px-2 text-[13px] font-semibold leading-[20px] text-neema-success-ink">{tag}</span>)}
-              </div>
-              <div className="line-clamp-3 text-[15px] leading-[21px]">{f.benefit}</div>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <H2>{theme.title}</H2>
+          <span className={cn('whitespace-nowrap rounded-full px-2.5 py-0.5 text-[13px] font-semibold', theme.chip)}>{st.short}</span>
+        </div>
+        <HScroll label={theme.title}>
+          {stageFoods.map((f, i) => (
+            <button key={`${stageId}-${f.name}`} type="button" onClick={() => setFood(f)} style={{ animationDelay: `${i * 50}ms` }}
+              className="neema-press neema-rise flex w-[176px] flex-none flex-col overflow-hidden rounded-3xl bg-white text-left shadow-neema-card">
+              <span className={cn('relative flex h-[88px] items-center justify-center', theme.band)}>
+                <FoodArt name={f.kind} className="h-16 w-16" />
+                <span aria-hidden="true" className={cn('absolute left-2.5 top-2.5 rounded-full bg-white/90 px-2 text-[13px] font-bold leading-5', theme.ink)}>{i + 1}</span>
+              </span>
+              <span className="flex flex-col gap-1.5 p-3.5">
+                <span className="font-semibold leading-[22px]">{f.name}</span>
+                <span className="text-[13px] font-medium leading-[18px] text-neema-muted">{f.local}</span>
+                <span className="flex flex-wrap gap-1">
+                  {f.tags.map((tag) => <span key={tag} className={cn('rounded-full px-2 text-[13px] font-semibold leading-[20px]', theme.chip)}>{tag}</span>)}
+                </span>
+                <span className="line-clamp-3 text-[15px] leading-[21px]">{f.benefit}</span>
+              </span>
             </button>
           ))}
         </HScroll>
         <p className="px-1 text-[15px] leading-[21px] text-neema-muted-strong">Eat leaves with orange, pineapple or tomato. {s.journey === 'preg' ? 'Food supports, but never replaces, the iron and folic acid tablets from your antenatal visit.' : s.journey === 'ttc' ? 'Food supports, but doesn’t replace, a daily folic acid tablet.' : 'Vitamin C helps your body take in the iron.'}</p>
       </Reveal>
+
+      {/* Local to her region */}
+      <Reveal i={5} className="flex flex-col gap-2.5">
+        {zone ? (
+          <>
+            <div className="flex items-center gap-2 px-1">
+              <MapPin className="h-5 w-5 text-neema-dark" aria-hidden="true" />
+              <H2>Popular in {ZONE_LABEL[zone]}</H2>
+            </div>
+            <div className="flex flex-col gap-2">
+              {REGIONAL_FOODS[zone].map((f) => (
+                <button key={f.name} type="button" onClick={() => setFood(f)} className="neema-press flex items-center gap-3 rounded-3xl bg-white p-3 text-left shadow-neema-card">
+                  <FoodArt name={f.kind} className="h-14 w-14 flex-none" />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="font-semibold leading-5">{f.name} <span className="font-medium text-neema-muted">· {f.local}</span></span>
+                    <span className="line-clamp-2 text-[15px] leading-[21px] text-neema-muted-strong">{f.benefit}</span>
+                  </span>
+                  <ChevronRight className="h-5 w-5 flex-none text-neema-muted" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+            <p className="px-1 text-[13px] font-medium leading-[18px] text-neema-muted">Based on your region: {s.region}. Change it in your profile.</p>
+          </>
+        ) : (
+          <button type="button" onClick={() => s.setTab('profile')} className="neema-press flex items-center gap-3 rounded-3xl border-2 border-dashed border-neema-border bg-white p-4 text-left">
+            <span aria-hidden="true" className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-neema-primary-soft text-neema-dark"><MapPin className="h-5 w-5" /></span>
+            <span className="flex flex-col"><span className="font-semibold">Foods from your region</span><span className="text-[15px] leading-[21px] text-neema-muted-strong">Add your region in your profile to see foods from your local markets.</span></span>
+          </button>
+        )}
+      </Reveal>
       <Sheet open={!!food} onClose={() => setFood(null)} title={food?.name ?? ''}>
         {food && (
           <div className="flex flex-col gap-3">
-            <FoodArt name={food.name} className="h-24 w-24" />
+            <FoodArt name={food.kind} className="h-24 w-24" />
             <div className="text-neema-muted-strong">{food.local}</div>
             <div className="flex flex-wrap gap-1.5">{food.tags.map((tag) => <Pill key={tag} className="bg-neema-success-soft text-neema-success-ink">{tag}</Pill>)}</div>
             <p className="text-lg leading-7">{food.benefit}</p>

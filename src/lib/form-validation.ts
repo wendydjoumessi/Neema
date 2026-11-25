@@ -1,12 +1,24 @@
 import { z } from 'zod';
 import { format, isValid, parseISO } from 'date-fns';
 import { normalizePhone } from '@/neema/contacts';
+import { CAMEROON, REGIONS } from '@/neema/location';
+
+/** Where she lives: country, region (one of the 10 in Cameroon) and town. Shared by sign-up and Profile. */
+export const locationSchema = z.object({
+  country: z.string().trim().min(1, 'Choose your country.').max(60, 'Use 60 characters or fewer.'),
+  region: z.string().trim().max(60, 'Use 60 characters or fewer.'),
+  city: z.string().trim().max(80, 'Use 80 characters or fewer.'),
+}).superRefine((data, ctx) => {
+  if (data.country === CAMEROON && !(REGIONS as readonly string[]).includes(data.region)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['region'], message: 'Choose your region.' });
+  }
+});
 
 export const signupSchema = z.object({
   name: z.string().trim().min(1, 'Enter your full name.').max(120, 'Use 120 characters or fewer.'),
   email: z.string().trim().min(1, 'Enter your email address.').email('Enter a valid email address.').max(254, 'Use 254 characters or fewer.'),
   password: z.string().min(6, 'Use at least 6 characters for your password.'),
-});
+}).and(locationSchema);
 
 const dateSchema = z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value)), 'Enter a valid date.');
 export const pregnancyDatingSchema = z.object({

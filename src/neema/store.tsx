@@ -20,7 +20,7 @@ export type ChatMessage = { id: number; role: 'user' | 'ai' | 'alert'; text: str
 
 /** Settings and progress saved to the user's account (and remembered on this device). */
 export const PERSISTED_KEYS = [
-  'discreet', 'lang', 'journey', 'city', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
+  'discreet', 'lang', 'journey', 'city', 'country', 'region', 'water', 'iron', 'activeWeek', 'shop', 'ttc', 'cycleLen', 'periodLen', 'lastPeriod',
   'pinLock', 'sharePreg', 'shareFp', 'folic', 'pills', 'method', 'feeds', 'mood', 'shopCustom', 'shopEdits', 'contacts', 'bodyPlan', 'moves',
 ] as const;
 export type PersistedKey = (typeof PERSISTED_KEYS)[number];
@@ -54,6 +54,8 @@ function useNeemaState(seed?: PersistedState) {
   const [lang, setLang] = usePersisted<Lang>('lang', 'en', seed);
   const [journey, setJourney] = usePersisted<JourneyId>('journey', 'preg', seed);
   const [city, setCity] = usePersisted('city', '', seed);
+  const [country, setCountry] = usePersisted('country', 'Cameroon', seed);
+  const [region, setRegion] = usePersisted('region', '', seed);
 
   // Overlays
   const [notifOpen, setNotifOpen] = useState(false);
@@ -127,13 +129,13 @@ function useNeemaState(seed?: PersistedState) {
   };
 
   const persisted: PersistedState = {
-    discreet, lang, journey, city, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
+    discreet, lang, journey, city, country, region, water, iron, activeWeek, shop, ttc, cycleLen, periodLen, lastPeriod, pinLock, sharePreg, shareFp,
     folic, pills, method, feeds, mood, shopCustom, shopEdits, contacts, bodyPlan, moves,
   };
 
   return {
     persisted,
-    tab, setTab, discreet, setDiscreet, lang, setLang, journey, setJourney, city, setCity,
+    tab, setTab, discreet, setDiscreet, lang, setLang, journey, setJourney, city, setCity, country, setCountry, region, setRegion,
     notifOpen, setNotifOpen, sosOpen, setSosOpen, symptomOpen, setSymptomOpen, symptomResult, setSymptomResult,
     dangerWord, setDangerWord, openSymptom, openSos,
     water, setWater, iron, setIron, activeWeek, setActiveWeek,

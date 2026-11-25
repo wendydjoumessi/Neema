@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart, Check, ShieldCheck, Syringe, Anchor, Pill, Baby, CalendarDays, Undo2, Scissors, SlidersHorizontal, Sprout, Sparkle, Droplet, ListChecks, Stethoscope, ChevronDown } from 'lucide-react';
+import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart, Check, ShieldCheck, Syringe, Anchor, Pill, Baby, CalendarDays, Undo2, Scissors, SlidersHorizontal, Sprout, Sparkle, Droplet, ListChecks, Stethoscope, ChevronDown, X } from 'lucide-react';
 import { HScroll, ProgressRing, Reveal, Sheet } from '../motion';
 import { CycleWheel, FoodArt, ShieldArt, SupportArt, TryingArt } from '../art';
 import { MY_METHODS, cycleInfo, fmtShort, methodStatus, type MyMethodId } from '../cycle';
 import { fmtDate } from '../format';
 import { cn } from '@/lib/utils';
-import { CMP_TABS, FP_FILTERS, JOURNEYS, METHODS, TTC_CHECK, TTC_FOODS } from '../data';
+import { CMP_TABS, FOOD_CONTRACEPTION_MYTHS, FP_FILTERS, JOURNEYS, METHODS, TTC_CHECK, TTC_FOODS } from '../data';
 import { useNeema } from '../store';
 import { Card, CheckBox, Disclaimer, H1, H2, PrimaryButton, Segmented } from '../ui';
 
@@ -119,6 +119,42 @@ function EmergencyCard() {
       <p className="text-[15px] leading-[22px] text-neema-muted-strong">Emergency pills don’t end a pregnancy and are not for regular use. Consider an HIV and STI test too.</p>
       <button type="button" onClick={() => setShowClinics(!showClinics)} className="mt-1 min-h-[52px] rounded-xl bg-neema-dark font-semibold text-white">Find a family planning clinic</button>
       {showClinics && <Clinics />}
+    </section>
+  );
+}
+
+/** No food prevents pregnancy: replaces the Diet tab for the avoiding journey. */
+function FoodMythCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="flex flex-col gap-3 rounded-[24px] bg-white p-4 shadow-neema-card">
+      <div className="flex items-center gap-3">
+        <span className="relative h-14 w-14 flex-none" aria-hidden="true">
+          <FoodArt name="fruit" className="h-full w-full" />
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-neema-dark text-white ring-2 ring-white"><X className="h-3.5 w-3.5" strokeWidth={3} /></span>
+        </span>
+        <div className="flex flex-col">
+          <H2>No food prevents pregnancy</H2>
+          <p className="text-[15px] leading-[21px] text-neema-muted-strong">You don’t need a special diet to avoid pregnancy.</p>
+        </div>
+      </div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="neema-press flex min-h-[48px] items-center justify-between rounded-2xl bg-neema-cream px-3.5 text-left font-semibold">
+        Common myths that don’t work
+        <ChevronDown className={cn('h-5 w-5 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="neema-fade flex flex-col gap-2">
+          <ul className="flex flex-col gap-1.5">
+            {FOOD_CONTRACEPTION_MYTHS.map((m) => (
+              <li key={m} className="flex items-start gap-2.5 text-[15px] leading-[21px]">
+                <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-neema-primary-soft text-neema-dark"><X className="h-3 w-3" strokeWidth={3} /></span>
+                {m}
+              </li>
+            ))}
+          </ul>
+          <p className="text-[15px] leading-[21px] text-neema-muted-strong">Large amounts of some of these, like neem or herbal mixtures, can make you ill. To avoid pregnancy, choose a method above. After unprotected sex, use emergency contraception.</p>
+        </div>
+      )}
     </section>
   );
 }
@@ -534,6 +570,7 @@ export function FamilyPlanningTab() {
           <H2 className="mt-1">Compare methods</H2>
           <CompareMethods />
           <PeriodTracking />
+          <FoodMythCard />
         </>
       ) : <CompareMethods />}
     </div>
