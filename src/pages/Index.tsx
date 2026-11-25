@@ -28,7 +28,7 @@ import type { EmergencyContact } from '@/neema/contacts';
 import { BirthScreen } from '@/components/screens/BirthScreen';
 import {
   CONSENT_VERSION, exportMyData, loadAccount, notPregnant, pregnancyFromRow, requestDeletion, saveAppState, saveBirth, saveContacts, saveConsent,
-  saveMedicalProfile, savePregnancy, saveProfile, signOut, type Account, type Journey, type PregnancyRow, type Profile,
+  saveMedicalProfile, savePregnancy, saveProfile, signOut, isSessionExpired, type Account, type Journey, type PregnancyRow, type Profile,
 } from '@/lib/account';
 import { MedicineSafety } from '@/components/screens/MedicineSafety';
 
@@ -115,11 +115,20 @@ function AppFlow() {
       .then(({ data }) => {
         if (!active) return;
         const u = data.session?.user;
+        if (u && isSessionExpired(u.last_sign_in_at)) { signOut().finally(() => active && setCurrentScreen('landing')); return; }
         if (u) openAccount(u.id, u.email);
         else setCurrentScreen((sc) => (sc === 'loading' ? 'landing' : sc));
       })
       .catch(() => active && setCurrentScreen('landing'));
-    return () => { active = false; sub.subscription.unsubscribe(); };
+    const checkExpiry = async () => {
+      const { data } = await supabase.auth.getSession();
+      const u = data.session?.user;
+      if (u && isSessionExpired(u.last_sign_in_at)) { await signOut(); window.location.reload(); }
+    };
+    const timer = window.setInterval(checkExpiry, 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') checkExpiry(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); sub.subscription.unsubscribe(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
