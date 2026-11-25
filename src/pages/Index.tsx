@@ -120,12 +120,15 @@ function AppFlow() {
         else setCurrentScreen((sc) => (sc === 'loading' ? 'landing' : sc));
       })
       .catch(() => active && setCurrentScreen('landing'));
-    const timer = window.setInterval(async () => {
+    const checkExpiry = async () => {
       const { data } = await supabase.auth.getSession();
       const u = data.session?.user;
       if (u && isSessionExpired(u.last_sign_in_at)) { await signOut(); window.location.reload(); }
-    }, 60_000);
-    return () => { active = false; window.clearInterval(timer); sub.subscription.unsubscribe(); };
+    };
+    const timer = window.setInterval(checkExpiry, 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') checkExpiry(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); sub.subscription.unsubscribe(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
