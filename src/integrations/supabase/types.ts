@@ -182,8 +182,6 @@ export type Database = {
       profiles: {
         Row: {
           city: string | null
-          country: string
-          region: string | null
           consent_health_data_at: string | null
           consent_partner_sharing: boolean
           consent_sms: boolean
@@ -202,8 +200,6 @@ export type Database = {
         }
         Insert: {
           city?: string | null
-          country?: string
-          region?: string | null
           consent_health_data_at?: string | null
           consent_partner_sharing?: boolean
           consent_sms?: boolean
@@ -222,8 +218,6 @@ export type Database = {
         }
         Update: {
           city?: string | null
-          country?: string
-          region?: string | null
           consent_health_data_at?: string | null
           consent_partner_sharing?: boolean
           consent_sms?: boolean
