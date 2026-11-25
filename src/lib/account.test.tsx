@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 type Row = Record<string, unknown>;
 const db: Record<string, Row[]> = { profiles: [], medical_profiles: [], pregnancies: [], app_state: [], data_requests: [], emergency_contacts: [] };
 const calls: { table: string; op: string; payload?: unknown }[] = [];
-let session: { user: { id: string; email: string } } | null = null;
+let session: { user: { id: string; email: string; last_sign_in_at?: string } } | null = null;
 let signInError: { message: string } | null = null;
 
 function query(table: string) {
@@ -60,7 +60,7 @@ vi.mock('@/integrations/supabase/client', () => ({
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => undefined } } }),
       signInWithPassword: ({ email }: { email: string }) => {
         if (signInError) return Promise.resolve({ data: { user: null, session: null }, error: signInError });
-        session = { user: { id: 'u1', email } };
+        session = { user: { id: 'u1', email, last_sign_in_at: new Date().toISOString() } };
         return Promise.resolve({ data: { user: session.user, session }, error: null });
       },
       signUp: () => Promise.resolve({ data: { user: { id: 'u2' }, session: null }, error: null }),
@@ -113,7 +113,7 @@ describe('accounts', () => {
   });
 
   it('reopens a signed-in mother straight into her app, with her saved settings', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina Nkeng', role: 'mother', language: 'en', journey: 'preg', discreet_mode: false, city: 'Akwa, Douala', ...consented });
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'active', due_date: iso(new Date(Date.now() + 112 * 86400000)), doctor_due_date: null });
     db.app_state.push({ user_id: 'u1', state: { water: 7 } });
@@ -125,7 +125,7 @@ describe('accounts', () => {
   });
 
   it('asks a new account for consent and saves it', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false });
     render(<Index />);
     expect(await screen.findByRole('heading', { name: 'Your data, your choice' })).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe('accounts', () => {
   });
 
   it('saves the pregnancy, then offers the medical profile, then opens the app', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false, ...consented });
     render(<Index />);
     fireEvent.change(await screen.findByLabelText('I know how many weeks pregnant I am'), { target: { value: '20' } });
@@ -158,7 +158,7 @@ describe('accounts', () => {
   });
 
   it('saves setting changes to the account', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false, ...consented });
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'active', due_date: iso(new Date(Date.now() + 112 * 86400000)), doctor_due_date: null });
     render(<Index />);
@@ -181,7 +181,7 @@ describe('accounts', () => {
   });
 
   it('lets a woman who is not pregnant go straight to family planning', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false, ...consented });
     render(<Index />);
     fireEvent.click(await screen.findByRole('button', { name: 'I’m not pregnant right now' }));
@@ -203,7 +203,7 @@ describe('accounts', () => {
   });
 
   it('asks a new mother for her baby’s birth date instead of pregnancy dates', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'pp', language: 'en', discreet_mode: false, ...consented });
     render(<Index />);
     const date = await screen.findByLabelText('Baby’s date of birth');
@@ -215,7 +215,7 @@ describe('accounts', () => {
   });
 
   it('reopens a mother after birth on her after-birth home', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'pp', language: 'en', discreet_mode: false, ...consented });
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'born', due_date: iso(new Date(Date.now() - 21 * 86400000)), outcome_date: iso(new Date(Date.now() - 21 * 86400000)), doctor_due_date: null });
     render(<Index />);
@@ -223,7 +223,7 @@ describe('accounts', () => {
   });
 
   it('loads her saved contacts and saves changes to the contacts table', async () => {
-    session = { user: { id: 'u1', email: 'amina@example.com' } };
+    session = { user: { id: 'u1', email: 'amina@example.com', last_sign_in_at: new Date().toISOString() } };
     db.profiles.push({ id: 'u1', full_name: 'Amina', role: 'mother', journey: 'preg', language: 'en', discreet_mode: false, ...consented });
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'active', due_date: iso(new Date(Date.now() + 112 * 86400000)), doctor_due_date: null });
     db.emergency_contacts.push({ id: 'c1', user_id: 'u1', name: 'Paul', relationship: 'Partner', phone: '+237677123456', alert_by_sms: true, position: 0 });

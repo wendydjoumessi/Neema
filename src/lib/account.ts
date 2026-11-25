@@ -60,6 +60,16 @@ export async function signIn(email: string, password: string) {
   return data.user;
 }
 
+/** People must sign in again once this long has passed since their last sign-in. */
+export const MAX_SESSION_MS = DAY;
+
+/** True when the last sign-in is older than MAX_SESSION_MS (or unknown). */
+export function isSessionExpired(lastSignInAt: string | null | undefined, now = Date.now()): boolean {
+  if (!lastSignInAt) return true;
+  const t = Date.parse(lastSignInAt);
+  return Number.isNaN(t) || now - t >= MAX_SESSION_MS;
+}
+
 export async function signOut() {
   await supabase.auth.signOut();
 }
