@@ -15,7 +15,7 @@ import {
 } from '../illustrations';
 import { daysBetween, todayIso } from '../cycle';
 import { useNeema, type BodySection } from '../store';
-import { Card, CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
+import { Card, CheckBox, H1, H2, Segmented, SwitchRow, RegionalActivityTips } from '../ui';
 
 type Nav = { goTab: (tab: 'diet' | 'ask') => void };
 
@@ -191,6 +191,7 @@ function AfterBirthActivity({ pregnancy, goTab }: { pregnancy: PregnancyData } &
             ? 'Safe from the first days. Watch each move, then press Start and follow along.'
             : stage === 'build' ? 'Your health worker said you can be more active. Build up a little each week.' : 'Aim for 150 active minutes a week, the same as other adults.'}
         </p>
+        <div className="mt-3"><RegionalActivityTips country={s.country} region={s.region} onSetRegion={() => { s.setExtraId(null); s.setTab('profile'); }} /></div>
         <RoutineButton moves={moves} onStart={(queue) => setPlayer({ queue, start: 0 })} />
         <ul className="mt-2 flex flex-col">{moves.map((m) => <MoveRow key={m.id} move={m} csection={plan.csection} speech={speech} onStart={() => setPlayer({ queue: [m], start: 0 })} />)}</ul>
       </section>

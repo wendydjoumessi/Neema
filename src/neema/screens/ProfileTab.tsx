@@ -5,6 +5,8 @@ import {
 import emblem from '@/assets/neema-emblem.png';
 import { methodStatus, fmtShort } from '../cycle';
 import { ListRow, Reveal } from '../motion';
+import { CAMEROON, COUNTRIES, REGIONS } from '../location';
+import { fieldErrors, locationSchema } from '@/lib/form-validation';
 import { MotherBabyArt, PregnantArt, ShieldArt, TryingArt } from '../art';
 
 const JOURNEY_ART = { ttc: TryingArt, preg: PregnantArt, pp: MotherBabyArt, avoid: ShieldArt };
@@ -41,6 +43,17 @@ export function ProfileTab({
   const t = T[s.lang];
   const [editing, setEditing] = useState(false);
   const [cityDraft, setCityDraft] = useState(s.city);
+  const [countryDraft, setCountryDraft] = useState(s.country || CAMEROON);
+  const [regionDraft, setRegionDraft] = useState(s.region);
+  const [locError, setLocError] = useState('');
+  const saveLocation = () => {
+    const r = locationSchema.safeParse({ country: countryDraft, region: regionDraft, city: cityDraft });
+    if (!r.success) { setLocError(Object.values(fieldErrors(r.error))[0] ?? 'Check your location.'); return; }
+    const v = r.data as { country: string; region: string; city: string };
+    s.setCountry(v.country); s.setRegion(v.region); s.setCity(v.city);
+    setEditing(false);
+  };
+  const place = [s.city, s.region, s.country && s.country !== CAMEROON ? s.country : ''].filter(Boolean).join(', ');
   const [exported, setExported] = useState<'' | 'busy' | 'done' | 'error'>('');
   const [delError, setDelError] = useState('');
   const [del, setDel] = useState<0 | 1 | 2>(0);
@@ -106,7 +119,7 @@ export function ProfileTab({
             <div aria-hidden="true" className="flex h-16 w-16 flex-none items-center justify-center rounded-full border-[3px] border-white/70 bg-white text-2xl font-bold text-neema-dark">{initials}</div>
             <div className="min-w-0 flex-1">
               <div className="text-xl font-semibold leading-7">{name}</div>
-              <div className="text-[15px] text-white/90">{s.city || 'Add your neighbourhood and city'}</div>
+              <div className="text-[15px] text-white/90">{place || 'Add your neighbourhood and city'}</div>
             </div>
           </div>
           <dl className="relative grid grid-cols-2 gap-2">
@@ -118,15 +131,35 @@ export function ProfileTab({
             ))}
           </dl>
           {editing && (
-            <div className="relative flex flex-col gap-1.5">
-              <label htmlFor="neema-city" className="text-sm font-semibold">Neighbourhood and city</label>
-              <input id="neema-city" value={cityDraft} onChange={(e) => setCityDraft(e.target.value)} className="h-[52px] rounded-xl border border-white/40 px-3.5 text-base text-neema-ink" />
+            <div className="relative flex flex-col gap-3 rounded-2xl bg-white p-3.5 text-neema-ink">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="neema-country" className="text-sm font-semibold">Country</label>
+                <select id="neema-country" value={countryDraft} onChange={(e) => { setCountryDraft(e.target.value); setRegionDraft(''); }} className="h-[52px] rounded-xl border border-neema-border bg-white px-3 text-base">
+                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="neema-region" className="text-sm font-semibold">{countryDraft === CAMEROON ? 'Region' : 'Region or state (optional)'}</label>
+                {countryDraft === CAMEROON ? (
+                  <select id="neema-region" value={regionDraft} onChange={(e) => setRegionDraft(e.target.value)} className="h-[52px] rounded-xl border border-neema-border bg-white px-3 text-base">
+                    <option value="" disabled>Choose your region</option>
+                    {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                ) : (
+                  <input id="neema-region" value={regionDraft} maxLength={60} onChange={(e) => setRegionDraft(e.target.value)} className="h-[52px] rounded-xl border border-neema-border px-3.5 text-base" />
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="neema-city" className="text-sm font-semibold">Neighbourhood and city</label>
+                <input id="neema-city" value={cityDraft} maxLength={80} onChange={(e) => setCityDraft(e.target.value)} className="h-[52px] rounded-xl border border-neema-border px-3.5 text-base" />
+              </div>
+              {locError && <p role="alert" className="text-sm font-medium text-neema-dark">{locError}</p>}
             </div>
           )}
           {editing ? (
-            <button type="button" onClick={() => { s.setCity(cityDraft.trim()); setEditing(false); }} className="neema-press relative min-h-[48px] rounded-2xl bg-white font-semibold text-neema-dark">Save changes</button>
+            <button type="button" onClick={saveLocation} className="neema-press relative min-h-[48px] rounded-2xl bg-white font-semibold text-neema-dark">Save changes</button>
           ) : (
-            <button type="button" onClick={() => { setCityDraft(s.city); setEditing(true); }} className="neema-press relative min-h-[48px] rounded-2xl border border-white/60 font-semibold">Edit profile</button>
+            <button type="button" onClick={() => { setCityDraft(s.city); setCountryDraft(s.country || CAMEROON); setRegionDraft(s.region); setLocError(''); setEditing(true); }} className="neema-press relative min-h-[48px] rounded-2xl border border-white/60 font-semibold">Edit profile</button>
           )}
         </section>
       </Reveal>

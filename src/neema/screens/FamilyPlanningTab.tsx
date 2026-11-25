@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart, Check, ShieldCheck, Syringe, Anchor, Pill, Baby, CalendarDays, Undo2, Scissors } from 'lucide-react';
-import { Reveal } from '../motion';
-import { ShieldArt } from '../art';
+import { useEffect, useRef, useState } from 'react';
+import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart, Check, ShieldCheck, Syringe, Anchor, Pill, Baby, CalendarDays, Undo2, Scissors, SlidersHorizontal, Sprout, Sparkle, Droplet, ListChecks, Stethoscope, ChevronDown, X } from 'lucide-react';
+import { HScroll, ProgressRing, Reveal, Sheet } from '../motion';
+import { CycleWheel, FoodArt, ShieldArt, SupportArt, TryingArt } from '../art';
 import { MY_METHODS, cycleInfo, fmtShort, methodStatus, type MyMethodId } from '../cycle';
 import { fmtDate } from '../format';
 import { cn } from '@/lib/utils';
-import { CMP_TABS, FP_FILTERS, JOURNEYS, METHODS, TTC_CHECK, TTC_FOODS } from '../data';
+import { CMP_TABS, FOOD_CONTRACEPTION_MYTHS, FP_FILTERS, JOURNEYS, METHODS, TTC_CHECK, TTC_FOODS } from '../data';
 import { useNeema } from '../store';
 import { Card, CheckBox, Disclaimer, H1, H2, PrimaryButton, Segmented } from '../ui';
 
@@ -123,6 +123,42 @@ function EmergencyCard() {
   );
 }
 
+/** No food prevents pregnancy: replaces the Diet tab for the avoiding journey. */
+function FoodMythCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="flex flex-col gap-3 rounded-[24px] bg-white p-4 shadow-neema-card">
+      <div className="flex items-center gap-3">
+        <span className="relative h-14 w-14 flex-none" aria-hidden="true">
+          <FoodArt name="fruit" className="h-full w-full" />
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-neema-dark text-white ring-2 ring-white"><X className="h-3.5 w-3.5" strokeWidth={3} /></span>
+        </span>
+        <div className="flex flex-col">
+          <H2>No food prevents pregnancy</H2>
+          <p className="text-[15px] leading-[21px] text-neema-muted-strong">You don’t need a special diet to avoid pregnancy.</p>
+        </div>
+      </div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="neema-press flex min-h-[48px] items-center justify-between rounded-2xl bg-neema-cream px-3.5 text-left font-semibold">
+        Common myths that don’t work
+        <ChevronDown className={cn('h-5 w-5 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="neema-fade flex flex-col gap-2">
+          <ul className="flex flex-col gap-1.5">
+            {FOOD_CONTRACEPTION_MYTHS.map((m) => (
+              <li key={m} className="flex items-start gap-2.5 text-[15px] leading-[21px]">
+                <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-neema-primary-soft text-neema-dark"><X className="h-3 w-3" strokeWidth={3} /></span>
+                {m}
+              </li>
+            ))}
+          </ul>
+          <p className="text-[15px] leading-[21px] text-neema-muted-strong">Large amounts of some of these, like neem or herbal mixtures, can make you ill. To avoid pregnancy, choose a method above. After unprotected sex, use emergency contraception.</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** Optional period tracking while avoiding pregnancy. */
 function PeriodTracking() {
   const s = useNeema();
@@ -149,103 +185,232 @@ function PeriodTracking() {
   );
 }
 
+/** Period and cycle length only (the date is asked for separately on the My cycle page). */
+function LengthSettings() {
+  const s = useNeema();
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex flex-col">
+          <span className="font-semibold">My period lasts</span>
+          <span className="text-sm leading-5 text-neema-muted">Usually 2–8 days</span>
+        </span>
+        <div role="group" aria-label="Period length in days" className="flex items-center gap-1 rounded-[14px] bg-white p-1 shadow-sm">
+          <button type="button" aria-label="One day shorter" disabled={s.periodLen <= 2} onClick={() => s.setPeriodLen(s.periodLen - 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-neema-cream disabled:opacity-40"><Minus className="h-5 w-5" /></button>
+          <span aria-live="polite" className="min-w-[64px] text-center font-bold">{s.periodLen} days</span>
+          <button type="button" aria-label="One day longer" disabled={s.periodLen >= 10} onClick={() => s.setPeriodLen(s.periodLen + 1)} className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-neema-cream disabled:opacity-40"><Plus className="h-5 w-5" /></button>
+        </div>
+      </div>
+      <div>
+        <div className="mb-1.5 font-semibold">My usual cycle length</div>
+        <Segmented role="radiogroup" label="Cycle length" value={s.cycleLen} onChange={s.setCycleLen} options={[26, 28, 30, 32].map((n) => ({ id: n, label: `${n} days` }))} />
+      </div>
+    </div>
+  );
+}
+
+/** One checklist item: tick on the left, tap the name to read why it matters. */
+function TtcItem({ id, label, sub }: { id: string; label: string; sub: string }) {
+  const s = useNeema();
+  const [open, setOpen] = useState(false);
+  const on = !!s.ttc[id];
+  return (
+    <div className={cn('mt-1.5 flex flex-col rounded-2xl transition-colors', on ? 'bg-neema-success-soft' : 'bg-neema-cream')}>
+      <div className="flex items-center gap-1">
+        <button type="button" aria-pressed={on} aria-label={`Done: ${label}`} onClick={() => s.setTtc({ ...s.ttc, [id]: !on })} className="flex h-14 w-12 flex-none items-center justify-center">
+          <CheckBox on={on} />
+        </button>
+        <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-[56px] min-w-0 flex-1 items-center gap-2 py-2 pr-3 text-left">
+          <span className={cn('flex-1 font-semibold leading-5', on && 'text-neema-success-ink')}>{label}</span>
+          <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />
+        </button>
+      </div>
+      {open && <p className="neema-fade px-3 pb-3 pl-12 text-[15px] leading-[21px] text-neema-muted-strong">{sub}</p>}
+    </div>
+  );
+}
+
+const TTC_FOOD_ART: Record<string, string> = { 'Folate-rich greens': 'leaf', 'Iron stores': 'beans', 'For him too': 'groundnut', 'Healthy weight': 'plantain' };
+
 function TryingToConceive() {
   const s = useNeema();
   const [showClinics, setShowClinics] = useState(false);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const lmp = new Date((s.lastPeriod || isoDate(today)) + 'T00:00:00');
-  const dayDate = (n: number) => new Date(lmp.getTime() + (n - 1) * DAY);
-  const cycleDay = Math.floor((today.getTime() - lmp.getTime()) / DAY) + 1;
+  const [settings, setSettings] = useState(false);
+  const [view, setView] = useState<'check' | 'food' | 'help'>('check');
+  const todayRef = useRef<HTMLDivElement>(null);
+  const c = cycleInfo(s.lastPeriod, s.cycleLen, s.periodLen);
+  const ttcDone = TTC_CHECK.filter((x) => s.ttc[x.id]).length;
   const ovu = s.cycleLen - 14;
   const fStart = ovu - 5;
   const fEnd = ovu + 1;
-  const fertileText =
-    cycleDay < fStart ? `Fertile window: ${fmt(dayDate(fStart))} – ${fmt(dayDate(fEnd))}`
-      : cycleDay <= fEnd ? `You are in your fertile window (until ${fmt(dayDate(fEnd))})`
-        : cycleDay <= s.cycleLen ? 'Fertile window has passed this cycle'
+  useEffect(() => { todayRef.current?.scrollIntoView?.({ inline: 'center', block: 'nearest' }); }, [s.lastPeriod, s.cycleLen]);
+
+  const lmp = s.lastPeriod ? new Date(s.lastPeriod + 'T00:00:00') : null;
+  const dayDate = (n: number) => new Date((lmp?.getTime() ?? 0) + (n - 1) * DAY);
+  const fertileText = !c ? ''
+    : c.cycleDay < fStart ? `Fertile window: ${fmt(c.fertileStart)} – ${fmt(c.fertileEnd)}`
+      : c.cycleDay <= fEnd ? `You are in your fertile window (until ${fmt(c.fertileEnd)})`
+        : c.cycleDay <= s.cycleLen ? 'Fertile window has passed this cycle'
           : 'Your period may be due. Update the date when it starts.';
-  const ttcDone = TTC_CHECK.filter((c) => s.ttc[c.id]).length;
 
   return (
     <div className="flex flex-col gap-4">
-      {!s.lastPeriod ? (
-        <Card className="flex flex-col gap-3">
-          <span aria-hidden="true" className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neema-primary-soft text-neema-dark"><CalendarHeart className="h-6 w-6" /></span>
+      {!c ? (
+        <Reveal className="flex flex-col items-center gap-3 rounded-[28px] bg-white p-5 text-center shadow-neema-card">
+          <span className="neema-float h-28 w-28"><TryingArt className="h-full w-full" /></span>
           <H2>When did your last period start?</H2>
-          <p className="text-neema-muted-strong">Neema uses it to estimate your fertile window and your next period. Nothing is shown until you add it.</p>
-          <PeriodSettings />
-        </Card>
+          <p className="text-[15px] leading-[22px] text-neema-muted-strong">Neema uses it to estimate your fertile window and your next period. Nothing is shown until you add it.</p>
+          <div className="flex w-full flex-col gap-1.5 text-left">
+            <label htmlFor="neema-lmp" className="font-semibold">First day of my last period</label>
+            <input id="neema-lmp" type="date" max={isoDate(new Date())} value={s.lastPeriod} onChange={(e) => s.setLastPeriod(e.target.value)}
+              className="h-[56px] rounded-2xl border border-neema-border bg-white px-3.5 text-base" />
+          </div>
+          <button type="button" onClick={() => setSettings(true)} className="flex min-h-[48px] items-center gap-2 font-semibold text-neema-dark">
+            <SlidersHorizontal className="h-5 w-5" /> Period {s.periodLen} days · cycle {s.cycleLen} days
+          </button>
+        </Reveal>
       ) : (
-      <Card className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between gap-2">
-          <H2>My fertile window</H2>
-          <span className="text-[13px] font-semibold leading-[18px] text-neema-muted-strong">Estimate</span>
-        </div>
-        <div className="rounded-xl bg-neema-primary-soft px-3.5 py-3">
-          <div className="text-[13px] font-bold leading-[18px] tracking-[0.04em] text-neema-dark">CYCLE DAY {cycleDay} · TODAY</div>
-          <div className="text-lg font-bold leading-[26px]">{fertileText}</div>
-          <div className="text-[15px] leading-[22px]">Likely ovulation: about {fmt(dayDate(ovu))} (day {ovu})</div>
-        </div>
-        <div role="img" aria-label={`Cycle of ${s.cycleLen} days with a ${s.periodLen}-day period. Today is day ${cycleDay}. ${fertileText}`} className="grid grid-cols-7 gap-1">
-          {Array.from({ length: s.cycleLen }, (_, i) => i + 1).map((n) => {
-            const fertile = n >= fStart && n <= fEnd;
-            const period = n <= s.periodLen;
-            return (
-              <div
-                key={n}
-                className={cn(
-                  'flex h-9 items-center justify-center rounded-lg border-2 text-[13px] font-semibold',
-                  fertile ? 'bg-neema-dark text-white' : period ? 'bg-[#F3D5CB]' : 'bg-neema-cream',
-                  n === cycleDay ? 'border-neema-ink' : 'border-transparent',
-                )}
-              >
-                {n}
+        <>
+          {/* The cycle at a glance */}
+          <Reveal>
+            <section className="relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] bg-gradient-to-br from-neema-primary to-neema-dark px-5 pb-5 pt-4 text-white shadow-neema-hero">
+              <div aria-hidden="true" className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-white/10" />
+              <div className="relative flex w-full items-center justify-between">
+                <h2 className="text-lg font-semibold leading-6">My fertile window</h2>
+                <button type="button" onClick={() => setSettings(true)} aria-label="Cycle settings" className="neema-press flex h-11 w-11 items-center justify-center rounded-full bg-white/15"><SlidersHorizontal className="h-5 w-5" /></button>
               </div>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap gap-3 text-[13px] font-medium leading-[18px] text-neema-muted-strong">
-          <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded bg-[#F3D5CB]" />Period</span>
-          <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded bg-neema-dark" />Fertile window</span>
-          <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded border-2 border-neema-ink" />Today</span>
-        </div>
+              <span role="img" aria-label={`Cycle of ${s.cycleLen} days with a ${s.periodLen}-day period. Today is day ${c.cycleDay}. ${fertileText}`} className="relative">
+                <CycleWheel cycleLen={s.cycleLen} periodLen={s.periodLen} day={c.cycleDay} ovulationDay={ovu} size={184}>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/85">Cycle day</span>
+                  <span className="text-5xl font-bold leading-[52px]">{c.cycleDay}</span>
+                  <span className="text-[13px] font-semibold text-white/85">of {s.cycleLen}</span>
+                </CycleWheel>
+              </span>
+              <div className="relative text-center">
+                <div className="text-xl font-bold leading-7">{fertileText}</div>
+                <div className="text-[15px] leading-[21px] text-white/85">Calendar estimates are a guide for conceiving, not a contraceptive method.</div>
+              </div>
+            </section>
+          </Reveal>
 
-        <PeriodSettings />
-        <p className="text-[15px] leading-[22px] text-neema-muted-strong">Calendar estimates are a guide for conceiving, not a contraceptive method.</p>
-      </Card>
+          {/* The three dates that matter */}
+          <Reveal i={1} className="grid grid-cols-3 gap-2">
+            {[
+              { Icon: Sprout, tint: 'bg-neema-success-soft text-neema-success-ink', label: 'Fertile window', value: c.fertileStart.getMonth() === c.fertileEnd.getMonth() ? `${c.fertileStart.getDate()}–${fmt(c.fertileEnd)}` : `${fmt(c.fertileStart)}–${fmt(c.fertileEnd)}` },
+              { Icon: Sparkle, tint: 'bg-neema-ochre-soft text-neema-ochre-ink', label: 'Likely ovulation', value: `~${fmt(c.ovulation)}` },
+              { Icon: Droplet, tint: 'bg-neema-primary-soft text-neema-dark', label: 'Next period', value: `~${fmt(c.nextPeriod)}` },
+            ].map((t) => (
+              <div key={t.label} className="flex flex-col gap-1.5 rounded-3xl bg-white p-3 shadow-neema-card">
+                <span aria-hidden="true" className={cn('flex h-9 w-9 items-center justify-center rounded-xl', t.tint)}><t.Icon className="h-[18px] w-[18px]" /></span>
+                <span className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{t.label}</span>
+                <span className="text-[15px] font-bold leading-5">{t.value}</span>
+              </div>
+            ))}
+          </Reveal>
+
+          {/* Swipeable day strip instead of a grid */}
+          <Reveal i={2} className="flex flex-col gap-2">
+            <HScroll label="Days of this cycle" className="gap-2">
+              {Array.from({ length: s.cycleLen }, (_, i) => i + 1).map((n) => {
+                const fertile = n >= fStart && n <= fEnd;
+                const period = n <= s.periodLen;
+                const isToday = n === c.cycleDay;
+                const d = dayDate(n);
+                return (
+                  <div key={n} ref={isToday ? todayRef : undefined} aria-current={isToday ? 'date' : undefined} className="flex-none">
+                    <span className={cn('flex h-[68px] w-12 flex-none flex-col items-center justify-center gap-0.5 rounded-2xl border-2 text-center',
+                      fertile ? 'border-transparent bg-neema-success text-white' : period ? 'border-transparent bg-[#F3D5CB] text-neema-dark' : 'border-transparent bg-white',
+                      n === ovu && 'ring-2 ring-neema-ochre ring-offset-2 ring-offset-neema-cream',
+                      isToday && 'border-neema-ink')}>
+                      <span className="text-[13px] font-semibold leading-4 opacity-80">{d.toLocaleDateString('en-GB', { weekday: 'narrow' })}</span>
+                      <span className="text-lg font-bold leading-6">{d.getDate()}</span>
+                      <span className="text-[13px] leading-4 opacity-75">{isToday ? 'today' : `d${n}`}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </HScroll>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-[13px] font-medium leading-[18px] text-neema-muted-strong">
+              <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded bg-[#F3D5CB]" />Period</span>
+              <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded bg-neema-success" />Fertile window</span>
+              <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded-full ring-2 ring-neema-ochre" />Ovulation</span>
+              <span className="flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded border-2 border-neema-ink" />Today</span>
+            </div>
+            <button type="button" onClick={() => s.setLastPeriod('')} className="min-h-[44px] self-start px-1 text-[15px] font-semibold text-neema-dark">My period started: update the date</button>
+          </Reveal>
+        </>
       )}
 
-      <Card className="flex flex-col px-5 pb-5 pt-4">
-        <div className="mb-1.5 flex items-baseline justify-between gap-2">
-          <H2>Pre-conception checklist</H2>
-          <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-neema-success-ink">{ttcDone} of {TTC_CHECK.length} done</span>
+      <Sheet open={settings} onClose={() => setSettings(false)} title="Cycle settings">
+        <div className="flex flex-col gap-4 pb-2">
+          {c && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="neema-lmp-edit" className="font-semibold">First day of my last period</label>
+              <input id="neema-lmp-edit" type="date" max={isoDate(new Date())} value={s.lastPeriod} onChange={(e) => s.setLastPeriod(e.target.value)} className="h-[52px] rounded-2xl border border-neema-border bg-white px-3.5 text-base" />
+            </div>
+          )}
+          <LengthSettings />
         </div>
-        {TTC_CHECK.map((c) => (
-          <button key={c.id} type="button" aria-pressed={!!s.ttc[c.id]} onClick={() => s.setTtc({ ...s.ttc, [c.id]: !s.ttc[c.id] })} className="flex min-h-[60px] w-full items-start gap-3 border-b border-neema-line py-2.5 text-left">
-            <span className="mt-0.5"><CheckBox on={!!s.ttc[c.id]} /></span>
-            <span className="flex flex-col"><span className="font-semibold">{c.label}</span><span className="text-[15px] leading-[21px] text-neema-muted">{c.sub}</span></span>
-          </button>
-        ))}
-      </Card>
+      </Sheet>
 
-      <Card className="flex flex-col gap-2.5">
-        <H2>Eating to conceive</H2>
-        {TTC_FOODS.map((f) => (
-          <div key={f.title} className="flex items-start gap-3">
-            <span aria-hidden="true" className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-neema-success-soft text-neema-success-ink"><Leaf className="h-5 w-5" /></span>
-            <span className="flex flex-col"><span className="font-semibold">{f.title}</span><span className="text-[15px] leading-[22px]">{f.text}</span></span>
+      {/* Everything else, one section at a time */}
+      <Reveal i={3}>
+        <div role="tablist" aria-label="More for trying to conceive" className="grid grid-cols-3 gap-1 rounded-2xl bg-neema-sand p-1">
+          {([['check', 'Checklist', ListChecks], ['food', 'Food', Leaf], ['help', 'Get help', Stethoscope]] as const).map(([id, label, Icon]) => (
+            <button key={id} type="button" role="tab" aria-selected={view === id} onClick={() => setView(id)}
+              className={cn('neema-press flex min-h-[48px] items-center justify-center gap-1.5 rounded-xl text-[15px] font-semibold transition-colors', view === id ? 'bg-white text-neema-dark shadow-sm' : 'text-neema-muted-strong')}>
+              <Icon className="h-[18px] w-[18px]" /> {label}
+            </button>
+          ))}
+        </div>
+      </Reveal>
+
+      {view === 'check' && (
+        <section key="check" className="neema-fade flex flex-col rounded-[28px] bg-white p-4 shadow-neema-card">
+          <div className="mb-2 flex items-center gap-3">
+            <ProgressRing value={ttcDone / TTC_CHECK.length} size={60} stroke={6} label={`${ttcDone} of ${TTC_CHECK.length} done`}>
+              <span className="text-[15px] font-bold leading-5 text-neema-success-ink">{ttcDone}/{TTC_CHECK.length}</span>
+            </ProgressRing>
+            <div className="flex flex-col">
+              <H2>Pre-conception checklist</H2>
+              <span className="text-[15px] font-semibold leading-[21px] text-neema-success-ink">{ttcDone} of {TTC_CHECK.length} done</span>
+            </div>
           </div>
-        ))}
-        <button type="button" onClick={() => s.setTab('diet')} className="min-h-[48px] rounded-xl border border-neema-border bg-white font-semibold">See local foods in Diet</button>
-      </Card>
+          {TTC_CHECK.map((x) => <TtcItem key={x.id} id={x.id} label={x.label} sub={x.sub} />)}
+        </section>
+      )}
 
-      <section className="flex flex-col gap-1.5 rounded-2xl bg-neema-lilac px-5 py-4">
-        <H2>When to see a health worker together</H2>
-        <p>If you are under 35 and haven’t conceived after 12 months of regular sex without contraception, or after 6 months if you are 35 or older. Fertility problems affect men as often as women, so go as a couple.</p>
-        <button type="button" onClick={() => setShowClinics(!showClinics)} className="mt-1.5 min-h-[52px] rounded-xl bg-neema-ink font-semibold text-white">Find a fertility or family planning clinic</button>
-        {showClinics && <Clinics />}
-      </section>
+      {view === 'food' && (
+        <section key="food" className="neema-fade flex flex-col gap-3 rounded-[28px] bg-white p-4 shadow-neema-card">
+          <H2>Eating to conceive</H2>
+          <div className="grid grid-cols-2 gap-2.5">
+            {TTC_FOODS.map((f) => (
+              <div key={f.title} className="flex flex-col gap-1.5 rounded-3xl bg-neema-cream p-3">
+                <FoodArt name={TTC_FOOD_ART[f.title] ?? 'leaf'} className="h-12 w-12" />
+                <span className="font-semibold leading-5">{f.title}</span>
+                <span className="text-[15px] leading-[21px] text-neema-muted-strong">{f.text}</span>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={() => s.setTab('diet')} className="neema-press min-h-[52px] rounded-2xl border border-neema-border bg-white font-semibold">See local foods in Diet</button>
+        </section>
+      )}
+
+      {view === 'help' && (
+        <section key="help" className="neema-fade flex flex-col gap-3 rounded-[28px] bg-neema-lilac p-5">
+          <div className="flex items-center gap-3">
+            <span className="h-16 w-16 flex-none"><SupportArt className="h-full w-full" /></span>
+            <H2>When to see a health worker together</H2>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white p-3 text-center"><div className="text-2xl font-bold">12 months</div><div className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">of trying, if you are under 35</div></div>
+            <div className="rounded-2xl bg-white p-3 text-center"><div className="text-2xl font-bold">6 months</div><div className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">if you are 35 or older</div></div>
+          </div>
+          <p className="text-[15px] leading-[22px]">If you are under 35 and haven’t conceived after 12 months of regular sex without contraception, or after 6 months if you are 35 or older. Fertility problems affect men as often as women, so go as a couple.</p>
+          <button type="button" onClick={() => setShowClinics(!showClinics)} className="neema-press min-h-[52px] rounded-2xl bg-neema-ink font-semibold text-white">Find a fertility or family planning clinic</button>
+          {showClinics && <Clinics />}
+        </section>
+      )}
       <Disclaimer />
     </div>
   );
@@ -405,6 +570,7 @@ export function FamilyPlanningTab() {
           <H2 className="mt-1">Compare methods</H2>
           <CompareMethods />
           <PeriodTracking />
+          <FoodMythCard />
         </>
       ) : <CompareMethods />}
     </div>

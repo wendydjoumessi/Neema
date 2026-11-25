@@ -66,6 +66,57 @@ export const FOODS = [
   { name: 'Beans', local: 'Haricots', photo: 'Photo slot · Red beans in a market basin', tags: ['Iron', 'Protein', 'Fibre'], benefit: 'Iron and protein together; helps prevent constipation.' }
 ];
 
+type StageFood = { name: string; local: string; kind: string; tags: string[]; benefit: string };
+
+/**
+ * Foods chosen for each stage's own needs (WHO antenatal and postnatal nutrition guidance).
+ * Trimester 2 keeps the original list.
+ */
+export const FOODS_BY_STAGE: Record<'t1' | 't2' | 't3' | 'pp' | 'ttc', StageFood[]> = {
+  t1: [
+    { name: 'Folong', local: 'Amaranth', kind: 'leaf', tags: ['Folate', 'Iron'], benefit: 'Folate protects baby’s brain and spine, which form in these first weeks. Cook lightly, with tomato.' },
+    { name: 'Ginger', local: 'Gingembre', kind: 'drink', tags: ['Nausea'], benefit: 'A little fresh ginger in hot water can ease morning sickness. Sip slowly between meals.' },
+    { name: 'Eggs', local: 'Œufs, well cooked', kind: 'egg', tags: ['Protein', 'Choline'], benefit: 'Easy protein when other foods are hard to eat. Cook until the yolk is firm.' },
+    { name: 'Pap with groundnuts', local: 'Bouillie', kind: 'milk', tags: ['Energy', 'Protein'], benefit: 'Gentle on a queasy stomach. Small meals often are easier than three big ones.' },
+    { name: 'Oranges', local: 'Or pineapple', kind: 'fruit', tags: ['Vitamin C', 'Fluids'], benefit: 'Helps your body take in iron from leaves and beans, and keeps you hydrated.' },
+    { name: 'Iodised salt', local: 'Sel iodé', kind: 'salt', tags: ['Iodine'], benefit: 'Iodine supports baby’s brain. Use iodised salt, in small amounts.' },
+  ],
+  t2: FOODS.map((f) => ({ name: f.name, local: f.local, kind: f.name, tags: f.tags, benefit: f.benefit })),
+  t3: [
+    { name: 'Kossam or milk', local: 'Boiled or pasteurised', kind: 'milk', tags: ['Calcium', 'Protein'], benefit: 'Baby’s bones grow fast now. A cup a day, or yoghurt, helps.' },
+    { name: 'Crayfish and small fish', local: 'Njanga, eaten whole', kind: 'fish', tags: ['Calcium', 'Protein'], benefit: 'Ground crayfish and small fish eaten with their bones are a cheap source of calcium.' },
+    { name: 'Cassava leaves', local: 'Kpwem, well cooked', kind: 'leaf', tags: ['Iron', 'Folate'], benefit: 'Your blood volume is at its highest. Keep eating iron-rich leaves with your iron tablets.' },
+    { name: 'Ripe pawpaw', local: 'Papaye mûre', kind: 'fruit', tags: ['Fibre', 'Vitamin C'], benefit: 'Helps with constipation and heartburn. Choose ripe fruit, not green pawpaw.' },
+    { name: 'Avocado', local: 'Pear', kind: 'fruit', tags: ['Healthy fats', 'Folate'], benefit: 'Energy and healthy fats for baby’s growing brain.' },
+    { name: 'Sweet potato', local: 'Patate douce', kind: 'tuber', tags: ['Vitamin A', 'Fibre'], benefit: 'Orange sweet potato gives vitamin A for you and baby. Boil or roast.' },
+  ],
+  pp: [
+    { name: 'Fish or chicken soup', local: 'Pepper soup', kind: 'drink', tags: ['Fluids', 'Protein'], benefit: 'A warm traditional after-birth meal that helps you drink more and heal.' },
+    { name: 'Ndolé or eru', local: 'Leafy sauce', kind: 'leaf', tags: ['Iron', 'Folate'], benefit: 'Rebuilds the iron lost at birth. Eat leaves most days.' },
+    { name: 'Groundnuts and egusi', local: 'A handful as a snack', kind: 'nut', tags: ['Energy', 'Protein'], benefit: 'Breastfeeding uses extra energy. Keep a handful close for night feeds.' },
+    { name: 'Kossam or milk', local: 'Or yoghurt', kind: 'milk', tags: ['Calcium'], benefit: 'Calcium for your bones while you make milk.' },
+    { name: 'Water at every feed', local: 'A cup each time', kind: 'drink', tags: ['Fluids'], benefit: 'Thirst while feeding is normal. Drink a cup of water every time baby feeds.' },
+    { name: 'Corn or millet pap', local: 'Bouillie', kind: 'grain', tags: ['Energy'], benefit: 'Easy, warm energy in the first weeks. Add groundnuts or milk.' },
+  ],
+  ttc: [
+    { name: 'Folong and cassava leaves', local: 'Folate-rich greens', kind: 'leaf', tags: ['Folate', 'Iron'], benefit: 'Builds folate stores before pregnancy, alongside a daily folic acid tablet.' },
+    { name: 'Beans', local: 'Haricots, koki', kind: 'bean', tags: ['Iron', 'Protein'], benefit: 'Start pregnancy with good iron levels. Eat with tomato or an orange.' },
+    { name: 'Eggs', local: 'Well cooked', kind: 'egg', tags: ['Protein'], benefit: 'Good protein for both partners.' },
+    { name: 'Groundnuts and egusi', local: 'Pumpkin seeds', kind: 'nut', tags: ['Zinc', 'For him too'], benefit: 'Zinc supports healthy sperm. Share them with your partner.' },
+    { name: 'Mackerel or sardines', local: 'Maquereau', kind: 'fish', tags: ['Omega-3', 'Protein'], benefit: 'Healthy fats for both of you. Cook fish through.' },
+    { name: 'Guava and oranges', local: 'Goyave', kind: 'fruit', tags: ['Vitamin C'], benefit: 'Vitamin C helps your body absorb iron from leaves and beans.' },
+  ],
+};
+
+/** No food prevents pregnancy: common myths to correct gently (avoiding pregnancy). */
+export const FOOD_CONTRACEPTION_MYTHS = [
+  'Pawpaw (green or ripe) or its seeds',
+  'Neem leaves or neem tea',
+  'Ginger, lemon or lime',
+  'Pineapple or herbal mixtures',
+  'Washing with salt water, Coca-Cola or lemon after sex',
+];
+
 export const SWAPS = [
   { from: 'Quinoa', to: 'Millet, sorghum or fonio', why: 'Similar fibre, protein and minerals; easy to make as pap.' },
   { from: 'Salmon', to: 'Mackerel, sardines or dried fish', why: 'The same omega-3 fats for baby’s brain.' },

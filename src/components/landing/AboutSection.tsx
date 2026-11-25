@@ -1,6 +1,7 @@
 import { ArrowRight, Baby, CalendarHeart, Users, Languages, WifiOff, Lock, BadgeCheck, Salad, Phone } from 'lucide-react';
 import nutritionImage from '@/assets/about-health-nutrition.jpg';
 import familyImage from '@/assets/family-planning-new.webp';
+import { ScrollReveal } from './Reveal';
 
 interface AboutSectionProps {
   onGetStarted: () => void;
@@ -26,43 +27,43 @@ export function AboutSection({ onGetStarted }: AboutSectionProps) {
     <section id="about-section" className="scroll-mt-4 bg-neema-cream py-16 md:py-24">
       <div className="mx-auto w-full max-w-6xl px-5 md:px-10">
         <div className="grid items-center gap-10 lg:grid-cols-2">
-          <div>
+          <ScrollReveal>
             <span className="mb-4 inline-block rounded-full bg-neema-primary-soft px-4 py-1.5 text-sm font-semibold text-neema-dark">Who Neema is for</span>
             <h2 className="font-sans text-3xl font-bold tracking-normal text-neema-ink md:text-4xl">A companion for the whole family</h2>
             <div className="mt-8 flex flex-col gap-5">
-              {audiences.map(({ Icon, title, text }) => (
-                <div key={title} className="flex gap-4">
+              {audiences.map(({ Icon, title, text }, i) => (
+                <ScrollReveal key={title} delay={i * 110} className="flex gap-4">
                   <span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-white text-neema-dark shadow-neema-card"><Icon className="h-6 w-6" /></span>
                   <div>
                     <h3 className="font-sans text-lg font-semibold tracking-normal text-neema-ink">{title}</h3>
                     <p className="text-neema-muted-strong">{text}</p>
                   </div>
-                </div>
+                </ScrollReveal>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
           <div className="grid grid-cols-2 gap-4">
-            <img src={nutritionImage} alt="A pregnant woman preparing fresh fruit and vegetables at home" className="aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" />
-            <img src={familyImage} alt="Cupped hands holding a paper cut-out of a family" className="mt-10 aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" />
+            <ScrollReveal><img src={nutritionImage} alt="A pregnant woman preparing fresh fruit and vegetables at home" className="aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" /></ScrollReveal>
+            <ScrollReveal delay={160} className="mt-10"><img src={familyImage} alt="Cupped hands holding a paper cut-out of a family" className="neema-float aspect-[4/5] w-full rounded-3xl object-cover shadow-lg" /></ScrollReveal>
           </div>
         </div>
 
         <div className="mt-16">
-          <h2 className="mb-8 text-center font-sans text-3xl font-bold tracking-normal text-neema-ink md:text-4xl">Why families choose Neema</h2>
+          <ScrollReveal as="h2" className="mb-8 text-center font-sans text-3xl font-bold tracking-normal text-neema-ink md:text-4xl">Why families choose Neema</ScrollReveal>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {reasons.map(({ Icon, title, text }) => (
-              <div key={title} className="rounded-2xl bg-white p-5 shadow-neema-card">
-                <Icon className="mb-3 h-6 w-6 text-neema-dark" />
+            {reasons.map(({ Icon, title, text }, i) => (
+              <ScrollReveal key={title} delay={(i % 3) * 90} className="group rounded-3xl bg-white p-5 shadow-neema-card transition-transform duration-300 hover:-translate-y-1">
+                <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-neema-primary-soft transition-transform duration-300 group-hover:scale-110"><Icon className="h-6 w-6 text-neema-dark" /></span>
                 <h3 className="font-sans text-lg font-semibold tracking-normal text-neema-ink">{title}</h3>
                 <p className="mt-1 text-neema-muted-strong">{text}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
           <p className="mx-auto mt-8 max-w-3xl text-center text-[15px] leading-[22px] text-neema-muted-strong">
             Neema is an education and navigation tool, not a medical provider. It does not diagnose or prescribe, and it always tells you when to see a qualified health worker.
           </p>
           <div className="mt-8 flex justify-center">
-            <button type="button" onClick={onGetStarted} className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98]">
+            <button type="button" onClick={onGetStarted} className="neema-shine inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-neema-dark px-7 text-lg font-semibold text-white shadow-neema-hero transition-transform duration-150 hover:shadow-neema-hero active:scale-[0.98]">
               Get started free <ArrowRight className="h-5 w-5" />
             </button>
           </div>

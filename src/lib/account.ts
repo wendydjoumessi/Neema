@@ -42,12 +42,18 @@ export function friendlyError(error: unknown): string {
 // Authentication
 // ---------------------------------------------------------------------------
 
-export async function signUp(input: { name: string; email: string; password: string; role: Role; journey?: Journey }) {
-  const validated = signupSchema.parse(input);
+export async function signUp(input: { name: string; email: string; password: string; country: string; region: string; city: string; role: Role; journey?: Journey }) {
+  const validated = signupSchema.parse(input) as { name: string; email: string; password: string; country: string; region: string; city: string };
   const { data, error } = await supabase.auth.signUp({
     email: validated.email,
     password: validated.password,
-    options: { data: { full_name: validated.name, role: input.role, journey: input.journey ?? 'preg' }, emailRedirectTo: window.location.origin },
+    options: {
+      data: {
+        full_name: validated.name, role: input.role, journey: input.journey ?? 'preg',
+        country: validated.country, region: validated.region, city: validated.city,
+      },
+      emailRedirectTo: window.location.origin,
+    },
   });
   if (error) throw error;
   // With email confirmation on, there is no session until the link is opened.

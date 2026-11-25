@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
-import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck, LoaderCircle } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck, LoaderCircle, MapPin, Globe2, Map as MapIcon, Home, ChevronDown } from 'lucide-react';
+import { CAMEROON, COUNTRIES, REGIONS } from '@/neema/location';
 import { cn } from '@/lib/utils';
 import { Segmented } from '@/neema/ui';
+import { PregnantArt, SupportArt } from '@/neema/art';
 import { User } from '@/types/pregnancy';
 import { friendlyError, requestPasswordReset, signIn, signUp, type Journey } from '@/lib/account';
 import logo from '@/assets/logo.png';
@@ -36,6 +38,9 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
+  const [country, setCountry] = useState<string>(CAMEROON);
+  const [region, setRegion] = useState('');
+  const [city, setCity] = useState('');
 
   const run = async (fn: () => Promise<void>) => {
     if (pending.current) return;
@@ -66,7 +71,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     if (pending.current) return;
     setError('');
     setNotice('');
-    const result = signupSchema.safeParse({ name: signupName, email: signupEmail, password: signupPassword });
+    const result = signupSchema.safeParse({ name: signupName, email: signupEmail, password: signupPassword, country, region, city });
     if (!result.success) {
       const errors = fieldErrors(result.error);
       setValidation(errors);
@@ -75,13 +80,14 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     }
     setValidation({});
     run(async () => {
-      const { user, needsConfirmation } = await signUp({ name: result.data.name ?? '', email: result.data.email ?? '', password: result.data.password ?? '', role: defaultRole, journey });
+      const v = result.data as { name: string; email: string; password: string; country: string; region: string; city: string };
+      const { user, needsConfirmation } = await signUp({ ...v, role: defaultRole, journey });
       if (!user) throw new Error('Account creation did not return a user');
       setSignupPassword('');
       if (needsConfirmation) {
-        setLoginEmail(result.data.email);
+        setLoginEmail(v.email);
         setMode('login');
-        setNotice(`Sign-up received. Check ${result.data.email} for your confirmation link (including spam). Confirm your email, then log in to save your pregnancy details.`);
+        setNotice(`Sign-up received. Check ${v.email} for your confirmation link (including spam). Confirm your email, then log in to save your pregnancy details.`);
       } else if (user) {
         toast.success('Your account is ready. You’re signed in.');
         onSignedIn(user.id);
@@ -133,33 +139,63 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
     </div>
   );
   const pwType = showPassword ? 'text' : 'password';
+  const select = (id: string, label: string, Icon: typeof Mail, value: string, onChange: (v: string) => void, options: readonly string[], placeholder: string) => {
+    const key = id.replace('signup-', '');
+    return (
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={id} className="text-[13px] font-semibold text-neema-ink">{label}</label>
+        <div className="relative">
+          <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-neema-muted" />
+          <select id={id} disabled={isLoading} value={value} aria-invalid={!!validation[key]} aria-describedby={validation[key] ? `${id}-error` : undefined}
+            onChange={(e) => { onChange(e.target.value); setError(''); setValidation((c) => { const n = { ...c }; delete n[key]; return n; }); }}
+            className={cn(inputCls, 'appearance-none pr-10', !value && 'text-neema-muted')}>
+            <option value="" disabled>{placeholder}</option>
+            {options.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-neema-muted" />
+        </div>
+        {validation[key] && <p id={`${id}-error`} role="alert" className="text-sm font-medium text-neema-dark">{validation[key]}</p>}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
-      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
-        <header className="flex items-center justify-between">
-          <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
-            <ArrowLeft className="h-5 w-5" /> Back
-          </button>
-          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
-        </header>
-
-        <div className="mt-6">
-          <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
-          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{mode === 'forgot' ? 'Reset your password' : isLogin ? 'Welcome back' : 'Create your account'}</h1>
-          <p className="mt-2 text-lg text-neema-muted-strong">
-            {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
-          </p>
+      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col pb-8">
+        {/* Warm illustrated header */}
+        <div className="relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-neema-primary-soft via-[#FBE3D6] to-neema-ochre-soft px-5 pb-16 pt-3">
+          <div aria-hidden="true" className="neema-drift absolute -right-10 -top-12 h-44 w-44 rounded-full bg-white/40" />
+          <div aria-hidden="true" className="neema-drift-slow absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-neema-primary/10" />
+          <header className="relative flex items-center justify-between">
+            <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full bg-white/70 px-3 font-semibold text-neema-dark backdrop-blur transition-colors duration-150 hover:bg-white">
+              <ArrowLeft className="h-5 w-5" /> Back
+            </button>
+            <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+          </header>
+          <div className="relative mt-5 flex items-end gap-3">
+            <div key={mode} className="neema-rise min-w-0 flex-1">
+              <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
+              <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{mode === 'forgot' ? 'Reset your password' : isLogin ? 'Welcome back' : 'Create your account'}</h1>
+              <p className="mt-2 text-lg text-neema-muted-strong">
+                {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
+              </p>
+            </div>
+            <span aria-hidden="true" className="neema-float block h-24 w-24 flex-none sm:h-28 sm:w-28">
+              {defaultRole === 'mother' ? <PregnantArt className="h-full w-full" /> : <SupportArt className="h-full w-full" />}
+            </span>
+          </div>
         </div>
 
+        <div className="relative -mt-10 flex flex-1 flex-col px-5">
+        <div className="neema-card-in rounded-[28px] bg-white p-1.5 shadow-neema-card [animation-delay:150ms]">
         {mode !== 'forgot' && (
-          <Segmented className="mt-6" label="Account" value={mode} onChange={switchMode}
+          <Segmented label="Account" value={mode} onChange={switchMode}
             options={[{ id: 'login', label: 'Log in' }, { id: 'signup', label: 'Sign up' }]} />
         )}
-        {notice && <p role="status" className="mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
-        {error && <p role="alert" className="mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
+        {notice && <p role="status" className="neema-fade mx-3.5 mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
+        {error && <p role="alert" className="neema-fade mx-3.5 mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
 
-        <section aria-busy={isLoading} className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
+        <section key={mode} aria-busy={isLoading} className="neema-stagger p-3.5 pt-5">
           {mode === 'forgot' ? (
             <form onSubmit={handleForgot} className="flex flex-col gap-4">
               <p className="text-neema-muted-strong">Enter your email and we’ll send you a link to choose a new password.</p>
@@ -180,16 +216,29 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
               {field('signup-email', 'Email', Mail, { type: 'email', placeholder: 'you@example.com', value: signupEmail, onChange: (e) => setSignupEmail(e.target.value), autoComplete: 'email', maxLength: 254 })}
               {field('signup-password', 'Password', Lock, { type: pwType, placeholder: 'Create a password', value: signupPassword, onChange: (e) => setSignupPassword(e.target.value), autoComplete: 'new-password', minLength: 6 }, true)}
               <p id="password-help" className="text-sm text-neema-muted-strong">Use at least 6 characters and a password you haven’t used elsewhere.</p>
+              <fieldset className="flex flex-col gap-4 rounded-2xl bg-neema-cream p-4">
+                <legend className="sr-only">Where you live</legend>
+                <div className="flex items-start gap-2.5">
+                  <span aria-hidden="true" className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-white text-neema-dark"><MapPin className="h-5 w-5" /></span>
+                  <p className="text-[15px] leading-[21px] text-neema-muted-strong"><span className="font-semibold text-neema-ink">Where do you live?</span> Neema suggests foods from your local markets and exercise that suits your climate.</p>
+                </div>
+                {select('signup-country', 'Country', Globe2, country, (v) => { setCountry(v); setRegion(''); }, COUNTRIES, 'Choose your country')}
+                {country === CAMEROON
+                  ? select('signup-region', 'Region', MapIcon, region, setRegion, REGIONS, 'Choose your region')
+                  : field('signup-region', 'Region or state (optional)', MapIcon, { type: 'text', placeholder: 'e.g. Île-de-France', value: region, onChange: (e) => setRegion(e.target.value), maxLength: 60, required: false })}
+                {field('signup-city', 'Town and neighbourhood (optional)', Home, { type: 'text', placeholder: 'e.g. Bonamoussadi, Douala', value: city, onChange: (e) => setCity(e.target.value), autoComplete: 'address-level2', maxLength: 80, required: false })}
+              </fieldset>
               <SubmitBtn loading={isLoading} pendingText="Creating your account…">Create account</SubmitBtn>
             </form>
           )}
         </section>
+        </div>
 
         <div className="my-6 flex items-center gap-3 text-sm text-neema-muted-strong">
           <span className="h-px flex-1 bg-neema-line" /> or <span className="h-px flex-1 bg-neema-line" />
         </div>
         <button type="button" disabled={isLoading} onClick={handleGuestLogin}
-          className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
+          className="neema-press flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
           Continue as guest
         </button>
         <p className="mt-2 text-center text-[15px] text-neema-muted-strong">As a guest, nothing is saved when you close Neema.</p>
@@ -198,6 +247,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-neema-success-ink" />
           Your data stays private. Neema never sells it and shows no ads.
         </p>
+        </div>
       </div>
     </div>
   );
@@ -206,7 +256,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
 function SubmitBtn({ loading, children, pendingText }: { loading: boolean; children: React.ReactNode; pendingText: string }) {
   return (
     <Button type="submit" variant="ghost" disabled={loading}
-      className="mt-1 min-h-[56px] w-full whitespace-normal bg-neema-dark px-4 text-lg text-neema-cream shadow-neema-hero hover:bg-neema-dark hover:text-neema-cream disabled:opacity-60">
+      className="neema-shine mt-1 min-h-[56px] w-full whitespace-normal rounded-xl bg-neema-dark px-4 text-lg text-neema-cream shadow-neema-hero hover:bg-neema-dark hover:text-neema-cream disabled:opacity-60">
       {loading ? <span role="status" className="flex items-center gap-2"><LoaderCircle aria-hidden="true" className="h-5 w-5 motion-safe:animate-spin" />{pendingText}</span> : children}
     </Button>
   );

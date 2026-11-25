@@ -225,7 +225,7 @@ function AppFlow() {
 
   /** Save settings and progress: preferences go to the profile, the rest to app_state. */
   const handlePersist = useCallback((state: PersistedState) => {
-    const { lang, journey, discreet, city, contacts, ...rest } = state;
+    const { lang, journey, discreet, city, country, region, contacts, ...rest } = state;
     // A journey that needs dates she hasn't given yet: ask for them.
     if (journey === 'preg' && (pregnancy?.id === 'none' || pregnancy?.birthDate)) setCurrentScreen('setup');
     if (journey === 'pp' && !pregnancy?.birthDate) setCurrentScreen('birth');
@@ -236,6 +236,8 @@ function AppFlow() {
       journey: (journey as Profile['journey']) ?? 'preg',
       discreet_mode: !!discreet,
       city: typeof city === 'string' && city ? city : null,
+      country: typeof country === 'string' && country ? country : 'Cameroon',
+      region: typeof region === 'string' && region ? region : null,
     }).catch(() => undefined);
     saveAppState(userId, rest).catch(() => undefined);
     const contactsJson = JSON.stringify(contacts ?? []);
@@ -382,6 +384,8 @@ function AppFlow() {
         journey: account.profile?.journey,
         discreet: account.profile?.discreet_mode,
         city: account.profile?.city ?? undefined,
+        country: account.profile?.country ?? undefined,
+        region: account.profile?.region ?? undefined,
         contacts: account.contacts,
       };
   const medicalFacts = [

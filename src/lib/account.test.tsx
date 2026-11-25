@@ -51,6 +51,7 @@ function query(table: string) {
   return api;
 }
 
+const signUps: unknown[] = vi.hoisted(() => []);
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: (t: string) => query(t),
@@ -63,7 +64,7 @@ vi.mock('@/integrations/supabase/client', () => ({
         session = { user: { id: 'u1', email, last_sign_in_at: new Date().toISOString() } };
         return Promise.resolve({ data: { user: session.user, session }, error: null });
       },
-      signUp: () => Promise.resolve({ data: { user: { id: 'u2' }, session: null }, error: null }),
+      signUp: (args: unknown) => { signUps.push(args); return Promise.resolve({ data: { user: { id: 'u2' }, session: null }, error: null }); },
       signOut: () => { session = null; return Promise.resolve({ error: null }); },
       resetPasswordForEmail: () => Promise.resolve({ error: null }),
       updateUser: () => Promise.resolve({ error: null }),
@@ -81,6 +82,7 @@ const consented = { consent_version: CONSENT_VERSION, consent_terms_at: '2026-11
 beforeEach(() => {
   for (const k of Object.keys(db)) db[k] = [];
   calls.length = 0;
+  signUps.length = 0;
   session = null;
   signInError = null;
   window.localStorage.clear();
@@ -242,5 +244,27 @@ describe('accounts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove this contact' }));
     fireEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }));
     await waitFor(() => expect(db.emergency_contacts.map((c) => c.name)).toEqual(['Rose']), { timeout: 2000 });
+  });
+  it('asks for country and region at sign-up and saves them with the account', async () => {
+    render(<Index />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Start free' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
+    fireEvent.click(screen.getByRole('button', { name: /I’m a mother/ }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to avoid pregnancy/ }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Sign up' }));
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Awa Bello' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'awa@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret123' } });
+    expect(screen.getByLabelText('Country')).toHaveValue('Cameroon');
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByText('Choose your region.')).toBeInTheDocument();
+    expect(signUps).toHaveLength(0);
+    expect(within(screen.getByLabelText('Region')).getAllByRole('option').length).toBe(11);
+    fireEvent.change(screen.getByLabelText('Region'), { target: { value: 'Far North' } });
+    fireEvent.change(screen.getByLabelText('Town and neighbourhood (optional)'), { target: { value: 'Maroua' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    await waitFor(() => expect(signUps).toHaveLength(1));
+    const meta = (signUps[0] as { options: { data: Record<string, string> } }).options.data;
+    expect(meta).toMatchObject({ country: 'Cameroon', region: 'Far North', city: 'Maroua', journey: 'avoid' });
   });
 });

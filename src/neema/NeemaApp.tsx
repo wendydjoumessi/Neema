@@ -88,12 +88,15 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
     shop: { id: 'shop' as TabId, label: t.shop, Icon: ShoppingBag },
   };
   // Same order in every journey, so tabs never move when she changes journey.
-  const tabs = s.journey === 'ttc' || s.journey === 'avoid'
+  // No food prevents pregnancy, so the avoiding journey has no Diet tab.
+  const tabs = s.journey === 'avoid'
+    ? [tab.home, tab.ask, tab.fp]
+    : s.journey === 'ttc'
     ? [tab.home, tab.ask, tab.diet, tab.fp]
     : [tab.home, tab.ask, tab.diet, tab.fp, tab.shop];
   useEffect(() => {
     if (!tabs.some((x) => x.id === s.tab) && s.tab !== 'profile') s.setTab('home');
-  }, [s.journey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.journey, s.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-[100dvh] bg-neema-sand/60 font-sans text-base leading-6 tracking-normal text-neema-ink [&_h1]:font-sans [&_h1]:tracking-normal [&_h2]:font-sans [&_h2]:tracking-normal [&_h3]:font-sans">

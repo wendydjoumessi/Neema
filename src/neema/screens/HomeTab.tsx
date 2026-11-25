@@ -90,18 +90,22 @@ function TickRow({ on, onToggle, label, sub }: { on: boolean; onToggle: () => vo
   );
 }
 
-/** Water as drops that fill in, instead of a sentence. Tap to log in Diet. */
+/** Water as drops that fill in, instead of a sentence. Tap to log in Diet (or here, when there is no Diet tab). */
 function WaterRow() {
   const s = useNeema();
   const total = waterTarget(s.journey);
+  const inline = s.journey === 'avoid';
   return (
-    <button type="button" onClick={() => { s.setDietView('day'); s.setTab('diet'); }} className="neema-press flex min-h-[60px] items-center gap-3 rounded-2xl bg-neema-cream px-3 py-2.5 text-left">
+    <button type="button" aria-label={inline ? `Add a cup of water. ${s.water} of ${total} cups today` : undefined}
+      onClick={() => { if (inline) { s.setWater(Math.min(total, s.water + 1)); return; } s.setDietView('day'); s.setTab('diet'); }} className="neema-press flex min-h-[60px] items-center gap-3 rounded-2xl bg-neema-cream px-3 py-2.5 text-left">
       <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-white text-neema-water"><Droplet className="h-5 w-5" /></span>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span>Water today: <span className="font-bold">{s.water} of {total} cups</span></span>
         <WaterDrops value={s.water} total={total} />
       </span>
-      <ChevronRight className="h-5 w-5 flex-none text-neema-muted" />
+      {inline
+        ? <span aria-hidden="true" className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white text-xl font-bold text-neema-water">+</span>
+        : <ChevronRight className="h-5 w-5 flex-none text-neema-muted" />}
     </button>
   );
 }

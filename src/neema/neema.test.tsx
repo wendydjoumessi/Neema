@@ -65,8 +65,22 @@ describe('Neema app', () => {
     expect(screen.queryByText('My fertile window')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('First day of my last period'), { target: { value: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10) } });
     expect(screen.getByText('My fertile window')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'One day longer' }));
-    expect(screen.getByText('6 days')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Today is day 4/ })).toBeInTheDocument();
+    // Period and cycle length live in the settings sheet
+    fireEvent.click(screen.getByRole('button', { name: 'Cycle settings' }));
+    const sheet = screen.getByRole('dialog', { name: 'Cycle settings' });
+    fireEvent.click(within(sheet).getByRole('button', { name: 'One day longer' }));
+    expect(within(sheet).getByText('6 days')).toBeInTheDocument();
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
+    // Checklist, food and help are one tap apart
+    fireEvent.click(screen.getByRole('button', { name: 'Done: Start folic acid every day' }));
+    expect(screen.getByRole('button', { name: 'Done: Start folic acid every day' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Start folic acid every day' }));
+    expect(screen.getByText(/Ideally 2–3 months before conceiving/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Food' }));
+    expect(screen.getByText('Folate-rich greens')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Get help' }));
+    expect(screen.getByRole('heading', { name: 'When to see a health worker together' })).toBeInTheDocument();
   });
 
   it('opens a pump guide on the checklist', () => {

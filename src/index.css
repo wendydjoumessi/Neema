@@ -463,8 +463,39 @@
 .neema-hscroll::-webkit-scrollbar { display: none; }
 .neema-hscroll > * { scroll-snap-align: start; }
 
+/* Landing and sign-in motion */
+@keyframes neema-drift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(10px, -14px) scale(1.06); } }
+@keyframes neema-photo-in { from { opacity: 0; transform: scale(.94) translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes neema-card-in { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes neema-glow { 0%, 100% { box-shadow: 0 10px 24px -8px rgba(181, 69, 35, .45); } 50% { box-shadow: 0 14px 34px -6px rgba(181, 69, 35, .7); } }
+@keyframes neema-shine { from { transform: translateX(-120%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
+.neema-pulse { position: relative; isolation: isolate; }
+.neema-pulse::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: rgba(255, 255, 255, .5); animation: neema-pulse-ring 2.4s ease-out infinite; pointer-events: none; z-index: -1; }
+.neema-stagger > form > * { animation: neema-rise 460ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-stagger > form > *:nth-child(2) { animation-delay: 60ms; }
+.neema-stagger > form > *:nth-child(3) { animation-delay: 120ms; }
+.neema-stagger > form > *:nth-child(4) { animation-delay: 180ms; }
+.neema-stagger > form > *:nth-child(5) { animation-delay: 240ms; }
+.neema-stagger > form > *:nth-child(n+6) { animation-delay: 300ms; }
+@keyframes neema-slide-l { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes neema-slide-r { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+.neema-slide-l { animation: neema-slide-l 420ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-slide-r { animation: neema-slide-r 420ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-drift { animation: neema-drift 9s ease-in-out infinite; }
+.neema-drift-slow { animation: neema-drift 13s ease-in-out infinite reverse; }
+.neema-photo-in { animation: neema-photo-in 900ms cubic-bezier(.2, .8, .2, 1) 200ms both; }
+.neema-card-in { animation: neema-card-in 700ms cubic-bezier(.2, .8, .2, 1) 900ms both; }
+.neema-glow { animation: neema-glow 3.2s ease-in-out infinite; }
+.neema-shine { position: relative; overflow: hidden; }
+.neema-shine::after { content: ''; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent); animation: neema-shine 3.6s ease-in-out 1.5s infinite; }
+/* Scroll reveal: hidden only once JS has marked the page, so content never stays invisible without JS. */
+.neema-js .neema-reveal { opacity: 0; transform: translateY(22px); transition: opacity 650ms cubic-bezier(.2, .8, .2, 1), transform 650ms cubic-bezier(.2, .8, .2, 1); transition-delay: var(--reveal-delay, 0ms); }
+.neema-js .neema-reveal.is-visible { opacity: 1; transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .neema-rise, .neema-fade, .neema-sheet, .neema-float, .neema-sway, .neema-ring-in, .neema-bar-in, .neema-drop-in,
+  .neema-drift, .neema-drift-slow, .neema-slide-l, .neema-slide-r, .neema-stagger > form > *, .neema-photo-in, .neema-card-in, .neema-glow, .neema-shine::after,
   .neema-pulse::after { animation: none !important; }
+  .neema-js .neema-reveal { opacity: 1; transform: none; transition: none; }
   .neema-press:active { transform: none; }
 }
