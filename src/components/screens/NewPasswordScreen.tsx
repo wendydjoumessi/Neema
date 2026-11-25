@@ -27,7 +27,7 @@ export function NewPasswordScreen({ onDone }: { onDone: () => void }) {
   const input = 'min-h-[52px] w-full rounded-xl border border-neema-border bg-white pl-11 pr-4 text-base focus:border-neema-primary focus:outline-none focus:ring-2 focus:ring-neema-primary/30';
   return (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink [&_h1]:font-sans [&_h1]:tracking-normal [&_h2]:font-sans [&_h2]:tracking-normal">
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-5 px-5 pb-8 pt-3">
+      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col gap-5 px-5 pb-8 pt-3">
         <header className="flex justify-end"><img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" /></header>
         <div>
           <h1 className="text-3xl font-bold leading-tight">Choose a new password</h1>

@@ -163,6 +163,7 @@ describe('accounts', () => {
     db.pregnancies.push({ id: 'p1', user_id: 'u1', status: 'active', due_date: iso(new Date(Date.now() + 112 * 86400000)), doctor_due_date: null });
     render(<Index />);
     await screen.findByText('Week 24');
+    fireEvent.click(screen.getByRole('button', { name: 'Open profile and settings' }));
     fireEvent.click(screen.getByRole('button', { name: /Discreet mode/ }));
     await waitFor(() => expect(db.profiles[0].discreet_mode).toBe(true), { timeout: 2000 });
   });

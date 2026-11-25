@@ -29,8 +29,8 @@ export function SymptomSheet() {
   const lv = r ? LEVELS[r.level] : null;
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col justify-end bg-neema-ink/40">
-      <div role="dialog" aria-modal="true" aria-label="Symptom checker" className="flex max-h-[94%] flex-col gap-3 overflow-y-auto [&>*]:shrink-0 rounded-t-3xl bg-white px-4 pb-6 pt-5">
+    <div className="neema-fade absolute inset-0 z-30 flex flex-col justify-end bg-neema-ink/40">
+      <div role="dialog" aria-modal="true" aria-label="Symptom checker" className="neema-sheet flex max-h-[94%] flex-col gap-3 overflow-y-auto [&>*]:shrink-0 rounded-t-3xl bg-white px-4 pb-6 pt-5">
         <div className="flex items-center justify-between gap-2">
           {r && (
             <button type="button" aria-label="Back to symptom list" onClick={() => { s.setSymptomResult(null); s.setDangerWord(''); }} className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-neema-cream">

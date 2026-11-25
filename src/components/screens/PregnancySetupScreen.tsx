@@ -77,7 +77,7 @@ export function PregnancySetupScreen({ onComplete, onNotPregnant, onBack, error 
 
   const Shell = ({ Icon, tint, title, sub, children, footer }: { Icon: typeof Calendar; tint: string; title: string; sub: string; children: ReactNode; footer: ReactNode }) => (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
         <header className="flex items-center justify-between">
           <button type="button" onClick={back} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
             <ArrowLeft className="h-5 w-5" /> Back
@@ -87,13 +87,13 @@ export function PregnancySetupScreen({ onComplete, onNotPregnant, onBack, error 
         <div className="mt-4 flex gap-1.5" aria-label={`Setup step ${step} of 3`}>
           {[1, 2, 3].map((n) => <span key={n} className={`h-1.5 flex-1 rounded-full transition-colors duration-200 ${n <= step ? 'bg-neema-dark' : 'bg-neema-line'}`} />)}
         </div>
-        <div className="mt-8">
+        <div key={step} className="neema-rise mt-8">
           <span className={`flex h-14 w-14 items-center justify-center rounded-2xl ${tint}`}><Icon className="h-7 w-7" /></span>
           <div className="mt-5 text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your pregnancy · {step} of 3</div>
           <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{title}</h1>
           <p className="mt-2 text-lg text-neema-muted-strong">{sub}</p>
         </div>
-        <div className="mt-6 flex flex-col gap-4">{children}</div>
+        <div key={`c${step}`} className="neema-rise mt-6 flex flex-col gap-4" style={{ animationDelay: '80ms' }}>{children}</div>
         <div className="mt-auto flex flex-col gap-3 pt-8">{footer}</div>
       </div>
     </div>

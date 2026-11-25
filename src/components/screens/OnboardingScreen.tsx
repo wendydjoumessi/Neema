@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState, type TouchEvent } from 'react';
+import { BabyArt, PregnantArt, SupportArt, StethoArt } from '@/neema/art';
 import { ArrowLeft, ArrowRight, Baby, CalendarHeart, HeartPulse, Users, ShieldCheck, Languages, WifiOff, type LucideIcon } from 'lucide-react';
 import heroImage from '@/assets/hero-pregnant-new.jpg';
 import logo from '@/assets/logo.png';
@@ -9,6 +10,9 @@ interface OnboardingScreenProps {
 }
 
 type Slide = { Icon: LucideIcon; tint: string; eyebrow: string; title: string; description: string };
+
+/** Picture for each slide after the first (the first uses the photo). */
+const SLIDE_ART = [PregnantArt, BabyArt, SupportArt, StethoArt];
 
 const slides: Slide[] = [
   { Icon: HeartPulse, tint: 'bg-neema-primary-soft text-neema-dark', eyebrow: 'Welcome', title: 'Care for every stage', description: 'A free companion for pregnancy, the months after birth and family planning, in English and French.' },
@@ -26,13 +30,14 @@ const trust = [
 export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const [current, setCurrent] = useState(0);
   const [showRoles, setShowRoles] = useState(false);
+  const touchX = useRef<number | null>(null);
   const slide = slides[current];
   const isLast = current === slides.length - 1;
 
   if (showRoles) {
     const roles = [
-      { id: 'mother' as const, Icon: Baby, tint: 'bg-neema-primary-soft text-neema-dark', title: 'I’m a mother', text: 'Pregnant, after birth, or planning a family.' },
-      { id: 'partner' as const, Icon: Users, tint: 'bg-neema-lilac text-neema-lilac-ink', title: 'I’m a support person', text: 'Husband, mother, sister or trusted friend.' },
+      { id: 'mother' as const, Art: PregnantArt, title: 'I’m a mother', text: 'Pregnant, after birth, or planning a family.' },
+      { id: 'partner' as const, Art: SupportArt, title: 'I’m a support person', text: 'Husband, mother, sister or trusted friend.' },
     ];
     return (
       <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
@@ -49,10 +54,10 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             <p className="mt-2 text-lg text-neema-muted-strong">We’ll tailor your guidance to you.</p>
           </div>
           <div className="mt-8 flex flex-col gap-4">
-            {roles.map(({ id, Icon, tint, title, text }) => (
-              <button key={id} type="button" onClick={() => onComplete(id)}
-                className="group flex items-center gap-4 rounded-2xl border-2 border-transparent bg-white p-5 text-left shadow-neema-card transition-all duration-150 hover:border-neema-primary active:scale-[0.98]">
-                <span className={cn('flex h-14 w-14 flex-none items-center justify-center rounded-2xl', tint)}><Icon className="h-7 w-7" /></span>
+            {roles.map(({ id, Art, title, text }, i) => (
+              <button key={id} type="button" onClick={() => onComplete(id)} style={{ animationDelay: `${i * 80}ms` }}
+                className="neema-rise group flex items-center gap-4 rounded-3xl border-2 border-transparent bg-white p-4 text-left shadow-neema-card transition-all duration-150 hover:border-neema-primary active:scale-[0.98]">
+                <span className="h-20 w-20 flex-none"><Art className="h-full w-full" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-sans text-lg font-semibold">{title}</span>
                   <span className="block text-neema-muted-strong">{text}</span>
@@ -67,9 +72,17 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     );
   }
 
-  const { Icon } = slide;
+  const SlideArt = SLIDE_ART[current] ?? PregnantArt;
+  const go = (i: number) => setCurrent(Math.max(0, Math.min(slides.length - 1, i)));
+  const onTouchStart = (e: TouchEvent<HTMLDivElement>) => { touchX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
+  };
   return (
-    <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
+    <div className="min-h-screen bg-neema-cream font-sans text-neema-ink" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
         <header className="flex items-center justify-between">
           <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
@@ -83,12 +96,12 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             <img src={heroImage} alt="A smiling pregnant woman using Neema on her phone" className="aspect-[4/3] w-full rounded-3xl object-cover shadow-neema-card" />
           ) : (
             <div className="flex aspect-[4/3] w-full items-center justify-center rounded-3xl bg-white shadow-neema-card">
-              <span className={cn('flex h-28 w-28 items-center justify-center rounded-full', slide.tint)}><Icon className="h-14 w-14" /></span>
+              <span key={current} className="neema-rise neema-float block h-44 w-44"><SlideArt className="h-full w-full" /></span>
             </div>
           )}
         </div>
 
-        <div key={current} className="mt-8">
+        <div key={current} className="neema-rise mt-8">
           <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">{slide.eyebrow}</div>
           <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{slide.title}</h1>
           <p className="mt-3 text-lg leading-relaxed text-neema-muted-strong">{slide.description}</p>

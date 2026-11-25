@@ -15,7 +15,7 @@ export function NotificationsPanel() {
           ? [{ title: s.method.id ? 'Reminder for your method' : 'Choose a method that fits your life', when: 'Neema · 9:00' }, { title: 'Did you know? Only condoms protect against HIV', when: 'Neema · Monday' }]
           : [{ title: 'Time for your iron and folic acid tablet', when: 'Neema · 9:00' }, { title: 'Antenatal visit coming up — bring your card', when: 'Neema · yesterday' }, { title: 'New this week: folong with groundnuts', when: 'Neema · Monday' }];
   return (
-    <div className="absolute left-3 right-3 top-[72px] z-20 flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[0_8px_28px_rgba(43,45,66,0.22)]">
+    <div className="neema-rise absolute left-3 right-3 top-[68px] z-20 flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[0_8px_28px_rgba(43,45,66,0.22)]">
       <div className="flex items-center justify-between">
         <H2>Notifications</H2>
         <button type="button" aria-label="Close notifications" onClick={() => s.setNotifOpen(false)} className="-m-3 flex h-12 w-12 items-center justify-center">

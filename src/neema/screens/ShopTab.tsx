@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { BAGS, READY, SHOP, SHOP_CATS, SHOP_STAGES, ShopItem } from '../data';
 import { useNeema, type CustomItem } from '../store';
 import { Card, CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
+import { ProgressRing } from '../motion';
 
 /** When each stage opens (by pregnancy week) and when it should be done. */
 const STAGE_TIMING: Record<string, { from: number; by: string }> = {
@@ -286,13 +287,15 @@ export function ShopTab({ week = 20 }: { week?: number }) {
       </div>
 
       {/* Summary */}
-      <section className="flex flex-col gap-2.5 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
-        <div className="flex items-baseline justify-between">
-          <span className="text-lg font-semibold leading-6">Essentials: {essDone} of {essentials.length} ready</span>
-          <span className="font-bold text-neema-success-ink">{pct}%</span>
-        </div>
-        <div className="h-3 overflow-hidden rounded-full bg-neema-sand" role="img" aria-label={`${essDone} of ${essentials.length} essentials ready`}>
-          <div className="h-full rounded-full bg-neema-success" style={{ width: `${pct}%` }} />
+      <section className="neema-rise flex flex-col gap-3 rounded-[28px] bg-white p-4 shadow-neema-card">
+        <div className="flex items-center gap-4">
+          <ProgressRing value={pct / 100} size={84} stroke={9} label={`${essDone} of ${essentials.length} essentials ready`}>
+            <span className="text-xl font-bold leading-6 text-neema-success-ink">{pct}%</span>
+          </ProgressRing>
+          <span className="flex min-w-0 flex-col">
+            <span className="text-lg font-semibold leading-6">Essentials: {essDone} of {essentials.length} ready</span>
+            <span className="text-[15px] leading-[21px] text-neema-muted-strong">{pct === 100 ? 'All set. Well done!' : 'Tick items as you get them.'}</span>
+          </span>
         </div>
         {!afterBirth && (
           <div className="flex items-center gap-2 text-[15px] leading-[21px] text-neema-muted-strong">

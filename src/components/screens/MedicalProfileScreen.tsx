@@ -156,7 +156,7 @@ export function MedicalProfileScreen({ initial, mode, onSave, onSkip, onBack }: 
 
   return (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink [&_h1]:font-sans [&_h1]:tracking-normal [&_h2]:font-sans [&_h2]:tracking-normal">
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-5 px-5 pb-8 pt-3">
+      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col gap-5 px-5 pb-8 pt-3">
         <header className="flex items-center justify-between">
           {onBack ? (
             <button type="button" onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark hover:bg-neema-sand">

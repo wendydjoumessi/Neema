@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart } from 'lucide-react';
+import { Lock, MapPin, Leaf, Minus, Plus, Clock, CalendarHeart, Check, ShieldCheck, Syringe, Anchor, Pill, Baby, CalendarDays, Undo2, Scissors } from 'lucide-react';
+import { Reveal } from '../motion';
+import { ShieldArt } from '../art';
 import { MY_METHODS, cycleInfo, fmtShort, methodStatus, type MyMethodId } from '../cycle';
 import { fmtDate } from '../format';
 import { cn } from '@/lib/utils';
@@ -249,11 +251,23 @@ function TryingToConceive() {
   );
 }
 
+/** Typical-use effectiveness as a number for the little bar ("Over 99%", "About 93%", "77–98%"). */
+function effPercent(eff: string) {
+  const nums = (eff.match(/\d+/g) ?? []).map(Number);
+  return nums.length ? Math.min(...nums) : 50;
+}
+
+const METHOD_ICON: Record<string, typeof ShieldCheck> = {
+  implant: Syringe, cuiud: Anchor, hiud: Anchor, inject: Syringe, coc: Pill, pop: Pill, mcondom: ShieldCheck, fcondom: ShieldCheck,
+  lam: Baby, fam: CalendarDays, withdraw: Undo2, steril: Scissors,
+};
+
 function CompareMethods() {
   const [filters, setFilters] = useState<Record<string, boolean>>({});
   const [selected, setSelected] = useState<string[]>(['implant', 'inject']);
   const [cmpTab, setCmpTab] = useState<(typeof CMP_TABS)[number]['id']>('pros');
   const [showClinics, setShowClinics] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const active = FP_FILTERS.filter((f) => filters[f.id]);
   const visible = METHODS.filter((m) => active.every((f) => f.test(m)));
   const full = selected.length >= 3;
@@ -283,20 +297,36 @@ function CompareMethods() {
         </div>
       </div>
 
-      <section className="rounded-2xl bg-white px-4 py-2 shadow-neema-card">
-        {visible.map((m) => {
+      <section className="rounded-[24px] bg-white px-3 py-1.5 shadow-neema-card">
+        {(showAll ? visible : visible.slice(0, 6)).map((m, i) => {
           const on = selected.includes(m.id);
+          const Icon = METHOD_ICON[m.id] ?? ShieldCheck;
+          const pct = effPercent(m.eff);
           return (
-            <button key={m.id} type="button" aria-pressed={on} onClick={() => toggle(m.id)} className={cn('flex min-h-[60px] w-full items-center gap-3 border-b border-neema-line py-1.5 text-left', !on && full && 'opacity-50')}>
-              <CheckBox on={on} tone="terracotta" />
-              <span className="flex flex-1 flex-col">
-                <span className="font-semibold">{m.name}</span>
-                <span className="text-[13px] font-medium leading-[18px] text-neema-muted">{m.eff} effective (typical use)</span>
+            <button key={m.id} type="button" aria-pressed={on} onClick={() => toggle(m.id)}
+              className={cn('neema-press neema-rise flex min-h-[64px] w-full items-center gap-3 border-b border-neema-line py-2 text-left last:border-b-0', !on && full && 'opacity-50')}
+              style={{ animationDelay: `${i * 40}ms` }}>
+              <span aria-hidden="true" className={cn('flex h-11 w-11 flex-none items-center justify-center rounded-2xl transition-colors', on ? 'bg-neema-dark text-white' : 'bg-neema-cream text-neema-dark')}>
+                {on ? <Check className="h-5 w-5" strokeWidth={3} /> : <Icon className="h-5 w-5" />}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="font-semibold leading-5">{m.name}</span>
+                <span className="flex items-center gap-2">
+                  <span aria-hidden="true" className="h-1.5 w-16 flex-none overflow-hidden rounded-full bg-neema-sand">
+                    <span className="neema-bar-in block h-full rounded-full bg-neema-success" style={{ width: `${pct}%` }} />
+                  </span>
+                  <span className="text-[13px] font-medium leading-[18px] text-neema-muted">{m.eff} effective (typical use)</span>
+                </span>
               </span>
             </button>
           );
         })}
-        {visible.length === 0 && <p className="my-3 text-neema-muted">No method matches all of those. Try removing a filter.</p>}
+        {visible.length === 0 && <p className="my-3 px-1 text-neema-muted">No method matches all of those. Try removing a filter.</p>}
+        {visible.length > 6 && (
+          <button type="button" onClick={() => setShowAll(!showAll)} className="min-h-[48px] w-full font-semibold text-neema-dark">
+            {showAll ? 'Show fewer' : `Show all ${visible.length} methods`}
+          </button>
+        )}
       </section>
 
       {chosen.length >= 2 ? (
@@ -355,14 +385,19 @@ export function FamilyPlanningTab() {
         : '';
 
   return (
-    <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 p-4">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 p-4 pb-8">
+      <Reveal className="flex items-center justify-between gap-2">
         <H1>{title}</H1>
-        <button type="button" onClick={() => s.setTab('profile')} className="flex min-h-[44px] items-center gap-1.5 self-start rounded-full border border-[#E3C9BE] bg-white px-3.5 text-sm font-semibold">
-          Journey: {journey.short} · <span className="text-neema-dark">Change</span>
+        <button type="button" onClick={() => s.setTab('profile')} className="neema-press flex min-h-[44px] flex-none items-center gap-1.5 rounded-full border border-[#E3C9BE] bg-white px-3.5 text-sm font-semibold">
+          {journey.short} · <span className="text-neema-dark">Change</span>
         </button>
-      </div>
-      {banner && <div className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">{banner}</div>}
+      </Reveal>
+      {banner && (
+        <Reveal i={1} className="flex items-start gap-3 rounded-[24px] bg-neema-ochre-soft p-3.5">
+          <span className="h-14 w-14 flex-none"><ShieldArt className="h-full w-full" /></span>
+          <p className="text-[15px] font-medium leading-[22px] text-neema-ochre-ink">{banner}</p>
+        </Reveal>
+      )}
       {s.journey === 'ttc' ? <TryingToConceive /> : s.journey === 'avoid' ? (
         <>
           <MyMethodCard />
