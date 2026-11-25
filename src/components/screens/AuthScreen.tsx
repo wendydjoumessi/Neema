@@ -3,6 +3,7 @@ import { Mail, Lock, User as UserIcon, ArrowLeft, Eye, EyeOff, ShieldCheck, Load
 import { CAMEROON, COUNTRIES, REGIONS } from '@/neema/location';
 import { cn } from '@/lib/utils';
 import { Segmented } from '@/neema/ui';
+import { PregnantArt, SupportArt } from '@/neema/art';
 import { User } from '@/types/pregnancy';
 import { friendlyError, requestPasswordReset, signIn, signUp, type Journey } from '@/lib/account';
 import logo from '@/assets/logo.png';
@@ -160,30 +161,41 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
 
   return (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
-      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
-        <header className="flex items-center justify-between">
-          <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
-            <ArrowLeft className="h-5 w-5" /> Back
-          </button>
-          <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
-        </header>
-
-        <div className="mt-6">
-          <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
-          <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{mode === 'forgot' ? 'Reset your password' : isLogin ? 'Welcome back' : 'Create your account'}</h1>
-          <p className="mt-2 text-lg text-neema-muted-strong">
-            {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
-          </p>
+      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col pb-8">
+        {/* Warm illustrated header */}
+        <div className="relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-neema-primary-soft via-[#FBE3D6] to-neema-ochre-soft px-5 pb-16 pt-3">
+          <div aria-hidden="true" className="neema-drift absolute -right-10 -top-12 h-44 w-44 rounded-full bg-white/40" />
+          <div aria-hidden="true" className="neema-drift-slow absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-neema-primary/10" />
+          <header className="relative flex items-center justify-between">
+            <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full bg-white/70 px-3 font-semibold text-neema-dark backdrop-blur transition-colors duration-150 hover:bg-white">
+              <ArrowLeft className="h-5 w-5" /> Back
+            </button>
+            <img src={logo} alt="Neema — Care for Every Stage" className="h-14 w-auto" />
+          </header>
+          <div className="relative mt-5 flex items-end gap-3">
+            <div key={mode} className="neema-rise min-w-0 flex-1">
+              <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-neema-dark">Your account</div>
+              <h1 className="font-sans mt-2 text-3xl font-bold leading-tight">{mode === 'forgot' ? 'Reset your password' : isLogin ? 'Welcome back' : 'Create your account'}</h1>
+              <p className="mt-2 text-lg text-neema-muted-strong">
+                {defaultRole === 'mother' ? 'Your pregnancy and family care, in one place.' : 'Stay close and support the mother.'}
+              </p>
+            </div>
+            <span aria-hidden="true" className="neema-float block h-24 w-24 flex-none sm:h-28 sm:w-28">
+              {defaultRole === 'mother' ? <PregnantArt className="h-full w-full" /> : <SupportArt className="h-full w-full" />}
+            </span>
+          </div>
         </div>
 
+        <div className="relative -mt-10 flex flex-1 flex-col px-5">
+        <div className="neema-card-in rounded-[28px] bg-white p-1.5 shadow-neema-card [animation-delay:150ms]">
         {mode !== 'forgot' && (
-          <Segmented className="mt-6" label="Account" value={mode} onChange={switchMode}
+          <Segmented label="Account" value={mode} onChange={switchMode}
             options={[{ id: 'login', label: 'Log in' }, { id: 'signup', label: 'Sign up' }]} />
         )}
-        {notice && <p role="status" className="mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
-        {error && <p role="alert" className="mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
+        {notice && <p role="status" className="neema-fade mx-3.5 mt-4 rounded-xl bg-neema-success-soft px-4 py-3 font-medium text-neema-success-ink">{notice}</p>}
+        {error && <p role="alert" className="neema-fade mx-3.5 mt-4 rounded-xl bg-neema-primary-soft px-4 py-3 font-medium text-neema-dark">{error}</p>}
 
-        <section aria-busy={isLoading} className="mt-4 rounded-2xl bg-white p-5 shadow-neema-card">
+        <section key={mode} aria-busy={isLoading} className="neema-stagger p-3.5 pt-5">
           {mode === 'forgot' ? (
             <form onSubmit={handleForgot} className="flex flex-col gap-4">
               <p className="text-neema-muted-strong">Enter your email and we’ll send you a link to choose a new password.</p>
@@ -220,12 +232,13 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
             </form>
           )}
         </section>
+        </div>
 
         <div className="my-6 flex items-center gap-3 text-sm text-neema-muted-strong">
           <span className="h-px flex-1 bg-neema-line" /> or <span className="h-px flex-1 bg-neema-line" />
         </div>
         <button type="button" disabled={isLoading} onClick={handleGuestLogin}
-          className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
+          className="neema-press flex min-h-[52px] w-full items-center justify-center rounded-xl border border-neema-border bg-white px-4 font-semibold text-neema-ink transition-transform duration-150 active:scale-[0.98]">
           Continue as guest
         </button>
         <p className="mt-2 text-center text-[15px] text-neema-muted-strong">As a guest, nothing is saved when you close Neema.</p>
@@ -234,6 +247,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-neema-success-ink" />
           Your data stays private. Neema never sells it and shows no ads.
         </p>
+        </div>
       </div>
     </div>
   );
@@ -242,7 +256,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
 function SubmitBtn({ loading, children, pendingText }: { loading: boolean; children: React.ReactNode; pendingText: string }) {
   return (
     <Button type="submit" variant="ghost" disabled={loading}
-      className="mt-1 min-h-[56px] w-full whitespace-normal bg-neema-dark px-4 text-lg text-neema-cream shadow-neema-hero hover:bg-neema-dark hover:text-neema-cream disabled:opacity-60">
+      className="neema-shine mt-1 min-h-[56px] w-full whitespace-normal rounded-xl bg-neema-dark px-4 text-lg text-neema-cream shadow-neema-hero hover:bg-neema-dark hover:text-neema-cream disabled:opacity-60">
       {loading ? <span role="status" className="flex items-center gap-2"><LoaderCircle aria-hidden="true" className="h-5 w-5 motion-safe:animate-spin" />{pendingText}</span> : children}
     </Button>
   );
