@@ -1,12 +1,29 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut } from 'lucide-react';
+import {
+  ChevronLeft, Download, LogOut, Check, MessageSquareX, KeyRound, EyeOff, Lock, Users, CalendarHeart, NotebookText, Sparkles, Stethoscope, Pill, CalendarDays, Timer, HeartHandshake, UserRound,
+} from 'lucide-react';
+import emblem from '@/assets/neema-emblem.png';
+import { methodStatus, fmtShort } from '../cycle';
+import { ListRow, Reveal } from '../motion';
+import { MotherBabyArt, PregnantArt, ShieldArt, TryingArt } from '../art';
+
+const JOURNEY_ART = { ttc: TryingArt, preg: PregnantArt, pp: MotherBabyArt, avoid: ShieldArt };
+const EXTRA_ICON: Record<string, { Icon: typeof Sparkles; tint: string }> = {
+  body: { Icon: Sparkles, tint: 'bg-neema-lilac text-[#4A3F6B]' },
+  medical: { Icon: Stethoscope, tint: 'bg-neema-success-soft text-neema-success-ink' },
+  medicines: { Icon: Pill, tint: 'bg-neema-primary-soft text-neema-dark' },
+  tracking: { Icon: CalendarDays, tint: 'bg-neema-ochre-soft text-neema-ochre-ink' },
+  labour: { Icon: Timer, tint: 'bg-neema-primary-soft text-neema-dark' },
+  spiritual: { Icon: HeartHandshake, tint: 'bg-neema-lilac text-[#4A3F6B]' },
+  partner: { Icon: UserRound, tint: 'bg-neema-success-soft text-neema-success-ink' },
+};
 import { cn } from '@/lib/utils';
 import type { PregnancyData, User } from '@/types/pregnancy';
 import { JOURNEYS, T } from '../data';
 import { EmergencyContactsCard } from './EmergencyContacts';
 import { useNeema } from '../store';
 import type { AccountActions, ExtraScreen } from '../NeemaApp';
-import { Card, H1, H2, OutlineButton, PrimaryButton, Segmented, SwitchRow } from '../ui';
+import { Card, H1, H2, Segmented, SwitchRow } from '../ui';
 import { fmtDate } from '../format';
 
 export function ProfileTab({
@@ -58,11 +75,19 @@ export function ProfileTab({
     try { if (account) await account.requestDeletion(); setDel(2); } catch { setDelError('We couldn’t send your request. Check your connection and try again.'); }
   };
 
+  const st = methodStatus(s.method);
+  const lockMessage =
+    s.journey === 'preg' ? `Week ${Math.max(1, pregnancy.currentWeek)}: time for your iron and folic acid tablet`
+      : s.journey === 'pp' ? 'Time for a feed and a cup of water'
+        : s.journey === 'ttc' ? 'Time for your folic acid tablet'
+          : s.method.id === 'coc' || s.method.id === 'pop' ? 'Time for your pill'
+            : st?.due ? `Reminder: your next appointment is on ${fmtShort(st.due)}` : 'You have a new reminder';
+
   const privacy = [
-    { key: 'disc', label: 'Discreet mode', sub: 'Neutral app name (“Notes”) and lock-screen messages', on: s.discreet, toggle: () => s.setDiscreet(!s.discreet) },
-    { key: 'pin', label: 'PIN lock', sub: 'Locks Neema after 2 minutes in the background', on: s.pinLock, toggle: () => s.setPinLock(!s.pinLock) },
-    { key: 'sp', label: 'Share pregnancy updates with my partner', sub: 'Weekly progress and visit reminders only', on: s.sharePreg, toggle: () => s.setSharePreg(!s.sharePreg) },
-    { key: 'sf', label: 'Share family planning with my partner', sub: 'Off by default. Only you can turn this on.', on: s.shareFp, toggle: () => s.setShareFp(!s.shareFp) },
+    { key: 'disc', Icon: EyeOff, label: 'Discreet mode', sub: 'Neutral app name (“Notes”) and lock-screen messages', on: s.discreet, toggle: () => s.setDiscreet(!s.discreet) },
+    { key: 'pin', Icon: Lock, label: 'PIN lock', sub: 'Locks Neema after 2 minutes in the background', on: s.pinLock, toggle: () => s.setPinLock(!s.pinLock) },
+    { key: 'sp', Icon: Users, label: 'Share pregnancy updates with my partner', sub: 'Weekly progress and visit reminders only', on: s.sharePreg, toggle: () => s.setSharePreg(!s.sharePreg) },
+    { key: 'sf', Icon: CalendarHeart, label: 'Share family planning with my partner', sub: 'Off by default. Only you can turn this on.', on: s.shareFp, toggle: () => s.setShareFp(!s.shareFp) },
   ];
 
   return (
@@ -74,64 +99,96 @@ export function ProfileTab({
         <H1>{t.profile}</H1>
       </div>
 
-      <Card className="flex flex-col gap-3.5">
-        <div className="flex items-center gap-3.5">
-          <div aria-hidden="true" className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-neema-primary-soft text-2xl font-bold text-neema-dark">{initials}</div>
-          <div className="min-w-0">
-            <div className="text-lg font-semibold leading-6">{name}</div>
-            <div className="text-neema-muted">{s.city || 'Add your neighbourhood and city'}</div>
+      <Reveal i={0}>
+        <section className="relative flex flex-col gap-3.5 overflow-hidden rounded-[28px] bg-gradient-to-br from-neema-primary to-neema-dark p-5 text-white shadow-neema-hero">
+          <div aria-hidden="true" className="absolute -right-10 -top-14 h-40 w-40 rounded-full bg-white/10" />
+          <div className="relative flex items-center gap-3.5">
+            <div aria-hidden="true" className="flex h-16 w-16 flex-none items-center justify-center rounded-full border-[3px] border-white/70 bg-white text-2xl font-bold text-neema-dark">{initials}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xl font-semibold leading-7">{name}</div>
+              <div className="text-[15px] text-white/90">{s.city || 'Add your neighbourhood and city'}</div>
+            </div>
           </div>
-        </div>
-        <dl className="grid grid-cols-2 gap-2.5">
-          {facts.map((f) => (
-            <div key={f.k} className={cn('min-w-0 rounded-xl bg-neema-cream px-3 py-2.5', f.k === 'Email' && 'col-span-2')}>
-              <dt className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{f.k}</dt>
-              <dd className="break-words font-semibold">{f.v}</dd>
+          <dl className="relative grid grid-cols-2 gap-2">
+            {facts.map((f) => (
+              <div key={f.k} className={cn('min-w-0 rounded-2xl bg-white/15 px-3 py-2', f.k === 'Email' && 'col-span-2')}>
+                <dt className="text-[13px] font-medium leading-[18px] text-white/85">{f.k}</dt>
+                <dd className="break-words font-semibold">{f.v}</dd>
+              </div>
+            ))}
+          </dl>
+          {editing && (
+            <div className="relative flex flex-col gap-1.5">
+              <label htmlFor="neema-city" className="text-sm font-semibold">Neighbourhood and city</label>
+              <input id="neema-city" value={cityDraft} onChange={(e) => setCityDraft(e.target.value)} className="h-[52px] rounded-xl border border-white/40 px-3.5 text-base text-neema-ink" />
+            </div>
+          )}
+          {editing ? (
+            <button type="button" onClick={() => { s.setCity(cityDraft.trim()); setEditing(false); }} className="neema-press relative min-h-[48px] rounded-2xl bg-white font-semibold text-neema-dark">Save changes</button>
+          ) : (
+            <button type="button" onClick={() => { setCityDraft(s.city); setEditing(true); }} className="neema-press relative min-h-[48px] rounded-2xl border border-white/60 font-semibold">Edit profile</button>
+          )}
+        </section>
+      </Reveal>
+
+      <Reveal i={1}>
+        <Card className="flex flex-col gap-2.5 rounded-[24px] px-4 pb-4 pt-4">
+          <H2 className="px-1">{t.journey}</H2>
+          <div role="radiogroup" aria-label={t.journey} className="grid grid-cols-2 gap-2.5">
+            {JOURNEYS.map((j) => {
+              const on = j.id === s.journey;
+              const Art = JOURNEY_ART[j.id as keyof typeof JOURNEY_ART];
+              return (
+                <button key={j.id} type="button" role="radio" aria-checked={on} onClick={() => s.setJourney(j.id as typeof s.journey)}
+                  className={cn('neema-press relative flex min-h-[128px] flex-col items-start gap-1 rounded-3xl border-2 p-3 text-left transition-colors', on ? 'border-neema-dark bg-neema-primary-soft' : 'border-transparent bg-neema-cream')}>
+                  <span className="h-11 w-11"><Art className="h-full w-full" /></span>
+                  <span className="font-semibold leading-5">{j.label}</span>
+                  <span className="text-[13px] font-medium leading-[18px] text-neema-muted-strong">{j.sub}</span>
+                  {on && <span aria-hidden="true" className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-neema-dark text-white"><Check className="h-4 w-4" /></span>}
+                </button>
+              );
+            })}
+          </div>
+          {s.journey === 'avoid' && !s.discreet && (
+            <div className="flex flex-col gap-2 rounded-2xl bg-neema-lilac px-3.5 py-3">
+              <div className="text-[15px] leading-[22px]">We recommend discreet mode for this journey, especially on a shared phone.</div>
+              <button type="button" onClick={() => s.setDiscreet(true)} className="min-h-[48px] rounded-xl bg-neema-ink font-semibold text-white">Turn on discreet mode</button>
+            </div>
+          )}
+        </Card>
+      </Reveal>
+
+      <Reveal i={2}>
+        <Card className="flex flex-col rounded-[24px] px-4 py-4">
+          <H2 className="mb-1 px-1">{t.privacy}</H2>
+          {privacy.map((p) => (
+            <div key={p.key} className="flex flex-col border-b border-neema-line last:border-b-0">
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-neema-cream text-neema-dark"><p.Icon className="h-5 w-5" /></span>
+                <SwitchRow label={p.label} sub={p.sub} on={p.on} onToggle={p.toggle} className="min-h-[68px] flex-1 py-2.5" />
+              </div>
+              {p.key === 'disc' && (
+                <div className="mb-3 ml-[52px] flex flex-col gap-1.5">
+                  <div className="text-[13px] font-semibold leading-[18px] text-neema-muted">LOCK-SCREEN PREVIEW</div>
+                  <div className="flex items-center gap-3 rounded-2xl bg-neema-ink px-3.5 py-3 text-white">
+                    {s.discreet ? (
+                      <>
+                        <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-[10px] bg-[#8A8FA3]"><NotebookText className="h-[22px] w-[22px]" /></span>
+                        <span className="flex flex-col"><span className="text-[13px] font-semibold leading-[18px] text-[#D9DBE3]">NOTES · now</span><span>You have a new message</span></span>
+                      </>
+                    ) : (
+                      <>
+                        <img src={emblem} alt="" className="h-10 w-10 flex-none rounded-[10px] object-cover" />
+                        <span className="flex flex-col"><span className="text-[13px] font-semibold leading-[18px] text-[#D9DBE3]">NEEMA · now</span><span>{lockMessage}</span></span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
-        </dl>
-        {editing && (
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="neema-city" className="text-sm font-semibold">Neighbourhood and city</label>
-            <input id="neema-city" value={cityDraft} onChange={(e) => setCityDraft(e.target.value)} className="h-[52px] rounded-xl border border-neema-border px-3.5 text-base" />
-          </div>
-        )}
-        {editing ? (
-          <PrimaryButton onClick={() => { s.setCity(cityDraft.trim()); setEditing(false); }} className="min-h-[48px]">Save changes</PrimaryButton>
-        ) : (
-          <OutlineButton onClick={() => { setCityDraft(s.city); setEditing(true); }}>Edit profile</OutlineButton>
-        )}
-      </Card>
-
-      <Card className="flex flex-col gap-2 px-5 pb-5 pt-4">
-        <H2 className="mb-1">{t.journey}</H2>
-        <div role="radiogroup" aria-label={t.journey} className="flex flex-col gap-2">
-          {JOURNEYS.map((j) => {
-            const on = j.id === s.journey;
-            return (
-              <button key={j.id} type="button" role="radio" aria-checked={on} onClick={() => s.setJourney(j.id as typeof s.journey)} className={cn('flex min-h-[60px] items-center gap-3 rounded-[14px] border-2 px-3.5 py-2 text-left', on ? 'border-neema-dark bg-neema-primary-soft' : 'border-neema-line bg-white')}>
-                <span aria-hidden="true" className={cn('flex h-6 w-6 flex-none items-center justify-center rounded-full border-2', on ? 'border-neema-dark' : 'border-neema-border')}>
-                  {on && <span className="h-3 w-3 rounded-full bg-neema-dark" />}
-                </span>
-                <span className="flex flex-col"><span className="font-semibold">{j.label}</span><span className="text-sm leading-5 text-neema-muted">{j.sub}</span></span>
-              </button>
-            );
-          })}
-        </div>
-        {s.journey === 'avoid' && !s.discreet && (
-          <div className="flex flex-col gap-2 rounded-xl bg-neema-lilac px-3.5 py-3">
-            <div className="text-[15px] leading-[22px]">We recommend discreet mode for this journey, especially on a shared phone.</div>
-            <button type="button" onClick={() => s.setDiscreet(true)} className="min-h-[48px] rounded-xl bg-neema-ink font-semibold text-white">Turn on discreet mode</button>
-          </div>
-        )}
-      </Card>
-
-      <Card className="flex flex-col px-5 py-4">
-        <H2 className="mb-1">{t.privacy}</H2>
-        {privacy.map((p) => (
-          <SwitchRow key={p.key} label={p.label} sub={p.sub} on={p.on} onToggle={p.toggle} className="min-h-[68px] border-b border-neema-line py-2.5" />
-        ))}
-      </Card>
+        </Card>
+      </Reveal>
 
       <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
         <H2>{t.language}</H2>
@@ -140,14 +197,16 @@ export function ProfileTab({
       </Card>
 
       {extras.length > 0 && (
-        <Card className="flex flex-col px-5 py-4">
-          <H2 className="mb-1">More from Neema</H2>
-          {extras.map((e) => (
-            <button key={e.id} type="button" onClick={() => onOpenExtra(e.id)} className="flex min-h-[60px] items-center justify-between gap-3 border-b border-neema-line py-2 text-left">
-              <span className="flex flex-col"><span className="font-semibold">{e.label}</span><span className="text-sm leading-5 text-neema-muted">{e.description}</span></span>
-              <ChevronRight className="h-5 w-5 flex-none text-neema-muted" />
-            </button>
-          ))}
+        <Card className="flex flex-col rounded-[24px] px-4 py-4">
+          <H2 className="mb-1 px-1">More from Neema</H2>
+          {extras.map((e) => {
+            const meta = EXTRA_ICON[e.id] ?? { Icon: Sparkles, tint: 'bg-neema-cream text-neema-dark' };
+            return (
+              <div key={e.id} className="border-b border-neema-line last:border-b-0">
+                <ListRow icon={<meta.Icon className="h-5 w-5" />} tint={meta.tint} title={e.label} sub={e.description} onClick={() => onOpenExtra(e.id)} />
+              </div>
+            );
+          })}
         </Card>
       )}
 
@@ -156,12 +215,12 @@ export function ProfileTab({
       <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
         <H2>{t.data}</H2>
         {/* Export downloads the data now; deletion is logged in data_requests and completed by staff within 30 days. */}
-        <OutlineButton onClick={doExport} className="min-h-[56px]"><Download className="h-5 w-5" />{exported === 'busy' ? 'Preparing your file…' : t.export}</OutlineButton>
+        <div className="flex flex-col divide-y divide-neema-line">
+          <ListRow icon={<Download className="h-5 w-5" />} tint="bg-neema-success-soft text-neema-success-ink" title={exported === 'busy' ? 'Preparing your file…' : t.export} onClick={doExport} />
+          <ListRow icon={<MessageSquareX className="h-5 w-5" />} tint="bg-neema-cream text-neema-ink" title={chatsDeleted ? 'Ask Neema chats deleted' : 'Delete my Ask Neema chats'} onClick={() => { s.setMessages([]); setChatsDeleted(true); }} />
+        </div>
         {exported === 'done' && <div role="status" className="rounded-xl bg-neema-success-soft px-3 py-2.5 text-[15px] font-medium leading-[22px] text-neema-success-ink">{account ? 'Your data file has downloaded: profile, pregnancy, health profile, habits and settings.' : 'Guests have no saved data. Create an account to keep your information.'}</div>}
         {exported === 'error' && <div role="alert" className="rounded-xl bg-neema-primary-soft px-3 py-2.5 text-[15px] font-medium leading-[22px] text-neema-dark">We couldn’t prepare your file. Check your connection and try again.</div>}
-        <OutlineButton onClick={() => { s.setMessages([]); setChatsDeleted(true); }} className="min-h-[56px]">
-          {chatsDeleted ? 'Ask Neema chats deleted' : 'Delete my Ask Neema chats'}
-        </OutlineButton>
         {del === 0 && (
           <button type="button" onClick={() => setDel(1)} className="min-h-[56px] rounded-xl border-2 border-neema-dark bg-white font-semibold text-neema-dark">{t.deleteAll}</button>
         )}
@@ -182,7 +241,7 @@ export function ProfileTab({
 
       <Card className="flex flex-col gap-2.5 px-5 pb-5 pt-4">
         <H2>{t.security}</H2>
-        <OutlineButton onClick={() => { setPinOpen(!pinOpen); setPinSaved(false); setPinDraft(''); }} className="min-h-[56px]">Change my PIN</OutlineButton>
+        <ListRow icon={<KeyRound className="h-5 w-5" />} tint="bg-neema-cream text-neema-ink" title="Change my PIN" onClick={() => { setPinOpen(!pinOpen); setPinSaved(false); setPinDraft(''); }} />
         {pinOpen && (
           <div className="flex flex-col gap-1.5 rounded-xl bg-neema-cream p-3">
             <label htmlFor="neema-pin" className="text-sm font-semibold">New 4-digit PIN</label>

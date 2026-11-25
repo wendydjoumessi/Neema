@@ -109,6 +109,8 @@ function useNeemaState(seed?: PersistedState) {
   // Screens opened on top of the tabs (Body & skin, and the Profile extras)
   const [extraId, setExtraId] = useState<string | null>(null);
   const [bodySection, setBodySection] = useState<BodySection>('activity');
+  /** Diet screen view: what to eat, or today's habits (water, iron, activity). */
+  const [dietView, setDietView] = useState<'food' | 'day'>('food');
   const openBody = (section: BodySection) => { setBodySection(section); setNotifOpen(false); setExtraId('body'); };
 
   const openSymptom = (result: string | null = null, word = '') => {
@@ -138,7 +140,7 @@ function useNeemaState(seed?: PersistedState) {
     shop, setShop, ttc, setTtc, cycleLen, setCycleLen, periodLen, setPeriodLen, lastPeriod, setLastPeriod,
     pinLock, setPinLock, sharePreg, setSharePreg, shareFp, setShareFp,
     folic, setFolic, pills, setPills, method, setMethod, feeds, setFeeds, mood, setMood, shopCustom, setShopCustom, shopEdits, setShopEdits, contacts, setContacts,
-    bodyPlan, setBodyPlan, moves, setMoves, extraId, setExtraId, bodySection, setBodySection, openBody,
+    bodyPlan, setBodyPlan, moves, setMoves, extraId, setExtraId, bodySection, setBodySection, openBody, dietView, setDietView,
     messages, setMessages,
   };
 }

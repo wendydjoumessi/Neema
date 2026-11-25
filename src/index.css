@@ -404,6 +404,11 @@
     animation: scale-in 0.3s ease-out;
   }
 
+  @keyframes neema-pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
@@ -428,4 +433,38 @@
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Neema motion: gentle, short, and switched off for people who ask for less motion.
+ * ------------------------------------------------------------------------- */
+@keyframes neema-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes neema-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes neema-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes neema-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes neema-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes neema-story-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes neema-ring-in { from { stroke-dashoffset: var(--ring-c); } }
+@keyframes neema-bar-in { from { transform: scaleX(0); } }
+@keyframes neema-pulse-ring { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes neema-drop-in { 0% { transform: translateY(-8px) scale(.6); opacity: 0; } 70% { transform: translateY(1px) scale(1.08); opacity: 1; } 100% { transform: none; } }
+
+.neema-rise { animation: neema-rise 460ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-fade { animation: neema-fade 280ms ease-out both; }
+.neema-sheet { animation: neema-sheet-up 320ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-float { animation: neema-float 4.5s ease-in-out infinite; }
+.neema-sway { animation: neema-sway 5s ease-in-out infinite; transform-origin: 50% 90%; }
+.neema-ring-in { animation: neema-ring-in 1100ms cubic-bezier(.2, .8, .2, 1) both; }
+.neema-bar-in { animation: neema-bar-in 1000ms cubic-bezier(.2, .8, .2, 1) both; transform-origin: left; }
+.neema-drop-in { animation: neema-drop-in 380ms ease-out both; }
+.neema-press { transition: transform 120ms ease-out; }
+.neema-press:active { transform: scale(.97); }
+.neema-hscroll { scrollbar-width: none; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.neema-hscroll::-webkit-scrollbar { display: none; }
+.neema-hscroll > * { scroll-snap-align: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  .neema-rise, .neema-fade, .neema-sheet, .neema-float, .neema-sway, .neema-ring-in, .neema-bar-in, .neema-drop-in,
+  .neema-pulse::after { animation: none !important; }
+  .neema-press:active { transform: none; }
 }

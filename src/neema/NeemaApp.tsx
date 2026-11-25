@@ -98,46 +98,42 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
   return (
     <div className="min-h-[100dvh] bg-neema-sand/60 font-sans text-base leading-6 tracking-normal text-neema-ink [&_h1]:font-sans [&_h1]:tracking-normal [&_h2]:font-sans [&_h2]:tracking-normal [&_h3]:font-sans">
       <div className="relative mx-auto flex h-[100dvh] max-w-md flex-col overflow-hidden bg-neema-cream md:shadow-xl">
-        {/* Header */}
-        <header className="flex flex-none items-center justify-between gap-3 border-b border-neema-line bg-neema-cream px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2">
+        {/* Header: logo, then notifications, SOS and her profile. Compact so content gets the room. */}
+        <header className="flex flex-none items-center justify-between gap-2 bg-neema-cream/95 px-4 pb-2 pt-2.5 backdrop-blur">
+          <button type="button" onClick={() => go('home')} className="flex min-h-[48px] min-w-0 items-center gap-2" aria-label={s.discreet ? 'Notes, home' : 'Neema, home'}>
             {s.discreet ? (
-              <span aria-hidden="true" className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-[#8A8FA3] text-white">
-                <NotebookText className="h-[22px] w-[22px]" />
+              <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-[#8A8FA3] text-white">
+                <NotebookText className="h-5 w-5" />
               </span>
             ) : (
-              <img src={emblem} alt="Neema logo" className="h-11 w-11 flex-none rounded-xl object-cover" />
+              <img src={emblem} alt="" className="h-10 w-10 flex-none rounded-xl object-cover" />
             )}
-            <button type="button" onClick={() => go('profile')} className="min-h-[48px] min-w-0 text-left">
-              <span className={cn('block text-lg font-bold leading-6', s.discreet ? 'text-neema-ink' : 'text-neema-dark')}>
-                {s.discreet ? 'Notes' : 'Neema'}
-              </span>
-              <span className="block whitespace-nowrap text-[13px] font-medium leading-[18px] text-neema-muted-strong">
-                {firstName} · {t.myProfile}
-              </span>
-            </button>
-          </div>
+            <span className={cn('text-xl font-bold leading-6', s.discreet ? 'text-neema-ink' : 'text-neema-dark')}>
+              {s.discreet ? 'Notes' : 'Neema'}
+            </span>
+          </button>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label={t.openProfile}
-              onClick={() => go('profile')}
-              className={cn(
-                'flex h-12 w-12 flex-none items-center justify-center rounded-full border-2 bg-neema-primary-soft text-base font-bold text-neema-dark',
-                s.tab === 'profile' && !extra ? 'border-neema-primary' : 'border-transparent',
-              )}
-            >
-              {initials}
-            </button>
+            <SosPill onClick={() => s.openSos()} />
             <button
               type="button"
               aria-label="Notifications"
               onClick={() => s.setNotifOpen(!s.notifOpen)}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-neema-ink shadow-sm"
+              className="neema-press flex h-12 w-12 items-center justify-center rounded-full bg-white text-neema-ink shadow-sm"
             >
-              <Bell className="h-6 w-6" />
+              <Bell className="h-[22px] w-[22px]" />
             </button>
-            <SosPill onClick={() => s.openSos()} />
+            <button
+              type="button"
+              aria-label={t.openProfile}
+              title={`${firstName} · ${t.myProfile}`}
+              onClick={() => go('profile')}
+              className={cn(
+                'neema-press flex h-12 w-12 flex-none items-center justify-center rounded-full border-2 bg-gradient-to-br from-neema-primary to-neema-dark text-base font-bold text-white shadow-sm',
+                s.tab === 'profile' && !extra ? 'border-neema-ochre' : 'border-white',
+              )}
+            >
+              {initials}
+            </button>
           </div>
         </header>
 
@@ -150,10 +146,10 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
                   <ChevronLeft className="h-5 w-5" /> {s.tab === 'profile' ? 'Back to Profile' : 'Back'}
                 </button>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">{extra.render({ goTab: go })}</div>
+              <div key={extra.id} className="neema-fade min-h-0 flex-1 overflow-y-auto">{extra.render({ goTab: go })}</div>
             </div>
           ) : (
-            <>
+            <div key={s.tab} className="neema-fade flex min-h-0 flex-1 flex-col">
               {s.tab === 'home' && <HomeTab firstName={firstName} pregnancy={pregnancy} />}
               {s.tab === 'ask' && <AskTab week={pregnancy.currentWeek} />}
               {s.tab === 'diet' && <DietTab trimester={pregnancy.trimester} />}
@@ -162,12 +158,12 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
               {s.tab === 'profile' && (
                 <ProfileTab user={user} pregnancy={pregnancy} onLogout={onLogout} extras={allExtras} onOpenExtra={setExtraId} extraFacts={profileFacts} account={account} />
               )}
-            </>
+            </div>
           )}
         </main>
 
-        {/* Tab bar */}
-        <nav aria-label="Main" className={cn('grid flex-none border-t border-neema-line bg-white px-1 pb-2.5 pt-1.5', tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-5')}>
+        {/* Tab bar: the active tab sits on a soft pill that slides in */}
+        <nav aria-label="Main" className={cn('grid flex-none border-t border-neema-line bg-white px-1 pb-[max(10px,env(safe-area-inset-bottom))] pt-1.5', tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-5')}>
           {tabs.map(({ id, label, Icon }) => {
             const on = s.tab === id && !extra;
             return (
@@ -176,9 +172,11 @@ function NeemaShell({ user, pregnancy, onLogout, extras, onPersist, profileFacts
                 type="button"
                 aria-current={on ? 'page' : undefined}
                 onClick={() => go(id)}
-                className={cn('flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[13px] font-semibold leading-4', on ? 'text-neema-primary' : 'text-neema-muted')}
+                className={cn('neema-press flex min-h-[56px] flex-col items-center justify-center gap-1 text-[13px] font-semibold leading-4', on ? 'text-neema-dark' : 'text-neema-muted')}
               >
-                <Icon className="h-6 w-6" />
+                <span className={cn('flex h-8 w-14 items-center justify-center rounded-full transition-all duration-300', on ? 'scale-100 bg-neema-primary-soft' : 'scale-90 bg-transparent')}>
+                  <Icon className={cn('h-[22px] w-[22px] transition-transform duration-300', on && '-translate-y-px')} strokeWidth={on ? 2.4 : 2} />
+                </span>
                 {label}
               </button>
             );

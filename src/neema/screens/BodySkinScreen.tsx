@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, Volume2, Square, AlertTriangle, Search, Ban, Lock, Unlock } from 'lucide-react';
+import { ChevronDown, Volume2, Square, AlertTriangle, Search, Ban, Lock, Unlock, Play } from 'lucide-react';
+import { ExerciseFigure, PROGRAMS, programSecs } from '../exerciseAnim';
+import { ExercisePlayer } from './ExercisePlayer';
 import { cn } from '@/lib/utils';
 import type { PregnancyData } from '@/types/pregnancy';
 import {
@@ -8,7 +10,7 @@ import {
   type HelperIcon,
 } from '../body';
 import {
-  AlmondIcon, CocoaIcon, CoconutIcon, DarkPatchMap, DnaIcon, DropIcon, FadeTimeline, HandHeartIcon, HatIcon, LeafIcon, ShadeIcon, SheaIcon,
+  AlmondIcon, CocoaIcon, CoconutIcon, DnaIcon, DropIcon, FadeTimeline, HandHeartIcon, HatIcon, LeafIcon, ShadeIcon, SheaIcon,
   SunscreenIcon, TubeIcon,
 } from '../illustrations';
 import { daysBetween, todayIso } from '../cycle';
@@ -37,11 +39,13 @@ function useSpeech() {
   return { supported, speaking, speak };
 }
 
-function MoveRow({ move, csection, speech }: { move: Move; csection: boolean; speech: ReturnType<typeof useSpeech> }) {
+/** One exercise as a fitness-style card: moving preview, done tick, and Start for the guided player. */
+function MoveRow({ move, csection, speech, onStart }: { move: Move; csection: boolean; speech: ReturnType<typeof useSpeech>; onStart: () => void }) {
   const s = useNeema();
   const [open, setOpen] = useState(false);
   const today = todayIso();
   const done = (s.moves[today] ?? []).includes(move.id);
+  const prog = PROGRAMS[move.id];
   const toggle = () => {
     const list = s.moves[today] ?? [];
     s.setMoves({ [today]: done ? list.filter((x) => x !== move.id) : [...list, move.id] });
@@ -49,30 +53,54 @@ function MoveRow({ move, csection, speech }: { move: Move; csection: boolean; sp
   const steps = [...move.steps, ...(csection && move.csNote ? [move.csNote] : [])];
   return (
     <li className="border-b border-neema-line last:border-b-0">
-      <div className="flex items-center gap-2 py-1.5">
-        <button type="button" aria-label={`Done today: ${move.name}`} aria-pressed={done} onClick={toggle} className="-ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
-          <CheckBox on={done} />
-        </button>
-        <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-[52px] min-w-0 flex-1 items-center gap-2 text-left">
+      <div className="flex items-center gap-3 py-2">
+        <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-[60px] min-w-0 flex-1 items-center gap-3 text-left">
+          <span className={cn('h-[60px] w-[88px] flex-none overflow-hidden rounded-xl p-1', done ? 'bg-neema-success-soft' : 'bg-neema-cream')}>
+            {prog && <ExerciseFigure program={prog} label={`${move.name}, animated`} className="h-full w-full" />}
+          </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="font-semibold">{move.name}</span>
+            <span className="font-semibold leading-5">{move.name}</span>
             <span className="text-[15px] leading-[21px] text-neema-muted">{move.dose}</span>
           </span>
-          <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />
+        </button>
+        <button type="button" aria-label={`Done today: ${move.name}`} aria-pressed={done} onClick={toggle} className="-mr-2 flex h-12 w-12 flex-none items-center justify-center">
+          <CheckBox on={done} />
         </button>
       </div>
       {open && (
-        <div className="mb-3 ml-10 flex flex-col gap-2 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
-          <ol className="flex list-decimal flex-col gap-1.5 pl-5">{steps.map((st) => <li key={st}>{st}</li>)}</ol>
-          {speech.supported && (
-            <button type="button" onClick={() => speech.speak(move.id, `${move.name}. ${move.dose}. ${steps.join(' ')}`, s.lang)}
-              className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">
-              {speech.speaking === move.id ? <><Square className="h-[18px] w-[18px]" /> Stop</> : <><Volume2 className="h-[18px] w-[18px]" /> Listen</>}
-            </button>
+        <div className="mb-3 flex flex-col gap-2.5 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
+          {prog && (
+            <div className="aspect-[16/9] overflow-hidden rounded-xl bg-white p-2">
+              <ExerciseFigure program={prog} label={`${move.name}, animated demonstration`} className="h-full w-full" />
+            </div>
           )}
+          <ol className="flex list-decimal flex-col gap-1.5 pl-5">{steps.map((st) => <li key={st}>{st}</li>)}</ol>
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={onStart} className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-neema-dark font-semibold text-white">
+              <Play className="h-5 w-5" /> Start
+            </button>
+            {speech.supported ? (
+              <button type="button" onClick={() => speech.speak(move.id, `${move.name}. ${move.dose}. ${steps.join(' ')}`, s.lang)}
+                className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">
+                {speech.speaking === move.id ? <><Square className="h-[18px] w-[18px]" /> Stop</> : <><Volume2 className="h-[18px] w-[18px]" /> Listen</>}
+              </button>
+            ) : <span />}
+          </div>
         </div>
       )}
     </li>
+  );
+}
+
+/** "Start today's routine" for every exercise in the plan except long walks, which have their own timer. */
+function RoutineButton({ moves, onStart }: { moves: Move[]; onStart: (queue: Move[]) => void }) {
+  const queue = moves.filter((m) => PROGRAMS[m.id] && !PROGRAMS[m.id].minutes);
+  if (queue.length < 2) return null;
+  const mins = Math.max(1, Math.round(queue.reduce((t, m) => t + programSecs(PROGRAMS[m.id]), 0) / 60));
+  return (
+    <button type="button" onClick={() => onStart(queue)} className="mt-2 flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-neema-dark text-lg font-semibold text-white shadow-neema-hero active:scale-[0.98]">
+      <Play className="h-6 w-6" /> Start today’s routine · {mins} min
+    </button>
   );
 }
 
@@ -125,6 +153,7 @@ function AfterBirthActivity({ pregnancy, goTab }: { pregnancy: PregnancyData } &
   const stage = !plan.checked ? 'gentle' : weeks !== null && weeks >= 12 ? 'full' : 'build';
   const moves = stage === 'gentle' ? MOVES_GENTLE : stage === 'build' ? [...MOVES_BUILD, MOVES_GENTLE[0], MOVES_GENTLE[1]] : [...MOVES_FULL, ...MOVES_BUILD.slice(1, 3), MOVES_GENTLE[0]];
   const doneToday = (s.moves[todayIso()] ?? []).filter((id) => moves.some((m) => m.id === id)).length;
+  const [player, setPlayer] = useState<{ queue: Move[]; start: number } | null>(null);
   const womb = days === null ? null : Math.min(100, Math.round((days / 42) * 100));
 
   return (
@@ -159,11 +188,13 @@ function AfterBirthActivity({ pregnancy, goTab }: { pregnancy: PregnancyData } &
         </div>
         <p className="mt-1 text-[15px] leading-[22px] text-neema-muted-strong">
           {stage === 'gentle'
-            ? 'Safe from the first days. Tap an exercise for the steps.'
+            ? 'Safe from the first days. Watch each move, then press Start and follow along.'
             : stage === 'build' ? 'Your health worker said you can be more active. Build up a little each week.' : 'Aim for 150 active minutes a week, the same as other adults.'}
         </p>
-        <ul className="mt-1 flex flex-col">{moves.map((m) => <MoveRow key={m.id} move={m} csection={plan.csection} speech={speech} />)}</ul>
+        <RoutineButton moves={moves} onStart={(queue) => setPlayer({ queue, start: 0 })} />
+        <ul className="mt-2 flex flex-col">{moves.map((m) => <MoveRow key={m.id} move={m} csection={plan.csection} speech={speech} onStart={() => setPlayer({ queue: [m], start: 0 })} />)}</ul>
       </section>
+      {player && <ExercisePlayer queue={player.queue} start={player.start} csection={plan.csection} onClose={() => setPlayer(null)} />}
 
       <Card className="flex flex-col gap-1 py-3">
         <SwitchRow label="I had a caesarean" sub="Adds wound care tips to each exercise" on={plan.csection} onToggle={() => s.setBodyPlan({ ...plan, csection: !plan.csection })} />
@@ -240,6 +271,7 @@ function OtherActivity() {
   const speech = useSpeech();
   const preg = s.journey === 'preg';
   const moves = preg ? MOVES_PREG : MOVES_GENERAL;
+  const [player, setPlayer] = useState<{ queue: Move[]; start: number } | null>(null);
   return (
     <>
       <section className="flex flex-col rounded-2xl bg-white px-5 pb-2 pt-4 shadow-neema-card">
@@ -249,8 +281,10 @@ function OtherActivity() {
             ? 'Regular, gentle activity is safe for most pregnancies and doesn’t cause miscarriage. It can ease back pain and help you in labour. Aim for 150 minutes a week.'
             : 'Aim for 150 active minutes a week. Walking to the market, dancing and housework all count.'}
         </p>
-        <ul className="mt-1 flex flex-col">{moves.map((m) => <MoveRow key={m.id} move={m} csection={false} speech={speech} />)}</ul>
+        <RoutineButton moves={moves} onStart={(queue) => setPlayer({ queue, start: 0 })} />
+        <ul className="mt-2 flex flex-col">{moves.map((m) => <MoveRow key={m.id} move={m} csection={false} speech={speech} onStart={() => setPlayer({ queue: [m], start: 0 })} />)}</ul>
       </section>
+      {player && <ExercisePlayer queue={player.queue} start={player.start} csection={false} onClose={() => setPlayer(null)} />}
       {preg && (
         <section className="flex flex-col gap-2 rounded-2xl border border-neema-line bg-white px-5 py-4">
           <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-neema-dark" /><H2>Stop and get checked if you notice</H2></div>
@@ -387,20 +421,14 @@ function SkinSection({ go }: { go: (to: BodySection | 'diet') => void }) {
         <button type="button" onClick={() => go('ingredients')} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-neema-dark font-semibold text-white"><Search className="h-5 w-5" /> Check a product’s ingredients</button>
       </section>
 
-      {/* 6. Dark patches, with a body map */}
+      {/* 6. Dark patches: where they show, as simple chips */}
       <section className="flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 shadow-neema-card">
         <H2>Dark patches are common</H2>
-        <div className="flex items-center gap-4">
-          <div className="w-[104px] flex-none"><DarkPatchMap /></div>
-          <ol className="flex flex-col gap-2.5 text-[15px] leading-[21px]">
-            {[['Face', 'cheeks and forehead'], ['Neck', 'and underarms'], ['Belly line', 'from navel down']].map(([t, sub], i) => (
-              <li key={t} className="flex items-start gap-2">
-                <span aria-hidden="true" className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-neema-primary text-[13px] font-bold text-white">{i + 1}</span>
-                <span><span className="font-semibold">{t}</span> <span className="text-neema-muted-strong">{sub}</span></span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <ul className="flex flex-wrap gap-2" aria-label="Where they usually show">
+          {['Cheeks and forehead', 'Neck and underarms', 'Line down the belly'].map((t) => (
+            <li key={t} className="rounded-full bg-neema-sand px-3.5 py-2 text-[15px] font-semibold leading-5">{t}</li>
+          ))}
+        </ul>
         <p className="rounded-xl bg-neema-success-soft px-3.5 py-2.5 text-[15px] font-medium leading-[22px] text-neema-success-ink">They usually fade in the months after birth. Even dark skin needs sun protection:</p>
         <div className="grid grid-cols-3 gap-2">
           <IconTile Icon={HatIcon} title="Hat" sub="Free" />

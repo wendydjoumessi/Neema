@@ -29,8 +29,8 @@ export function SosSheet({ firstName }: { firstName: string }) {
   const close = () => { s.setSosOpen(false); s.setDangerWord(''); };
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-neema-ink/50">
-      <div role="dialog" aria-modal="true" aria-label="Emergency SOS" className="flex max-h-[96%] flex-col overflow-y-auto [&>*]:shrink-0 rounded-t-3xl bg-white">
+    <div className="neema-fade absolute inset-0 z-50 flex flex-col justify-end bg-neema-ink/50">
+      <div role="dialog" aria-modal="true" aria-label="Emergency SOS" className="neema-sheet flex max-h-[96%] flex-col overflow-y-auto [&>*]:shrink-0 rounded-t-3xl bg-white">
         <div className="flex items-center justify-between rounded-t-3xl bg-neema-sos py-4 pl-5 pr-4 text-white">
           <div>
             <div className="text-[13px] font-bold leading-[18px] tracking-[0.08em]">EMERGENCY</div>

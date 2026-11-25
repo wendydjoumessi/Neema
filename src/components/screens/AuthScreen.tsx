@@ -136,7 +136,7 @@ export function AuthScreen({ onSignedIn, onGuest, onBack, defaultRole, journey }
 
   return (
     <div className="min-h-screen bg-neema-cream font-sans text-neema-ink">
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
+      <div className="neema-rise mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-8 pt-3">
         <header className="flex items-center justify-between">
           <button type="button" disabled={isLoading} onClick={onBack} className="flex min-h-[48px] items-center gap-1.5 rounded-full px-3 font-semibold text-neema-dark transition-colors duration-150 hover:bg-neema-sand">
             <ArrowLeft className="h-5 w-5" /> Back
