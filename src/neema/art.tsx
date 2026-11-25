@@ -309,3 +309,23 @@ export function SupportArt({ className }: ArtProps) {
     </svg>
   );
 }
+
+/** A packed hospital bag with a baby blanket peeking out, for the Shopping page. */
+export function BagArt({ className }: ArtProps) {
+  return (
+    <svg viewBox="0 0 120 120" aria-hidden="true" className={className}>
+      <ellipse cx="60" cy="104" rx="38" ry="5" fill={C.dark} opacity=".12" />
+      <path d="M44 40v-8a16 16 0 0 1 32 0v8" fill="none" stroke={C.dark} strokeWidth="6" strokeLinecap="round" />
+      <path d="M38 44c3-8 41-8 44 0" fill={C.lilac} />
+      <path d="M46 40c6-10 22-12 30-2l-2 6H46z" fill="#F6C9B5" />
+      <path d="M58 33c4-2 9-1 12 3" fill="none" stroke={C.white} strokeWidth="2" strokeLinecap="round" />
+      <rect x="22" y="42" width="76" height="60" rx="16" fill={C.primary} />
+      <rect x="22" y="42" width="76" height="20" rx="10" fill={C.dark} opacity=".25" />
+      <rect x="52" y="56" width="16" height="10" rx="3" fill={C.ochre} />
+      <path d="M34 74h52" stroke={C.white} strokeWidth="2" strokeDasharray="4 4" opacity=".55" />
+      <circle cx="40" cy="88" r="6" fill={C.white} opacity=".9" />
+      <path d="M40 85v6M37 88h6" stroke={C.primary} strokeWidth="2" strokeLinecap="round" />
+      <path d="M74 84l3 3 6-6" fill="none" stroke={C.white} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
