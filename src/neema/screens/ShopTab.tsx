@@ -1,11 +1,12 @@
-import { FormEvent, ReactNode, useState } from 'react';
-import { ChevronDown, Share2, Plus, Trash2, PartyPopper, CalendarClock, ShieldCheck, Pencil, RotateCcw } from 'lucide-react';
+import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { ChevronDown, Share2, Plus, Trash2, PartyPopper, CalendarClock, ShieldCheck, Pencil, RotateCcw, Heart, Baby, Milk, Stethoscope, Lock, Check, ShoppingBag, Briefcase, Info, type LucideIcon } from 'lucide-react';
 import { fieldErrors, shopItemSchema } from '@/lib/form-validation';
 import { cn } from '@/lib/utils';
 import { BAGS, READY, SHOP, SHOP_CATS, SHOP_STAGES, ShopItem } from '../data';
 import { useNeema, type CustomItem } from '../store';
 import { Card, CheckBox, H1, H2, Segmented, SwitchRow } from '../ui';
-import { ProgressRing } from '../motion';
+import { ProgressRing, Reveal } from '../motion';
+import { BabyArt, BagArt } from '../art';
 
 /** When each stage opens (by pregnancy week) and when it should be done. */
 const STAGE_TIMING: Record<string, { from: number; by: string }> = {
@@ -16,10 +17,28 @@ const STAGE_TIMING: Record<string, { from: number; by: string }> = {
 const STAGE_ORDER = ['t2', 't3', 'bag'] as const;
 
 type View = 'now' | 'bag' | 'all' | 'pp';
-type Row = { id: string; name: string; qty?: string; tip?: string; guide?: string[]; ess: boolean; custom?: boolean };
+type Row = { id: string; name: string; qty?: string; tip?: string; guide?: string[]; ess: boolean; custom?: boolean; cat?: string };
 
-const toRow = (it: ShopItem): Row => ({ id: it.id, name: it.name, qty: it.qty, tip: it.tip, guide: 'guide' in it ? it.guide : undefined, ess: it.ess });
-const customRow = (c: CustomItem): Row => ({ id: c.id, name: c.name, qty: c.qty || 'Added by you', ess: true, custom: true });
+const toRow = (it: ShopItem): Row => ({ id: it.id, name: it.name, qty: it.qty, tip: it.tip, guide: 'guide' in it ? it.guide : undefined, ess: it.ess, cat: it.cat });
+const customRow = (c: CustomItem): Row => ({ id: c.id, name: c.name, qty: c.qty || 'Added by you', ess: true, custom: true, cat: c.group });
+
+/** A small coloured icon per category, so the list can be scanned at a glance. */
+const CAT_STYLE: Record<string, { Icon: LucideIcon; bg: string; ink: string; label: string }> = {
+  mother: { Icon: Heart, bg: 'bg-neema-primary-soft', ink: 'text-neema-dark', label: 'For you' },
+  baby: { Icon: Baby, bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', label: 'For baby' },
+  feed: { Icon: Milk, bg: 'bg-neema-success-soft', ink: 'text-neema-success-ink', label: 'Feeding' },
+  kit: { Icon: Stethoscope, bg: 'bg-neema-lilac', ink: 'text-[#4A3F6B]', label: 'Mama kit' },
+};
+
+/** Each pregnancy stage's own icon and colour (timeline and section headings). */
+const STAGE_STYLE: Record<string, { Icon: LucideIcon; short: string; bg: string; ink: string; bar: string }> = {
+  t2: { Icon: ShoppingBag, short: 'Trimester 2', bg: 'bg-neema-ochre-soft', ink: 'text-neema-ochre-ink', bar: 'bg-neema-ochre' },
+  t3: { Icon: Baby, short: 'Trimester 3', bg: 'bg-neema-primary-soft', ink: 'text-neema-dark', bar: 'bg-neema-primary' },
+  bag: { Icon: Briefcase, short: 'Hospital bag', bg: 'bg-neema-lilac', ink: 'text-[#4A3F6B]', bar: 'bg-[#7A6BA8]' },
+};
+
+const reducedMotion = () => typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const scrollToId = (id: string) => window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }), 60);
 
 function ItemEditor({ row, onDone }: { row: Row; onDone: () => void }) {
   const s = useNeema();
@@ -69,11 +88,24 @@ function ItemEditor({ row, onDone }: { row: Row; onDone: () => void }) {
   );
 }
 
-function ItemRow({ row }: { row: Row }) {
+function ItemRow({ row, exitOnTick = false, showCat = false }: { row: Row; exitOnTick?: boolean; showCat?: boolean }) {
   const s = useNeema();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<'view' | 'edit' | 'remove'>('view');
-  const on = !!s.shop[row.id];
+  const [leaving, setLeaving] = useState(false);
+  const timer = useRef<number>();
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const on = !!s.shop[row.id] || leaving;
+  const cat = showCat ? CAT_STYLE[row.cat ?? ''] : undefined;
+  // In "Get now", a ticked item gives a little check, then glides off the list.
+  const toggle = () => {
+    if (exitOnTick && !on && !reducedMotion()) {
+      setLeaving(true);
+      timer.current = window.setTimeout(() => s.setShop({ ...s.shop, [row.id]: true }), 520);
+      return;
+    }
+    s.setShop({ ...s.shop, [row.id]: !on });
+  };
 
   const remove = () => {
     const { [row.id]: _tick, ...ticks } = s.shop;
@@ -84,13 +116,18 @@ function ItemRow({ row }: { row: Row }) {
   };
 
   return (
-    <li className="border-b border-neema-line last:border-b-0">
-      <div className="flex items-center gap-2 py-1.5">
-        <button type="button" aria-label={`Got it: ${row.name}`} aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [row.id]: !on })} className="-ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
-          <CheckBox on={on} />
+    <li className={cn('border-b border-neema-line last:border-b-0', leaving && 'neema-tick-out')}>
+      <div className="flex items-center gap-1.5 py-1.5">
+        <button type="button" aria-label={`Got it: ${row.name}`} aria-pressed={on} onClick={toggle} className="-ml-2.5 flex h-12 w-12 flex-none items-center justify-center">
+          <span key={String(on)} className={cn('block', on && 'neema-check-pop')}><CheckBox on={on} /></span>
         </button>
+        {cat && (
+          <span aria-hidden="true" title={cat.label} className={cn('flex h-9 w-9 flex-none items-center justify-center rounded-xl transition-opacity', cat.bg, cat.ink, on && 'opacity-50')}>
+            <cat.Icon className="h-[18px] w-[18px]" />
+          </span>
+        )}
         <button type="button" onClick={() => { setOpen(!open); setMode('view'); }} aria-expanded={open}
-          className="flex min-h-[52px] min-w-0 flex-1 items-center gap-2 text-left">
+          className="ml-1 flex min-h-[52px] min-w-0 flex-1 items-center gap-2 text-left">
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="flex flex-wrap items-center gap-x-2">
               <span className={cn('font-semibold', on && 'text-neema-muted line-through')}>{row.name}</span>
@@ -101,9 +138,9 @@ function ItemRow({ row }: { row: Row }) {
           <ChevronDown aria-hidden="true" className={cn('h-5 w-5 flex-none text-neema-muted transition-transform', open && 'rotate-180')} />
         </button>
       </div>
-      {open && mode === 'edit' && <div className="ml-10"><ItemEditor row={row} onDone={() => setMode('view')} /></div>}
+      {open && mode === 'edit' && <div className="neema-fade ml-10"><ItemEditor row={row} onDone={() => setMode('view')} /></div>}
       {open && mode !== 'edit' && (
-        <div className="mb-3 ml-10 flex flex-col gap-2 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
+        <div className="neema-fade mb-3 ml-10 flex flex-col gap-2 rounded-xl bg-neema-cream px-3.5 py-3 text-[15px] leading-[22px]">
           {row.tip && <p>{row.tip}</p>}
           {row.guide && (
             <>
@@ -167,19 +204,33 @@ function RemovedItems({ removed }: { removed: ShopItem[] }) {
   );
 }
 
-function Section({ title, note, rows, badge, children }: { title: string; note?: string; rows: Row[]; badge?: string; children?: ReactNode }) {
+function Section({ id, title, note, rows, badge, children, Icon, tone, exitOnTick, i = 0 }: {
+  id?: string; title: string; note?: string; rows: Row[]; badge?: string; children?: ReactNode; Icon?: LucideIcon; tone?: string; exitOnTick?: boolean; i?: number;
+}) {
   const s = useNeema();
   const done = rows.filter((r) => s.shop[r.id]).length;
+  // Category icons help only when a section mixes categories.
+  const showCat = new Set(rows.map((r) => r.cat)).size > 1;
   return (
-    <Card className="flex flex-col px-4 pb-2 pt-4">
-      <div className="flex items-baseline justify-between gap-2 px-1">
-        <H2>{title}</H2>
-        <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-neema-muted-strong">{badge ?? `${done} of ${rows.length}`}</span>
-      </div>
-      {note && <p className="mt-1 px-1 text-[15px] leading-[21px] text-neema-muted-strong">{note}</p>}
-      <ul className="mt-1 flex flex-col">{rows.map((r) => <ItemRow key={r.id} row={r} />)}</ul>
-      {children}
-    </Card>
+    <Reveal i={i} className="scroll-mt-4">
+      <section id={id} className="flex scroll-mt-4 flex-col rounded-[24px] bg-white px-4 pb-2 pt-4 shadow-neema-card">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex min-w-0 items-center gap-2.5">
+            {Icon && <span aria-hidden="true" className={cn('flex h-10 w-10 flex-none items-center justify-center rounded-2xl', tone)}><Icon className="h-5 w-5" /></span>}
+            <H2>{title}</H2>
+          </div>
+          <span className="whitespace-nowrap rounded-full bg-neema-cream px-2.5 py-0.5 text-[13px] font-semibold leading-[20px] text-neema-muted-strong">{badge ?? `${done} of ${rows.length}`}</span>
+        </div>
+        {!badge && rows.length > 0 && (
+          <div aria-hidden="true" className="mx-1 mt-3 h-1.5 overflow-hidden rounded-full bg-neema-sand">
+            <div className="h-full rounded-full bg-neema-success transition-[width] duration-500" style={{ width: `${(100 * done) / rows.length}%` }} />
+          </div>
+        )}
+        {note && <p className="mt-2 px-1 text-[15px] leading-[21px] text-neema-muted-strong">{note}</p>}
+        <ul className="mt-1 flex flex-col">{rows.map((r) => <ItemRow key={r.id} row={r} exitOnTick={exitOnTick} showCat={showCat} />)}</ul>
+        {children}
+      </section>
+    </Reveal>
   );
 }
 
@@ -209,19 +260,22 @@ function ReadinessCard() {
   const s = useNeema();
   const done = READY.filter((r) => s.shop[r.id]).length;
   return (
-    <section className="flex flex-col rounded-2xl bg-neema-lilac px-5 pb-3 pt-4">
+    <section className="flex flex-col rounded-[24px] bg-neema-lilac px-5 pb-3 pt-4">
       <div className="flex items-baseline justify-between gap-2">
         <H2>Ready for labour?</H2>
         <span className="whitespace-nowrap text-[13px] font-semibold leading-[18px] text-[#4A3F6B]">{done} of {READY.length}</span>
       </div>
-      <p className="mt-1 text-[15px] leading-[21px]">Not things to buy, but the plans that matter most when labour starts.</p>
+      <div aria-hidden="true" className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/70">
+        <div className="h-full rounded-full bg-[#7A6BA8] transition-[width] duration-500" style={{ width: `${(100 * done) / READY.length}%` }} />
+      </div>
+      <p className="mt-2 text-[15px] leading-[21px]">Not things to buy, but the plans that matter most when labour starts.</p>
       <ul className="mt-1 flex flex-col">
         {READY.map((r) => {
           const on = !!s.shop[r.id];
           return (
             <li key={r.id}>
               <button type="button" aria-pressed={on} onClick={() => s.setShop({ ...s.shop, [r.id]: !on })} className="flex min-h-[60px] w-full items-start gap-3 border-b border-[#D9D2EA] py-2.5 text-left last:border-b-0">
-                <span className="mt-0.5"><CheckBox on={on} tone="ink" /></span>
+                <span key={String(on)} className={cn('mt-0.5', on && 'neema-check-pop')}><CheckBox on={on} tone="ink" /></span>
                 <span className="flex flex-col"><span className="font-semibold">{r.label}</span><span className="text-[15px] leading-[21px] text-neema-muted-strong">{r.sub}</span></span>
               </button>
             </li>
@@ -279,71 +333,128 @@ export function ShopTab({ week = 20 }: { week?: number }) {
     ? [{ id: 'pp' as View, label: 'After birth' }, { id: 'all' as View, label: 'Everything' }]
     : [{ id: 'now' as View, label: 'Get now' }, { id: 'bag' as View, label: 'Hospital bag' }, { id: 'all' as View, label: 'Everything' }];
 
+  const stageCount = (st: string) => {
+    const rows = items.filter((i) => i.when === st);
+    return { done: rows.filter((i) => s.shop[i.id]).length, total: rows.length };
+  };
+  const goStage = (st: string) => {
+    if (st === 'bag') { setView('bag'); scrollToId('shop-bags'); return; }
+    setView('now'); scrollToId(`shop-${st}`);
+  };
+
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto [&>*]:shrink-0 p-4">
-      <div>
+      <Reveal>
         <H1>{afterBirth ? 'After-birth checklist' : 'Getting ready for baby'}</H1>
         <p className="mt-1 text-neema-muted-strong">{afterBirth ? 'Only what helps now. Breastfeeding itself needs no equipment.' : 'What to get, and when. You don’t need everything at once.'}</p>
-      </div>
+      </Reveal>
 
       {/* Summary */}
-      <section className="neema-rise flex flex-col gap-3 rounded-[28px] bg-white p-4 shadow-neema-card">
-        <div className="flex items-center gap-4">
-          <ProgressRing value={pct / 100} size={84} stroke={9} label={`${essDone} of ${essentials.length} essentials ready`}>
-            <span className="text-xl font-bold leading-6 text-neema-success-ink">{pct}%</span>
-          </ProgressRing>
-          <span className="flex min-w-0 flex-col">
-            <span className="text-lg font-semibold leading-6">Essentials: {essDone} of {essentials.length} ready</span>
-            <span className="text-[15px] leading-[21px] text-neema-muted-strong">{pct === 100 ? 'All set. Well done!' : 'Tick items as you get them.'}</span>
-          </span>
-        </div>
-        {!afterBirth && (
-          <div className="flex items-center gap-2 text-[15px] leading-[21px] text-neema-muted-strong">
-            <CalendarClock className="h-[18px] w-[18px] flex-none" />
-            <span>Week {week} · Hospital bag {bagDone} of {bagTotal} packed{week >= 32 && bagDone < bagTotal ? ' — pack it by week 36' : ''}</span>
+      <Reveal i={1}>
+        <section className="relative flex flex-col gap-2.5 overflow-hidden rounded-[28px] bg-gradient-to-br from-neema-primary-soft via-[#FBE3D6] to-neema-ochre-soft p-4 shadow-neema-card">
+          <div aria-hidden="true" className="neema-drift absolute -right-10 -top-12 h-36 w-36 rounded-full bg-white/40" />
+          <div className="relative flex items-center gap-3.5">
+            <span className="rounded-full bg-white/80 p-1">
+              <ProgressRing value={pct / 100} size={76} stroke={8} track="#F1E4DA" label={`${essDone} of ${essentials.length} essentials ready`}>
+                <span className="text-xl font-bold leading-6 text-neema-success-ink">{pct}%</span>
+              </ProgressRing>
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-lg font-semibold leading-6">Essentials: {essDone} of {essentials.length} ready</span>
+              <span className="text-[15px] leading-[21px] text-neema-muted-strong">{pct === 100 ? 'All set. Well done!' : 'Tick items as you get them.'}</span>
+            </span>
+            {afterBirth && <span aria-hidden="true" className="neema-sway hidden h-16 w-16 flex-none min-[380px]:block"><BabyArt className="h-full w-full" /></span>}
           </div>
-        )}
-        <button type="button" onClick={share} className="mt-1 flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-neema-border bg-white font-semibold text-neema-dark">
-          <Share2 className="h-5 w-5" /> Share the list with family
-        </button>
-        {shared && <p role="status" className="text-center text-[15px] text-neema-muted-strong">{shared}</p>}
-      </section>
+          {!afterBirth && (
+            <div className="relative flex items-center gap-2.5 rounded-2xl bg-white/70 py-2 pl-1.5 pr-3">
+              <span aria-hidden="true" className="neema-sway block h-12 w-12 flex-none"><BagArt className="h-full w-full" /></span>
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <span className="text-[15px] leading-[20px] text-neema-muted-strong">Week {week} · Hospital bag {bagDone} of {bagTotal} packed{week >= 32 && bagDone < bagTotal ? ' — pack it by week 36' : ''}</span>
+                <div aria-hidden="true" className="h-1.5 overflow-hidden rounded-full bg-neema-sand">
+                  <div className="neema-bar-in h-full rounded-full bg-[#7A6BA8]" style={{ width: `${bagTotal ? (100 * bagDone) / bagTotal : 0}%` }} />
+                </div>
+              </div>
+            </div>
+          )}
+          <button type="button" onClick={share} className="neema-press relative flex min-h-[48px] items-center justify-center gap-2 self-start rounded-full bg-white px-4 text-[15px] font-semibold text-neema-dark shadow-sm">
+            <Share2 className="h-[18px] w-[18px]" /> Share the list with family
+          </button>
+          {shared && <p role="status" className="relative text-center text-[15px] text-neema-muted-strong">{shared}</p>}
+        </section>
+      </Reveal>
+
+      {/* When to get what: a timeline through pregnancy */}
+      {!afterBirth && (
+        <Reveal i={2}>
+          <nav aria-label="Shopping stages" className="relative grid grid-cols-3 gap-2">
+            <span aria-hidden="true" className="absolute left-[16%] right-[16%] top-[26px] border-t-2 border-dashed border-neema-border" />
+            {STAGE_ORDER.map((st) => {
+              const { done, total } = stageCount(st);
+              const locked = week < STAGE_TIMING[st].from;
+              const complete = !locked && total > 0 && done === total;
+              const style = STAGE_STYLE[st];
+              const when = locked ? `From week ${STAGE_TIMING[st].from}` : STAGE_TIMING[st].by.replace('Get by', 'By').replace('Pack by', 'By');
+              return (
+                <button key={st} type="button" onClick={() => goStage(st)}
+                  aria-label={`${style.short}: ${locked ? `opens from week ${STAGE_TIMING[st].from}` : `${done} of ${total} got`}. ${STAGE_TIMING[st].by}`}
+                  className={cn('neema-press relative flex flex-col items-center gap-1 rounded-2xl bg-white px-1.5 pb-2 pt-2 text-center shadow-neema-card', locked && 'bg-white/70')}>
+                  <span className={cn('relative flex h-9 w-9 items-center justify-center rounded-full ring-4 ring-neema-cream', complete ? 'bg-neema-success text-white' : locked ? 'bg-neema-sand text-neema-muted' : cn(style.bg, style.ink))}>
+                    {complete ? <Check className="neema-check-pop h-5 w-5" strokeWidth={3} /> : locked ? <Lock className="h-4 w-4" /> : <style.Icon className="h-[18px] w-[18px]" />}
+                  </span>
+                  <span className="text-[13px] font-bold leading-[17px]">{style.short}</span>
+                  <span className="text-[13px] leading-[17px] text-neema-muted-strong">{when}</span>
+                  <span aria-hidden="true" className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-neema-sand">
+                    {!locked && <span className={cn('neema-bar-in block h-full rounded-full', complete ? 'bg-neema-success' : style.bar)} style={{ width: `${total ? (100 * done) / total : 0}%` }} />}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </Reveal>
+      )}
 
       <Segmented label="Show" value={view} onChange={setView} options={views} />
 
       {view === 'now' && (
         <>
           {open.length === 0 ? (
-            <Card className="flex flex-col gap-2">
-              <ShieldCheck className="h-7 w-7 text-neema-success-ink" />
+            <Card className="neema-rise flex flex-col gap-2">
+              <span className="neema-float flex h-12 w-12 items-center justify-center rounded-2xl bg-neema-success-soft"><ShieldCheck className="h-7 w-7 text-neema-success-ink" /></span>
               <H2>Nothing to buy yet</H2>
               <p className="text-neema-muted-strong">In the first trimester, your energy and money are best spent on antenatal visits, iron and folic acid, and good food. Many families start getting things ready from week 14.</p>
             </Card>
           ) : nowRows.length === 0 ? (
-            <Card className="flex flex-col gap-2">
-              <PartyPopper className="h-7 w-7 text-neema-success-ink" />
+            <Card className="neema-rise relative flex flex-col gap-2 overflow-hidden">
+              <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-16">
+                {['#D95D39', '#E09F3E', '#2B9348', '#7A6BA8', '#D95D39', '#E09F3E'].map((c, i) => (
+                  <span key={i} className="neema-confetti absolute top-0 h-2 w-2 rounded-sm" style={{ left: `${12 + i * 15}%`, background: c, animationDelay: `${i * 90}ms` }} />
+                ))}
+              </span>
+              <span className="neema-sway flex h-12 w-12 items-center justify-center rounded-2xl bg-neema-success-soft"><PartyPopper className="h-7 w-7 text-neema-success-ink" /></span>
               <H2>You’re up to date</H2>
               <p className="text-neema-muted-strong">Everything for this stage is ticked.{next ? ` More from week ${STAGE_TIMING[next].from}.` : ''}</p>
             </Card>
           ) : (
-            open.map((st) => {
+            open.map((st, i) => {
               const rows = stageRows(st).filter((r) => !s.shop[r.id]);
               if (!rows.length) return null;
               const title = SHOP_STAGES.find((x) => x.id === st)!.title.split(' · ')[0];
-              return <Section key={st} title={st === 'bag' ? 'Hospital bag' : title} badge={STAGE_TIMING[st].by} rows={rows} />;
+              const style = STAGE_STYLE[st];
+              return <Section key={st} id={`shop-${st}`} i={i} Icon={style.Icon} tone={cn(style.bg, style.ink)} title={st === 'bag' ? 'Hospital bag' : title} badge={STAGE_TIMING[st].by} rows={rows} exitOnTick />;
             })
           )}
           {week >= 28 && <ReadinessCard />}
           {next && (
-            <Card className="flex flex-col gap-2 py-4">
-              <button type="button" aria-expanded={showNext} onClick={() => setShowNext(!showNext)} className="flex min-h-[48px] items-center justify-between gap-2 text-left">
-                <span className="flex flex-col">
+            <Card className="flex flex-col gap-2 border-2 border-dashed border-neema-border bg-white/70 py-4 shadow-none">
+              <button type="button" aria-expanded={showNext} onClick={() => setShowNext(!showNext)} className="flex min-h-[48px] items-center justify-between gap-3 text-left">
+                <span aria-hidden="true" className="flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-neema-sand text-neema-muted-strong"><Lock className="h-5 w-5" /></span>
+                <span className="flex min-w-0 flex-1 flex-col">
                   <span className="font-semibold">Coming up from week {STAGE_TIMING[next].from}</span>
                   <span className="text-[15px] leading-[21px] text-neema-muted-strong">{stageRows(next).length} items · {STAGE_TIMING[next].by.toLowerCase()}</span>
                 </span>
                 <ChevronDown className={cn('h-5 w-5 text-neema-muted transition-transform', showNext && 'rotate-180')} />
               </button>
-              {showNext && <ul className="flex flex-col">{stageRows(next).map((r) => <ItemRow key={r.id} row={r} />)}</ul>}
+              {showNext && <ul className="neema-fade flex flex-col">{stageRows(next).map((r) => <ItemRow key={r.id} row={r} showCat />)}</ul>}
             </Card>
           )}
         </>
@@ -351,11 +462,30 @@ export function ShopTab({ week = 20 }: { week?: number }) {
 
       {view === 'bag' && (
         <>
-          <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+          <div id="shop-bags" aria-hidden="true" className="-mb-4 scroll-mt-4" />
+          <Reveal className="grid grid-cols-3 gap-2">
+            {BAGS.map((b) => {
+              const rows = [...items.filter((i) => i.when === 'bag' && i.cat === b.id).map(toRow), ...custom(b.id as CustomItem['group'])];
+              const done = rows.filter((r) => s.shop[r.id]).length;
+              const style = CAT_STYLE[b.id];
+              return (
+                <button key={b.id} type="button" onClick={() => scrollToId(`bag-${b.id}`)} aria-label={`${b.title}: ${done} of ${rows.length} packed`}
+                  className="neema-press flex flex-col items-center gap-1 rounded-2xl bg-white px-1.5 py-3 shadow-neema-card">
+                  <ProgressRing value={rows.length ? done / rows.length : 0} size={58} stroke={6} color={done === rows.length && rows.length ? '#2B9348' : '#D95D39'}>
+                    <span className={cn('flex h-9 w-9 items-center justify-center rounded-full', style.bg, style.ink)}><style.Icon className="h-[18px] w-[18px]" /></span>
+                  </ProgressRing>
+                  <span className="text-[13px] font-bold leading-[17px]">{style.label}</span>
+                  <span className="text-[13px] leading-[17px] text-neema-muted-strong">{done} of {rows.length}</span>
+                </button>
+              );
+            })}
+          </Reveal>
+          <p className="flex items-start gap-2.5 rounded-2xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+            <CalendarClock className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
             Pack by week 36 and keep the bags by the door. Labour can start early.
           </p>
-          {BAGS.map((b) => (
-            <Section key={b.id} title={b.title} note={b.note}
+          {BAGS.map((b, i) => (
+            <Section key={b.id} id={`bag-${b.id}`} i={i} Icon={CAT_STYLE[b.id].Icon} tone={cn(CAT_STYLE[b.id].bg, CAT_STYLE[b.id].ink)} title={b.title} note={b.note}
               rows={[...items.filter((i) => i.when === 'bag' && i.cat === b.id).map(toRow), ...custom(b.id as CustomItem['group'])]}>
               <AddItem group={b.id as CustomItem['group']} label={b.id === 'kit' ? 'Add an item from your clinic’s list' : 'Add your own item'} />
             </Section>
@@ -366,11 +496,11 @@ export function ShopTab({ week = 20 }: { week?: number }) {
 
       {view === 'pp' && (
         <>
-          <Section title="For you" rows={ppMother} />
-          <Section title="Feeding" note={SHOP_CATS.find((c) => c.id === 'feed')!.note} rows={ppFeed}>
+          <Section title="For you" Icon={Heart} tone="bg-neema-primary-soft text-neema-dark" rows={ppMother} />
+          <Section title="Feeding" Icon={Milk} tone="bg-neema-success-soft text-neema-success-ink" note={SHOP_CATS.find((c) => c.id === 'feed')!.note} rows={ppFeed}>
             <AddItem group="feed" label="Add your own item" />
           </Section>
-          <Section title="For baby" rows={ppBaby} />
+          <Section title="For baby" Icon={Baby} tone="bg-neema-ochre-soft text-neema-ochre-ink" rows={ppBaby} />
         </>
       )}
 
@@ -387,13 +517,15 @@ export function ShopTab({ week = 20 }: { week?: number }) {
               ...items.filter((it) => (groupBy === 'cat' ? it.cat : it.when) === g.id && !(essOnly && !it.ess)).map(toRow),
               ...(groupBy === 'cat' ? custom(g.id as CustomItem['group']) : []),
             ];
-            return rows.length ? <Section key={g.id} title={g.title} note={g.note} rows={rows} /> : null;
+            const style = groupBy === 'cat' ? CAT_STYLE[g.id] : STAGE_STYLE[g.id];
+            return rows.length ? <Section key={g.id} title={g.title} note={g.note} rows={rows} Icon={style?.Icon ?? CalendarClock} tone={style ? cn(style.bg, style.ink) : 'bg-neema-cream text-neema-muted-strong'} /> : null;
           })}
           <RemovedItems removed={removed} />
         </>
       )}
 
-      <p className="rounded-xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+      <p className="flex items-start gap-2.5 rounded-2xl bg-neema-ochre-soft px-3.5 py-3 text-[15px] font-medium leading-[22px] text-neema-ochre-ink">
+        <Info className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
         Choose unperfumed products for baby, and never use skin lighteners or talc. Lay baby on their back on a firm, flat surface, under a treated net.
       </p>
     </div>
