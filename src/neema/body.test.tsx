@@ -83,3 +83,32 @@ describe('body and skin after birth', () => {
     expect(screen.getByRole('heading', { name: 'Safe activity in pregnancy' })).toBeInTheDocument();
   });
 });
+
+describe('body and skin redesign', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.localStorage.setItem('neema:journey', JSON.stringify('pp'));
+    Element.prototype.scrollTo = vi.fn();
+  });
+
+  it('shows recovery as a ring and the stages as steps, unlocking after a check', () => {
+    render(<NeemaApp user={user} pregnancy={afterBirth} onLogout={vi.fn()} extras={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: /Tummy & exercise/ }));
+    expect(screen.getByRole('img', { name: /Womb recovery about \d+ percent/ })).toBeInTheDocument();
+    const steps = within(screen.getByRole('list', { name: 'Your recovery stages' }));
+    expect(steps.getAllByRole('listitem')[0]).toHaveAttribute('aria-current', 'step');
+    expect(screen.getByRole('button', { name: /^Start today’s routine · \d+ min$/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /A health worker checked me/ }));
+    expect(within(screen.getByRole('list', { name: 'Your recovery stages' })).getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
+  });
+
+  it('switches sections with tabs and marks ingredient results by safety', () => {
+    render(<NeemaApp user={user} pregnancy={afterBirth} onLogout={vi.fn()} extras={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: /Tummy & exercise/ }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Ingredients' }));
+    expect(screen.getByRole('tab', { name: 'Ingredients' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.change(screen.getByLabelText(/Type an ingredient/), { target: { value: 'hydroquinone, shea butter' } });
+    expect(screen.getByText('Avoid in pregnancy and breastfeeding')).toBeInTheDocument();
+    expect(screen.getByText('Generally safe')).toBeInTheDocument();
+  });
+});
